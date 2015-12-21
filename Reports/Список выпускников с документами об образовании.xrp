@@ -1,0 +1,140 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список выпускников с документами об образовании" ProgressMax="100" EncodeText="False" ID="{AA52316D-11FB-485B-8F25-FBC429A7A476}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="YEAR" DisplayLabel="Год выпуска" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR as EDUYEAR, EDUYEAR as EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Parameter Name="DEPARTMENT" DisplayLabel="Факультет" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, DEPARTMENT
+from GUIDE_DEPARTMENT
+where USE = 1" CommonValue="False"/><Parameter Name="RecNum" DisplayLabel="Регистрационный номер" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR as EDUYEAR, EDUYEAR as EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Parameter Name="Dipl_date" DisplayLabel="Дата выдачи документа об образовании" ParamType="Date" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR as EDUYEAR, EDUYEAR as EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Parameter Name="Protocol_Date_Num" DisplayLabel="Дата и номер протокола гос. экз. комиссии" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR as EDUYEAR, EDUYEAR as EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Parameter Name="Inspector" DisplayLabel="Провідний спеціаліст" ParamType="Edit" Required="False" AutoSize="True" SaveValue="true" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="True"/><Parameter Name="Chief" DisplayLabel="Декан" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER"/></UserParameters><Bands><Band Name="dsStudents_B_exist" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="" OnFirstPrintBand=""/><SQL>select first 1 S.FIO, 'Диплом ' || GL.EDULEVEL_CASE2 as EDULEVEL, GS.SPECIALITY  , GS.QUALIFICATION, S.EDUBASISID, GC.COUNTRYTYPE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = S.DEPARTMENTID
+inner join GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+      and S.EDUBASISID = 'Б'
+order by FIO
+</SQL><Bands><Band Name="dsStudents_B" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="dsStudents_B_OnBeforePrintRec" OnFirstPrintBand="" OnAfterPrintBand="" OnAfterPrintRec=""/><SQL>select S.FIO, 'Диплом ' || GL.EDULEVEL_CASE2 as EDULEVEL, GS.SPECIALITY  , GS.QUALIFICATION, S.EDUBASISID, GC.COUNTRYTYPE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = S.DEPARTMENTID
+inner join GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+      and S.EDUBASISID = 'Б'
+order by FIO
+</SQL><Bands/></Band></Bands></Band><Band Name="dsDecan" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsDecan_OnFirstPrintBand" OnBeforePrintBand="dsDecan_OnBeforePrintBand"/></Band><Band Name="dsInsp" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsInsp_OnFirstPrintBand" OnBeforePrintBand="dsInsp_OnBeforePrintBand"/><Bands/></Band><Band Name="dsStudents_K_exist" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="" OnFirstPrintBand=""/><SQL>select first 1 S.FIO, 'Диплом ' || GL.EDULEVEL_CASE2 as EDULEVEL, GS.SPECIALITY  , GS.QUALIFICATION, S.EDUBASISID, GC.COUNTRYTYPE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = S.DEPARTMENTID
+inner join GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+      and S.EDUBASISID = 'К'
+      and GC.COUNTRYTYPE = 'УКР'
+order by FIO
+</SQL><Bands><Band Name="dsStudents_K" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="dsStudents_B_OnBeforePrintRec" OnFirstPrintBand=""/><SQL>select S.FIO, 'Диплом ' || GL.EDULEVEL_CASE2 as EDULEVEL, GS.SPECIALITY  , GS.QUALIFICATION, S.EDUBASISID, GC.COUNTRYTYPE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = S.DEPARTMENTID
+inner join GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+      and S.EDUBASISID = 'К'
+      and GC.COUNTRYTYPE = 'УКР'
+order by FIO
+</SQL><Bands/></Band></Bands></Band><Band Name="dsStudents_I_exist" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="" OnFirstPrintBand=""/><SQL>select first 1 S.FIO, 'Диплом ' || GL.EDULEVEL_CASE2 as EDULEVEL, GS.SPECIALITY  , GS.QUALIFICATION, S.EDUBASISID, GC.COUNTRYTYPE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = S.DEPARTMENTID
+inner join GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+      and S.EDUBASISID = 'К'
+      and GC.COUNTRYTYPE &lt;&gt; 'УКР'
+order by FIO
+</SQL><Bands><Band Name="dsStudents_I" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="dsStudents_B_OnBeforePrintRec" OnFirstPrintBand=""/><SQL>select S.FIO, 'Диплом ' || GL.EDULEVEL_CASE2 as EDULEVEL, GS.SPECIALITY  , GS.QUALIFICATION, S.EDUBASISID, GC.COUNTRYTYPE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = S.DEPARTMENTID
+inner join GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+      and S.EDUBASISID = 'К'
+      and GC.COUNTRYTYPE &lt;&gt; 'УКР'
+order by FIO
+</SQL><Bands/></Band></Bands></Band></Bands><Script>var num: integer;
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsDecan_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+procedure dsDecan_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Chief_Enabled').Value;
+end;
+
+procedure dsInsp_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+procedure dsInsp_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Inspector_Enabled').Value;
+end;
+
+
+procedure dsStudents_B_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  Params.Item('num').Value := Params.Item('num').Value + 1;
+end;
+
+
+begin
+  Params.Item('num').Value := 0;
+end.</Script></Report>

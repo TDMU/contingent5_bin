@@ -1,0 +1,204 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Промежуточный рейтинг студентов" ProgressMax="100" EncodeText="False" ID="{AF11CD69-431D-449D-830B-64043519D85B}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="ComboBox" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="OnDate" DisplayLabel="Состояние на дату:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsTitle" AutoOpen="True" UniDirectional="False" Master=""><SQL>select distinct BSI.DISCIPLINEID, GD.DISCIPLINE, BAM.MODULENUM
+--from V_STUDENT2TESTLIST_LASTRETAKE VSL
+
+from STUDENT2TESTLIST S2T
+
+inner join B_TESTLIST TL
+on (TL.TESTLISTID = S2T.TESTLISTID
+  and TL.TESTLISTID = (
+    select first 1 TL1.TESTLISTID
+    from STUDENT2TESTLIST S2T1
+    inner join B_TESTLIST TL1
+    on (TL1.TESTLISTID = S2T1.TESTLISTID)
+    where S2T1.STUDENTID = S2T.STUDENTID
+    and TL1.STREAMITEMID = TL.STREAMITEMID
+    and TL1.TESTDATE &lt;= ?OnDate
+    order by TL1.TESTDATE desc nulls first
+  ))
+
+inner join B_STREAM_ITEMS BSI
+on (BSI.STREAMITEMID = TL.STREAMITEMID)
+
+inner join GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = BSI.DISCIPLINEID)
+
+inner join B_ADDSTREAM_MODULE BAM
+  on (BAM.STREAMITEMID = TL.STREAMITEMID)
+
+where S2T.STUDENTID in (@@StudentsID@)
+--VSL.STUDENTID in (7010000034028)
+  and TL.SEMESTER = ?Semester
+  and TL.EDUYEAR = ?EduYear_EduYear
+order by GD.DISCIPLINE, BAM.MODULENUM
+</SQL></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master="dsStudents"><SQL>select BSI.DISCIPLINEID, BAM.MODULENUM, S2T.CREDITS_ALL
+
+from STUDENT2TESTLIST S2T
+
+inner join B_TESTLIST TL
+on (TL.TESTLISTID = S2T.TESTLISTID
+  and TL.TESTLISTID = (
+    select first 1 TL1.TESTLISTID
+    from STUDENT2TESTLIST S2T1
+    inner join B_TESTLIST TL1
+    on (TL1.TESTLISTID = S2T1.TESTLISTID)
+    where S2T1.STUDENTID = S2T.STUDENTID
+    and TL1.STREAMITEMID = TL.STREAMITEMID
+    and TL1.TESTDATE &lt;= ?OnDate
+    order by TL1.TESTDATE desc nulls first
+  ))
+
+--left join V_STUDENT2TESTLIST_LASTRETAKE VSL
+--on (VSL.STUDENTID = S.STUDENTID
+--  and VSL.SEMESTER = ?Semester
+--  and VSL.EDUYEAR = ?EduYear_EduYear)
+
+inner join B_STREAM_ITEMS BSI
+on (BSI.STREAMITEMID = TL.STREAMITEMID)
+
+inner join B_ADDSTREAM_MODULE BAM
+on (BAM.STREAMITEMID = TL.STREAMITEMID)
+
+where S2T.STUDENTID = ?MAS_STUDENTID
+and TL.SEMESTER = ?Semester
+and TL.EDUYEAR = ?EduYear_EduYear
+</SQL></Band></Bands><SQL>1
+</SQL></Band></Bands><Script>const
+  TitleDisciplineRow = 2;
+  TitleModulesRow = 3;
+  NumCol = 2;
+  FIOCol = 3;
+  GroupNumCol = 4;
+  FirstRow = 4;
+  FirstCol = 5;
+
+procedure OnAfterQueryParams;
+var
+  App : Variant;
+  sheet, range : Variant;
+  Row,Col : Integer;
+  MaxCol: Integer;
+  // Предыдущие значения
+  LastDisciplineId: Integer;
+  LastDisciplineCell: Integer;
+  
+    //************************************
+    function GetCol(DisciplineId, ModuleNum: Integer): integer;
+    begin
+      dsTitle.Locate('DISCIPLINEID;MODULENUM',[DisciplineId, ModuleNum],0);
+      Result := dsTitle.RecNo + FirstCol - 1;
+    end;
+    //************************************
+    
+begin
+  App := CreateOleObject('Excel.Application');
+  App.Visible := True;
+  App.WorkBooks.Add(Report.TemplateDoc);
+  Report.TemplateDoc := '';
+  Sheet := App.ActiveSheet;
+   
+  Sheet.Cells(1,1).Value := Params.Item('Semester').Value;
+  Sheet.Cells(2,1).Value := Params.Item('EduYear_EDUYEARSTR').Value;
+  Sheet.Cells(3,1).Value := Params.Item('OnDate').Value;
+
+//   dsL := FindDataSet('dsList');
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+  Params.Item('CurrentDate').Value := Params.Item('OnDate').Value;
+//   '7010000034506,7010000034450,7010000034522,7010000034524,7010000034526,7010000034523,7010000033573,7010000034563';
+
+  // ШАПКА Begin
+  dsTitle.Active := True;
+  dsTitle.First;
+  Col := FirstCol;
+  LastDisciplineId := 0;
+  LastDisciplineCell := FirstCol;
+  while not dsTitle.Eof do
+  begin
+    Sheet.Columns(Col).ColumnWidth := 5.71;
+    Sheet.Columns(Col).NumberFormat := '0';
+    if (LastDisciplineId &lt;&gt; dsTitle.FieldByName('DISCIPLINEID').asInteger) then
+    begin // New Discipline
+      if (LastDisciplineId &gt; 0) then
+      begin
+        range := Sheet.Range(
+          Sheet.Cells(TitleDisciplineRow,LastDisciplineCell), Sheet.Cells(TitleDisciplineRow,Col-1)
+        );
+        range.MergeCells := True;
+      end;
+      Sheet.Cells(TitleDisciplineRow, Col).Value := dsTitle.FieldByName('DISCIPLINE').asString;
+      LastDisciplineId := dsTitle.FieldByName('DISCIPLINEID').asInteger;
+      LastDisciplineCell := Col;
+    end;
+    Sheet.Cells(TitleModulesRow, Col).Value := dsTitle.FieldByName('MODULENUM').AsString;
+    dsTitle.Next;
+    Inc(Col);
+  end;
+  range := Sheet.Range(Sheet.Cells(TitleDisciplineRow,LastDisciplineCell), Sheet.Cells(TitleDisciplineRow,Col-1));
+  range.MergeCells := True;
+  range.Value := dsTitle.FieldByName('DISCIPLINE').asString;
+  MaxCol := Col;
+  // ШАПКА End
+   
+   // Init
+   dsStudents.SelectSQL.Text :=
+   HostAppl.Data.GetSQL('STUDENTID, FIO, GROUPNUM', 1) +
+   ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+   dsStudents.Active := True;
+   
+   dsList.Active := True;
+   dsList.First;
+   Row := FirstRow - 1;
+
+
+   while not dsStudents.Eof do
+   begin
+     Inc(Row);
+     Sheet.Cells(Row,NumCol).Value := '''' + IntToStr(Row-3) + '.'; // Номер п.п.
+     Sheet.Cells(Row,FIOCol).Value := dsStudents.FieldByName('FIO').AsString; //ФИО
+     Sheet.Cells(Row,GroupNumCol).Value := dsStudents.FieldByName('GROUPNUM').AsString; //GroupNum
+
+     while not dsList.Eof do
+     begin
+       Col := GetCol(dsList.FieldByName('DISCIPLINEID').AsInteger, dsList.FieldByName('MODULENUM').AsInteger);
+       Sheet.Cells(Row,Col).Value := dsList.FieldByName('CREDITS_ALL').AsString;
+       dsList.Next;
+     end;
+     dsStudents.Next;
+   end;
+   //*************************
+
+   range := Sheet.Range(Sheet.Cells(TitleDisciplineRow,NumCol), Sheet.Cells(Row, MaxCol-1));
+   range.Borders(7).LineStyle := 1; //xlContinuous
+   range.Borders(8).LineStyle := 1; //xlContinuous
+   range.Borders(9).LineStyle := 1; //xlContinuous
+   range.Borders(10).LineStyle := 1; //xlContinuous
+   range.Borders(11).LineStyle := 1; //xlContinuous
+   range.Borders(12).LineStyle := 1; //xlContinuous
+end;
+
+begin
+end.</Script></Report>

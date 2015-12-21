@@ -1,0 +1,267 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Анализ успеваемости (трад)" ProgressMax="100" EncodeText="False" ID="{A3EC5777-1C48-468A-AF63-7694FC56D34C}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="OnDate" DisplayLabel="Получить факультет и семестр студентов на дату" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EvaluationSystem" DisplayLabel="Cистема оценивания" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="5
+12" KeyItems="5
+12" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="SpecialityUse" DisplayLabel="Доп. груп. по спец." ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStat" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>
+/*           ! традиционная система !
+ *  отчет:   Анализ успеваемости (трад).xrp
+ *
+ */
+
+select @@SPUSE_CAP@,
+  HMF.SEMESTER, GT.DISCIPLINE, (VLM.DISCIPLINETYPE || ', ' || GF.FORMREPORTNAME) as FORMREPORT,
+  count(HMF.STUDENTID) as STDCNT,
+  sum(
+    case when GM.MARKNUM = 5 then 1 else 0 end
+  ) as MARK5,
+  sum(
+    case when GM.MARKNUM = 4 then 1 else 0 end
+  ) as MARK4,
+  sum(
+    case when GM.MARKNUM = 3 then 1 else 0 end
+  ) as MARK3,
+  sum(
+    case when GM.MARKNUM = 2 then 1 else 0 end
+  ) as MARK2,
+  sum(
+    case when GM.MARKID in (11000, 10000) then 1 else 0 end
+  ) as ZACHET,
+-- for 12 b system
+  sum(
+    case when GM.MARKNUM = 12 then 1 else 0 end
+  ) as MARK12, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 11 then 1 else 0 end
+  ) as MARK11, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 10 then 1 else 0 end
+  ) as MARK10, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 9 then 1 else 0 end
+  ) as MARK9, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 8 then 1 else 0 end
+  ) as MARK8, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 7 then 1 else 0 end
+  ) as MARK7, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 6 then 1 else 0 end
+  ) as MARK6, -- use for 12 b system
+  sum(
+    case when GM.MARKNUM = 1 then 1 else 0 end
+  ) as MARK1, -- use for 12 b system
+  sum(
+    case when ((GM.MARKNUM is null) and
+        not (GM.MARKID = 10000) and   -- зачтено
+        not (GM.MARKID = 11000)       -- сдал
+       ) then 1 else 0 end
+  ) as MARK_NOT_RANGE,
+  sum(
+    case when (not(GM.MARKNUM is null)) then 1 else 0 end
+  ) as STDPR
+  /*,
+  min(
+    case when GM.MARKNUM in (3, 4, 5) then LP.CREDITS_AVG else 1000 end
+  ) as MIN_CREDITS_AVG,
+  max(
+    case when GM.MARKNUM in (3, 4, 5) then LP.CREDITS_AVG else 0 end
+  ) as MAX_CREDITS_AVG */
+from HS_MOVEMENT_FULL HMF
+inner join STUDENTPLAN SP
+  on SP.STUDENTID = HMF.STUDENTID
+    and SP.EDUYEAR = HMF.EDUYEAR
+    and SP.SEMESTER = HMF.SEMESTER
+inner join V_LASTRETAKEMARKS VLM
+  on VLM.STUDENTID = HMF.STUDENTID
+    and VLM.PLANID = SP.PLANID
+inner join GUIDE_MARKTYPE GM
+  on GM.MARKID = VLM.MARKID
+inner join V_GUIDE_FORMREPORT GF
+  on GF.FORMREPORT = VLM.FORMREPORT
+
+
+inner join V_GUIDE_DISCIPLINE GT
+  on (GT.DISCIPLINEID = VLM.DISCIPLINEID)
+
+inner join V_GUIDE_DEPARTMENT GD
+  on (GD.DEPARTMENTID = HMF.DEPARTMENTID)
+inner join GUIDE_SPECIALITY G_SP
+  on (G_SP.SPECIALITYID = HMF.SPECIALITYID)
+
+where (HMF.STATUS = 'С') and
+  HMF.BEGINDATE &lt;= :ONDATE and
+  HMF.ENDDATE &gt; :ONDATE and
+  VLM.FORMREPORT &lt;&gt; '-'
+@@SPUSE_BOTTOM@
+order by 1, 2, 3
+</SQL><Bands><Band Name="CharterTitle" Master="dsStat" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="" OnBeforePrintRec="CharterTitle_OnBeforePrintRec" OnAfterPrintRec=""/></Band><Band Name="MarkInfo_5" Master="dsStat" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="MarkInfo_5_OnBeforePrintBand"/></Band><Band Name="MarkInfo_12" Master="dsStat" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="MarkInfo_12_OnBeforePrintBand"/></Band></Bands><Events OnBeforePrintRec="" OnGetFieldData="dsStat_OnGetFieldData" OnBeforeOpenDataSet=""/></Band><Band Name="Comment_5" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Comment_5_OnBeforePrintBand"/></Band><Band Name="Comment_12" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Comment_12_OnBeforePrintBand"/></Band></Bands><Script>var
+  CurDepartment: string;
+  CurSemester: Integer;
+  CurSpeciality: string;
+
+procedure CharterTitle_OnBeforePrintRec(Band: TDBBandInfo);
+var
+  sp: Boolean;
+begin
+  sp := False;
+  if (Params.Item('SpecialityUse').Value) then
+    sp := (CurSpeciality &lt;&gt; dsStat.FieldByName('SPECIALITY').AsString);
+
+  Band.Visible :=
+    (CurDepartment &lt;&gt; dsStat.FieldByName('DEPARTMENT').AsString) or
+    (CurSemester &lt;&gt; dsStat.FieldByName('SEMESTER').AsInteger) or sp;
+
+  if (Band.Visible) then
+  begin
+    CurDepartment := dsStat.FieldByName('DEPARTMENT').AsString;
+    CurSemester := dsStat.FieldByName('SEMESTER').AsInteger;
+    if (Params.Item('SpecialityUse').Value) then
+      CurSpeciality := dsStat.FieldByName('SPECIALITY').AsString;
+  end;
+end;
+
+procedure dsStat_OnGetFieldData(Field: TDBFieldInfo);
+var
+  IsZachet: Boolean;
+begin
+  if (Params.Item('SpecialityUse').Value) and (Field.FieldName = 'DEPARTMENT') then
+  begin
+    Field.Value := dsStat.FieldByName('DEPARTMENT').asString + ' (' + dsStat.FieldByName('SPECIALITY').asString + ')';
+    Exit;
+  end;
+
+  IsZachet := dsStat.FieldByName('ZACHET').AsInteger &gt; 0;
+  
+  if (dsStat.FieldByName('STDPR').AsInteger = 0) then Exit;
+  
+  if (Field.FieldName = 'V_ABS') then
+  begin
+    if (IsZachet) then
+      Field.Value := Format('%.2f',
+        [
+          (dsStat.FieldByName('ZACHET').AsInteger / dsStat.FieldByName('STDPR').AsInteger) * 100.0
+        ])
+    else
+    begin
+      if (Params.Item('EvaluationSystem').Value = 5) then
+        Field.Value := Format('%.2f',
+          [
+          ((dsStat.FieldByName('MARK5').AsInteger +
+            dsStat.FieldByName('MARK4').AsInteger +
+            dsStat.FieldByName('MARK3').AsInteger) / dsStat.FieldByName('STDPR').AsInteger) * 100.0
+          ])
+      else
+      if (Params.Item('EvaluationSystem').Value = 12) then
+        Field.Value := Format('%.2f',
+          [
+          ((dsStat.FieldByName('MARK12').AsInteger +
+            dsStat.FieldByName('MARK11').AsInteger +
+            dsStat.FieldByName('MARK10').AsInteger +
+            dsStat.FieldByName('MARK9').AsInteger +
+            dsStat.FieldByName('MARK8').AsInteger +
+            dsStat.FieldByName('MARK7').AsInteger +
+            dsStat.FieldByName('MARK6').AsInteger +
+            dsStat.FieldByName('MARK5').AsInteger +
+            dsStat.FieldByName('MARK4').AsInteger) / dsStat.FieldByName('STDPR').AsInteger) * 100.0
+          ]);
+//        '&amp;par&amp;min: ' + dsStat.FieldByName('MIN_CREDITS_AVG').AsString +
+//        '&amp;par&amp;max: ' + dsStat.FieldByName('MAX_CREDITS_AVG').AsString
+    end;
+  end
+  else
+  if (Field.FieldName = 'V_QUAL') then
+  begin
+    if (not IsZachet) then
+    begin
+      if (Params.Item('EvaluationSystem').Value = 5) then
+        Field.Value := Format('%.2f',
+          [
+          ((dsStat.FieldByName('MARK5').AsInteger +
+            dsStat.FieldByName('MARK4').AsInteger) / dsStat.FieldByName('STDPR').AsInteger) * 100.0
+          ])
+      else
+      if (Params.Item('EvaluationSystem').Value = 12) then
+        Field.Value := Format('%.2f',
+          [
+          ((dsStat.FieldByName('MARK12').AsInteger +
+            dsStat.FieldByName('MARK11').AsInteger +
+            dsStat.FieldByName('MARK10').AsInteger +
+            dsStat.FieldByName('MARK9').AsInteger +
+            dsStat.FieldByName('MARK8').AsInteger +
+            dsStat.FieldByName('MARK7').AsInteger)/ dsStat.FieldByName('STDPR').AsInteger) * 100.0
+          ]);
+    end;
+  end
+  else
+  if (Field.FieldName = 'V_MID') then
+    if (not IsZachet) then
+    begin
+      if (Params.Item('EvaluationSystem').Value = 5) then
+        Field.Value := Format('%f',
+          [(
+            dsStat.FieldByName('MARK5').AsInteger * 5 +
+            dsStat.FieldByName('MARK4').AsInteger * 4 +
+            dsStat.FieldByName('MARK3').AsInteger * 3 +
+            dsStat.FieldByName('MARK2').AsInteger * 2 +
+            dsStat.FieldByName('MARK_NOT_RANGE').AsInteger * 2
+           ) / dsStat.FieldByName('STDPR').AsInteger
+          ])
+      else
+      if (Params.Item('EvaluationSystem').Value = 12) then
+        Field.Value := Format('%f',
+          [(
+            dsStat.FieldByName('MARK12').AsInteger * 12 +
+            dsStat.FieldByName('MARK11').AsInteger * 11 +
+            dsStat.FieldByName('MARK10').AsInteger * 10 +
+            dsStat.FieldByName('MARK9').AsInteger * 9 +
+            dsStat.FieldByName('MARK8').AsInteger * 8 +
+            dsStat.FieldByName('MARK7').AsInteger * 7 +
+            dsStat.FieldByName('MARK6').AsInteger * 6 +
+            dsStat.FieldByName('MARK5').AsInteger * 5 +
+            dsStat.FieldByName('MARK4').AsInteger * 4 +
+            dsStat.FieldByName('MARK3').AsInteger * 3 +
+            dsStat.FieldByName('MARK2').AsInteger * 2 +
+            dsStat.FieldByName('MARK1').AsInteger * 1 +
+            dsStat.FieldByName('MARK_NOT_RANGE').AsInteger * 2
+           ) / dsStat.FieldByName('STDPR').AsInteger
+          ]);
+    end;
+  end;
+
+procedure Comment_5_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (Params.Item('EvaluationSystem').Value &lt;&gt; 5);
+end;
+
+procedure Comment_12_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (Params.Item('EvaluationSystem').Value &lt;&gt; 12);
+end;
+
+procedure MarkInfo_5_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (Params.Item('EvaluationSystem').Value &lt;&gt; 5);
+end;
+
+procedure MarkInfo_12_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (Params.Item('EvaluationSystem').Value &lt;&gt; 12);
+end;
+
+procedure OnAfterQueryParams;
+begin
+  // Макрас
+  if Params.Item('SpecialityUse').Value then
+  begin
+    Params.Item('SPUSE_CAP').Value := 'GD.DEPARTMENT, ' +
+      '('' '' || G_SP.CODE || '' - '' || G_SP.SPECIALITY || ''; '') as SPECIALITY';
+    Params.Item('SPUSE_BOTTOM').Value := 'group by 1, 2, 3, 4, 5';
+  end
+  else
+  begin
+    Params.Item('SPUSE_CAP').Value := 'GD.DEPARTMENT';
+    Params.Item('SPUSE_BOTTOM').Value := 'group by 1, 2, 3, 4';
+  end;
+end;
+
+begin
+end.</Script></Report>

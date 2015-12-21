@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перевод на другой семестр (шапка)" ProgressMax="100" ID="{2C4DC552-AB05-4B9C-A1AA-121FD7714D7F}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams" OnBeforeQueryParams="OnBeforeQueryParams"/><Parameter Name="NewSemester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="NewEduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="Edu_type" DisplayLabel="Система образования" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="Традиционная
+Кредитно-модульная" KeyItems="1
+2" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudent" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudent_OnAfterCreateDataSet"/><SQL>1
+</SQL></Band></Bands><Script>procedure dsStudent_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('SEMESTER,EDUYEAR,EDUYEARSTR,CODE,DEPARTMENT_RUS_CASE2,EDUFORM_RUS_CASE2,EDULEVEL,SPECIALITY,EDUDIRECTION, EDUDIRECTION_CODE, EDUBASIS_RUS_CASE9, EDUTERM') +
+    ' where S.STUDENTID = ?STUDENTID';
+
+  Params.Item('STUDENTID').Value := HostAppl.Data.GetData('STUDENTID');
+end;
+
+
+procedure OnAfterQueryParams;
+begin
+  OrderParams.Item('NewSemester_SEMESTER').Value :=
+    Params.Item('NewSemester_SEMESTER').Value;
+
+  OrderParams.Item('NewEduYear_EDUYEAR').Value :=
+    Params.Item('NewEduYear_EDUYEAR').Value;
+
+  OrderParams.Item('NewEduYear_EDUYEARSTR').Value :=
+    Params.Item('NewEduYear_EDUYEARSTR').Value;
+  OrderParams.Item('EDU_TYPE').Value :=
+    Params.Item('Edu_type_KEY').Value;
+end;
+
+
+procedure OnBeforeQueryParams;
+var
+  ds: TpFibDataSet;
+  NewSemester, NewEduYear: integer;
+begin
+  ds := FindDataSet('dsStudent');
+  ds.Active := True;
+  
+  NewSemester := ds.FieldByName('SEMESTER').AsInteger + 1;
+  NewEduYear := ds.FieldByName('EDUYEAR').AsInteger;
+  if (NewSemester / 2) &lt;&gt; Trunc(NewSemester / 2) then
+    NewEduYear := NewEduYear + 1;
+
+  Report.UserParams.Item('NewSemester').Value := NewSemester;
+  Report.UserParams.Item('NewEduYear').Value := NewEduYear;
+  OrderParams.Item('DEPARTMENT_RUS_CASE2').Value :=ds.FieldByName('DEPARTMENT_RUS_CASE2').AsString;
+  OrderParams.Item('EDUFORM_RUS_CASE2').Value :=ds.FieldByName('EDUFORM_RUS_CASE2').AsString;
+  OrderParams.Item('EDULEVEL').Value :=ds.FieldByName('EDULEVEL').AsString;
+  OrderParams.Item('SPECIALITY').Value :=ds.FieldByName('SPECIALITY').AsString;
+  OrderParams.Item('CODE').Value :=ds.FieldByName('CODE').AsString;
+  OrderParams.Item('EDUDIRECTION').Value :=ds.FieldByName('EDUDIRECTION').AsString;
+  OrderParams.Item('EDUDIRECTION_CODE').Value :=ds.FieldByName('EDUDIRECTION_CODE').AsString;
+  OrderParams.Item('EDUBASIS_RUS_CASE9').Value :=ds.FieldByName('EDUBASIS_RUS_CASE9').AsString;
+  OrderParams.Item('EDUTERMNAME').Value :=ds.FieldByName('EDUTERM').AsString;
+  OrderParams.Item('EDUYEARSTR').Value :=ds.FieldByName('EDUYEARSTR').AsString;
+  OrderParams.Item('SEMESTER').Value :=ds.FieldByName('SEMESTER').AsInteger;
+end;
+
+
+begin
+end.</Script></Report>

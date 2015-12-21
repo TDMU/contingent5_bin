@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Допуск (шапка)" ProgressMax="100" ID="{C9741BDE-58D4-4F71-B178-1377CD30D891}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="AccessType" DisplayLabel="Тип допуска" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="до навчання
+до сесії
+до комісійних іспитів
+до державних випускних іспитів
+до ліцензійного інтегрованого іспиту &quot;Крок-2. Загальна лікарська підготовка&quot; та практично-орієнтованого комплексного державного іспиту
+до ліцензійного інтегрованого іспиту &quot;Крок-2. Стоматологія&quot; та практично-орієнтованого комплексного державного іспиту
+до медичного ліцензійного іспиту &quot;Крок 1&quot; з загальної лікарської підготовкидо ліцензійного інтегрованого іспиту &quot;Крок-2. Стоматологія&quot; та практично-орієнтованого комплексного державного іспиту
+до ліцензійного інтегрованого іспиту &quot;Крок-1. Стоматологія&quot;
+" KeyItems="0
+12000
+12002
+12004
+12006
+12008
+12010
+12012" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsStudent" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudent_OnAfterCreateDataSet"/><SQL>1
+</SQL></Band></Bands><Script>procedure dsStudent_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('SEMESTER,EDUYEARSTR,CODE,SPECIALITY') +
+                         ' where S.STUDENTID = ?STUDENTID';
+
+  Params.Item('STUDENTID').Value := HostAppl.Data.GetData('STUDENTID');
+end;
+
+
+procedure OnAfterQueryParams;
+begin
+  OrderParams.Item('AccessType_KEY').Value :=
+    Params.Item('AccessType_KEY').Value
+
+end;
+
+begin
+end.</Script></Report>

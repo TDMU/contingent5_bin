@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перевод на другой факультет (технологический)" ProgressMax="100" ID="{186910D4-BE81-4C28-A433-BAA327062D81}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="True" SaveCheckBox="False" Position="poScreenCenter" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="С какой даты" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="True"/><Events OnBeforeQueryParams="OnBeforeQueryParams" OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="NewDepartment" DisplayLabel="Отдел" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" SQL="select DEPARTMENTID, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE = 1
+order by DEPARTMENT"/><Parameter Name="NewSpeciality" DisplayLabel="Специальность" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SPECIALITYID,
+(CODE || ' - ' || SPECIALITY) as SPECIALITY
+from V_GUIDE_SPECIALITY
+where USE = 1
+order by SPECIALITY" CommonValue="False"/><Parameter Name="NewEduTerm" DisplayLabel="Срок обучения" ParamType="Lookup" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUTERM, EDUTERMNAME
+from V_GUIDE_EDUTERM
+order by 1" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Events OnAfterOpenDataSet="" OnBeforeOpenDataSet="" OnGetFieldData="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL><Bands/></Band></Bands><Script>function Equal(v1, v2: Variant): Boolean;
+begin
+  Result := VarToStr(v1) = VarToStr(v2);
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,SEX,COUNTRYNAME,DEPARTMENTID,DEPARTMENT_RUS_CASE2,SPECIALITYID,EDUTERM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  Params.Item('StudentsID').Value :=
+    HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure OnBeforeQueryParams;
+var
+  ds: TpFibDataSet;
+begin
+  ds := FindDataSet('dsStudents');
+  ds.Active := True;
+
+  if not ds.FieldByName('DEPARTMENTID').IsNull then
+    Report.UserParams.Item('NewDepartment').Value := ds.FieldByName('DEPARTMENTID').Value;
+  if not ds.FieldByName('SPECIALITYID').IsNull then
+    Report.UserParams.Item('NewSpeciality').Value := ds.FieldByName('SPECIALITYID').Value;
+  if not ds.FieldByName('EDUTERM').IsNull then
+    Report.UserParams.Item('NewEduTerm').Value := ds.FieldByName('EDUTERM').Value;
+end;
+
+
+procedure OnAfterQueryParams;
+var
+  ds: TpFibDataSet;
+begin
+  ds := FindDataSet('dsStudents');
+//  ds.Active := True;
+
+  Params.Item('Department_Changed').Value :=
+    not Equal(Params.Item('NewDepartment_DEPARTMENTID').Value, ds.FieldByName('DEPARTMENTID').Value);
+
+  Params.Item('Speciality_Changed').Value :=
+    not Equal(Params.Item('NewSpeciality_SPECIALITYID').Value, ds.FieldByName('SPECIALITYID').Value);
+
+  Params.Item('EduTerm_Changed').Value :=
+    not Equal(Params.Item('NewEduTerm_EDUTERM').Value, ds.FieldByName('EDUTERM').Value);
+end;
+
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

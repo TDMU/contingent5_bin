@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Ведомость итогового модульного контроля" ProgressMax="100" EncodeText="False" ID="{95B32107-DEBA-46C2-A9E5-4EEF1D6CD208}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/></UserParameters><Bands><Band Name="dsTestList" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="grMK" Master="tlTake" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grMK_OnBeforePrintBand"/></Band><Band Name="grDA" Master="tlTake" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grDA_OnBeforePrintBand"/></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="dsTestList" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>SELECT
+    (select first 1 HF.FIO
+     from HS_FIO HF
+     where HF.STUDENTID = S2T.STUDENTID and HF.BEGINDATE &lt; coalesce(?MAS_CREATEDATE, CURRENT_DATE)
+     order by HF.BEGINDATE desc) as FIO,
+    S.RECORDBOOKNUM,
+    (select first 1 HG.GROUPNUM
+     from HS_GROUPNUM HG
+     where HG.STUDENTID = S2T.STUDENTID and HG.BEGINDATE &lt; coalesce(?MAS_CREATEDATE, CURRENT_DATE)
+     order by HG.BEGINDATE desc) as GROUPNUM,
+    S2T.TL_POSITION
+from STUDENTS S
+inner join STUDENT2TESTLIST S2T
+on (S2T.STUDENTID = S.STUDENTID)
+where S2T.TESTLISTID = ?MAS_TESTLISTID
+order by S2T.TL_POSITION, 1
+</SQL><Events OnGetFieldData="dsStudents_OnGetFieldData"/></Band><Band Name="tlTake" Master="grTestList" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="tlTake_OnBeforePrintBand"/><Bands/></Band><Band Name="tlReTake" Master="grTestList" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="tlReTake_OnBeforePrintBand"/></Band><Band Name="tlReTakePerson" Master="grTestList" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="tlReTakePerson_OnBeforePrintBand"/></Band></Bands><SQL>select
+    BTL.TESTLISTID,
+    BTL.TESTDATE,
+    BTL.TESTLISTNUM,
+    BVD.FORMREPORT,
+    BTL.SEMESTER,
+    GEY.EDUYEARSTR,
+    GD.DISCIPLINE,
+    VM.MODULENUM,
+    VM.MODULETHEME,
+    GDP.DEPARTMENT,
+    cast(((BTL.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+    BTL.GROUPNUM,
+    BTL.ISRETAKE,
+    GE.EMP_POSTFULL,
+    GE.EMP_FIO,
+    (select count(S2T.STUDENTID) from STUDENT2TESTLIST S2T where S2T.TESTLISTID = BTL.TESTLISTID) as STUDENTCOUNT,
+    BTL.CREATEDATE
+from
+    B_TESTLIST BTL
+inner join GUIDE_EDUYEAR GEY
+  on (GEY.EDUYEAR = BTL.EDUYEAR)
+inner join B_VARIANT_ITEMS VI -- module
+  on (VI.VARIANTID = BTL.VARIANTID)
+inner join B_VARIANT_MODULE VM -- module
+  on (VM.VARIANTID = BTL.VARIANTID)
+left join B_VARIANT_DISCIPLINE BVD
+  on (BVD.VARIANTID = VI.PARENTVARIANTID)
+inner join V_GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = VI.DISCIPLINEID)
+inner join V_GUIDE_DEPARTMENT GDP
+  on (GDP.DEPARTMENTID = BTL.DEPARTMENTID)
+left join GUIDE_EMPLOYER GE
+on (GE.EMP_ID = GDP.BOSSID)
+where BTL.TESTLISTID in (@@TESTLISTS%0@)
+--between 7010000038330 and 7010000038441
+</SQL><Events OnGetFieldData="grTestList_OnGetFieldData" OnAfterOpenDataSet=""/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>procedure grTestList_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'NewPage' then
+  begin
+    if Field.DataSet.RecNo &gt; 1 then
+      Field.Value := '&amp;page&amp;';
+  end
+  else if (Field.FieldName = 'TESTLISTNUM') then
+  begin
+    if Field.Value = '' then
+      Field.Value := '__________';
+  end
+{  else if (Field.FieldName = 'TESTDATE') then
+  begin
+    if Field.Value = '' then
+      Field.Value := '___________';
+  end}
+end;
+
+
+procedure tlTake_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsTestList.FieldByName('ISRETAKE').Value = 1;
+end;
+
+procedure tlReTake_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop :=
+    (dsTestList.FieldByName('ISRETAKE').Value = 0)
+    or (dsTestList.FieldByName('STUDENTCOUNT').Value = 1);
+end;
+
+procedure tlReTakePerson_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop :=
+    (dsTestList.FieldByName('ISRETAKE').Value = 0)
+    or (dsTestList.FieldByName('STUDENTCOUNT').Value &gt; 1);
+end;
+
+procedure grMK_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsTestList.FieldByName('FORMREPORT').Value = 'де';
+end;
+
+procedure grDA_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsTestList.FieldByName('FORMREPORT').Value &lt;&gt; 'де';
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin // add v. 235
+  if (Field.FieldName = 'RecNo') then
+    if (not Field.DataSet.FieldByName('TL_POSITION').IsNull) then
+      Field.Value := Field.DataSet.FieldByName('TL_POSITION').AsInteger;
+end;
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

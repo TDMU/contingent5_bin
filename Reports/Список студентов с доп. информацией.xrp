@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов с доп. информацией" ProgressMax="100" EncodeText="False" ID="{630682C0-9EC4-4438-85A9-3EE49EB42B00}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL><Bands><Band Name="dsEnterOrder" AutoOpen="True" UniDirectional="False" Master="dsStudents"><SQL>select first 1 V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 2
+order by V_STO.ORDERDATE
+</SQL></Band><Band Name="dsOutOrder" AutoOpen="True" UniDirectional="False" Master="dsStudents"><SQL>select first 1 V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 3
+order by V_STO.ORDERDATE desc
+</SQL></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+   HostAppl.Data.GetSQL('STUDENTID, FIO, PRIVATEAFFAIRNUM, BIRTHDATE, NOTE, COUNTRYNAME, PROTOCOLNUM, PROTOCOLDATE') +
+   ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+Begin
+End.</Script></Report>

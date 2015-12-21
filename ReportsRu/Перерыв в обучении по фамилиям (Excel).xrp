@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Перерыв в обучении по фамилиям (Excel)" ProgressMax="100" EncodeText="False" ID="{9421E8F3-E0DC-4725-B1CE-5CD1554285CF}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="С какой даты:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="По какую дату:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Department" DisplayLabel="Подразделение" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE=1
+order by DEPARTMENT" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="grReasons" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="grStudents" Master="grReasons" AutoOpen="True" UniDirectional="False"><SQL>select
+  (select first 1 HSF.FIO
+  from HS_FIO HSF
+  where HSF.STUDENTID = V_SO.STUDENTID
+  and HSF.BEGINDATE &lt;= VHMF.BEGINDATE
+  order by HSF.BEGINDATE desc) as FIO,
+
+  V_SO.ORDERNUM,
+  V_SO.ORDERDATE,
+  cast(((VHMF.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+  (G_SP.CODE || ' - ' || G_SP.SPECIALITY) as SPECIALITY, G_EB.EDUBASIS as EDUBASIS,
+  G_ET.EDUTERMNAME as EDUTERM,
+  G_EF.EDUFORM as EDUFORM,
+
+  (select first 1 HS_GN.GROUPNUM
+   from HS_GROUPNUM HS_GN
+   where HS_GN.STUDENTID = V_SO.STUDENTID
+     and HS_GN.BEGINDATE &lt;= VHMF.BEGINDATE
+   order by HS_GN.BEGINDATE desc
+  ) as GROUPNUM,
+  
+  (select S.NOTE
+   from STUDENTS S
+   where S.STUDENTID = V_SO.STUDENTID) as NOTE,
+   
+   VHMF.TODATE
+
+from V_STUDENTORDERS V_SO
+  inner join V_MOVEMENT_FULL VHMF on (VHMF.STUDENTID = V_SO.STUDENTID and VHMF.ORDERID = V_SO.ORDERID)
+  inner join V_GUIDE_SPECIALITY G_SP on (G_SP.SPECIALITYID = VHMF.SPECIALITYID) -- Нов Специальность
+  inner join V_GUIDE_EDUBASIS G_EB on (G_EB.EDUBASISID = VHMF.EDUBASISID) -- Нов форма финансирования
+  inner join V_GUIDE_EDUFORM G_EF on (G_EF.EDUFORMID = VHMF.EDUFORMID) -- Нов Форма обучения
+  left join V_GUIDE_EDUTERM G_ET on (G_ET.EDUTERM = VHMF.EDUTERM) -- Новый срок обучения
+where
+  V_SO.REASONID = ?MAS_REASONID
+  and VHMF.BEGINDATE &gt;= ?FromDate
+  and VHMF.BEGINDATE &lt;= ?ToDate
+  and VHMF.DEPARTMENTID = ?Department_DEPARTMENTID
+
+order by V_SO.ORDERDATE
+</SQL></Band></Bands><SQL>select distinct GR.REASONID, GR.REASONFULL, 0 as RECORDCOUNT
+from v_GUIDE_REASON GR
+  inner join REASONTOCATEGORY RTC on (GR.REASONID = RTC.REASONID)
+WHERE ( (RTC.REASONCATEGORYID = 5) --- Перерва в навчанні
+  or (GR.REASONID in (10005,10006))
+  )
+order by 1
+</SQL><Events OnGetFieldData="grReasons_OnGetFieldData"/></Band></Bands><Script>procedure grReasons_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  If Field.FieldName = 'RECORDCOUNT' Then Begin
+    Field.Value := findDataset('grStudents').RecordCount;
+  End;
+end;
+
+Begin
+End.</Script></Report>

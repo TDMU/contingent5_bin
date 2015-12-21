@@ -1,0 +1,307 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Приложение к аттестату" ProgressMax="100" EncodeText="False" ID="{89C012AF-E2AB-471D-8B12-03774CC71F69}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="export_to_200" DisplayLabel="середній бал за 200-бальною шкалою" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="PZSO_Only" DisplayLabel="Только дисциплины обр. уровня ПЗСО" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="COURSE2" DisplayLabel="Аттестат после 2-ого курса" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsFac" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select SM.DISCIPLINEID,
+       GD.DISCIPLINE
+
+from V_LASTSESSIONMARKS SM
+inner join GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = SM.DISCIPLINEID)
+
+where SM.STUDENTID = :STUDENTID
+  and SM.DISCIPLINETYPE = 'Е'
+  and SM.MARKID &lt;&gt; 10020 /* Освобождён */
+  and SM.SEMESTER in (@@COURSE2M@)
+order by GD.DISCIPLINE collate WIN1251_UA
+</SQL><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet=""/></Band><Band Name="dsDisciplines" AutoOpen="True" UniDirectional="False" Master="dsStudents" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select SM.DISCIPLINEID,
+       GD.DISCIPLINE,
+(
+select first 1 GM.MARKSTR
+    from V_LASTSESSIONMARKS SM1
+    inner join GUIDE_FORMREPORT FR1
+      on (FR.FORMREPORT = SM1.FORMREPORT)
+    inner join GUIDE_MARKTYPE GM
+      on (GM.MARKID = SM1.MARKID)
+
+    where SM1.STUDENTID = SM.STUDENTID
+      and SM1.DISCIPLINEID = SM.DISCIPLINEID
+      and not SM1.DISCIPLINETYPE in ('П', 'Е')
+      and not SM1.FORMREPORT in ('де','дд','дк','дп','дм')
+      and SM1.MARKID &lt;&gt; 10020 /* Освобождён */
+      and SM1.SEMESTER in (@@COURSE2M@)
+    order by FR1.WEIGHT desc, SM1.SEMESTER desc, GM.MARKNUM desc
+) as MARKSTR ,
+
+(
+select first 1 GM.MARKNUM
+    from V_LASTSESSIONMARKS SM1
+    inner join GUIDE_FORMREPORT FR1
+      on (FR.FORMREPORT = SM1.FORMREPORT)
+    inner join GUIDE_MARKTYPE GM
+      on (GM.MARKID = SM1.MARKID)
+
+    where SM1.STUDENTID = SM.STUDENTID
+      and SM1.DISCIPLINEID = SM.DISCIPLINEID
+      and not SM1.DISCIPLINETYPE in ('П', 'Е')
+      and not SM1.FORMREPORT in ('де','дд','дк','дп','дм')
+      and SM1.MARKID &lt;&gt; 10020 /* Освобождён */
+      and SM1.SEMESTER in (@@COURSE2M@)
+    order by FR1.WEIGHT desc, SM1.SEMESTER desc, GM.MARKNUM desc
+) as MARKNUM
+
+from V_LASTSESSIONMARKS SM
+inner join GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = SM.DISCIPLINEID)
+inner join GUIDE_FORMREPORT FR
+  on (FR.FORMREPORT = SM.FORMREPORT)
+
+where SM.STUDENTID = :STUDENTID
+  and not SM.DISCIPLINETYPE in ('П', 'Е')
+  and not SM.FORMREPORT in ('де','дд','дк','дп','дм')
+  and SM.MARKID &lt;&gt; 10020 /* Освобождён */
+  and SM.SEMESTER in (@@COURSE2M@)
+  and SM.PLANID = (
+    select first 1 SM3.PLANID
+    from V_LASTSESSIONMARKS SM3
+    where SM3.STUDENTID = SM.STUDENTID
+    and SM3.DISCIPLINEID = SM.DISCIPLINEID
+    and not SM3.DISCIPLINETYPE in ('П', 'Е')
+    and not SM3.FORMREPORT in ('де','дд','дк','дп','дм')
+    and SM3.MARKID &lt;&gt; 10020 /* Освобождён */
+    and SM3.SEMESTER in (@@COURSE2M@)
+    order by SM3.SEMESTER desc, SM3.EDUYEAR desc
+  )
+  and (not('True' = @@PZSO_ONLY%#@ ) or (
+    exists(select 1 from DISCIPLINE_EDULEVEL D_EL
+           where D_EL.STUDENTID = SM.STUDENTID
+             and D_EL.DISCIPLINEID = SM.DISCIPLINEID
+             and D_EL.PLANID = SM.PLANID)
+    )
+  )
+order by GD.DISCIPLINE collate WIN1251_UA
+
+</SQL><Events OnBeforePrintRec="dsDisciplines_OnBeforePrintRec" OnBeforePrintBand="dsDisciplines_OnBeforePrintBand" OnAfterOpenDataSet="" OnAfterCreateDataSet="" OnBeforeOpenDataSet="" OnAfterPrintRec="dsDisciplines_OnAfterPrintRec" OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band><Band Name="dsState" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select SM.DISCIPLINEID,
+       GD.DISCIPLINE,
+(
+select first 1 GM.MARKSTR
+    from V_LASTSESSIONMARKS SM1
+    inner join GUIDE_FORMREPORT FR1
+      on (FR.FORMREPORT = SM1.FORMREPORT)
+    inner join GUIDE_MARKTYPE GM
+      on (GM.MARKID = SM1.MARKID)
+
+    where SM1.STUDENTID = SM.STUDENTID
+      and SM1.DISCIPLINEID = SM.DISCIPLINEID
+      and SM1.DISCIPLINETYPE &lt;&gt; 'П'
+      and SM1.FORMREPORT  = 'де'
+      and SM1.MARKID &lt;&gt; 10020 /* Освобождён */
+      and SM1.SEMESTER in (@@COURSE2M@)
+    order by FR1.WEIGHT desc, SM1.SEMESTER desc, GM.MARKNUM desc
+) as MARKSTR,
+
+(
+select first 1 GM.MARKNUM
+    from V_LASTSESSIONMARKS SM1
+    inner join GUIDE_FORMREPORT FR1
+      on (FR.FORMREPORT = SM1.FORMREPORT)
+    inner join GUIDE_MARKTYPE GM
+      on (GM.MARKID = SM1.MARKID)
+
+    where SM1.STUDENTID = SM.STUDENTID
+      and SM1.DISCIPLINEID = SM.DISCIPLINEID
+      and SM1.DISCIPLINETYPE &lt;&gt; 'П'
+      and SM1.FORMREPORT  = 'де'
+      and SM1.MARKID &lt;&gt; 10020 /* Освобождён */
+      and SM1.SEMESTER in (@@COURSE2M@)
+    order by FR1.WEIGHT desc, SM1.SEMESTER desc, GM.MARKNUM desc
+) as MARKNUM
+
+from V_LASTSESSIONMARKS SM
+inner join GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = SM.DISCIPLINEID)
+inner join GUIDE_FORMREPORT FR
+  on (FR.FORMREPORT = SM.FORMREPORT)
+
+where SM.STUDENTID = :STUDENTID
+  and SM.FORMREPORT  = 'де'
+  and SM.MARKID &lt;&gt; 10020 /* Освобождён */
+  and SM.SEMESTER in (@@COURSE2M@)
+  and (not('True' = @@PZSO_Only%#@ ) or (
+    exists(select 1 from DISCIPLINE_EDULEVEL D_EL
+           where D_EL.STUDENTID = SM.STUDENTID
+             and D_EL.DISCIPLINEID = SM.DISCIPLINEID
+             and D_EL.PLANID = SM.PLANID)
+    )
+  )
+order by GD.DISCIPLINE collate WIN1251_UA
+</SQL><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet="" OnAfterPrintBand="dsState_OnAfterPrintBand" OnGetFieldData="dsState_OnGetFieldData"/></Band></Bands><SQL>1
+</SQL><Events OnBeforePrintRec="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>var
+  RecCnt: Integer;
+  count_discipline: integer;
+const
+  arr = ['100,0','100,6','101,2','101,8','102,4','103,0','103,6','104,2','104,8','105,4',
+         '106,0','106,6','107,2','107,8','108,4','109,0','109,6','110,2','110,8','111,4',
+         '112,0','112,6','113,2','113,8','114,4','115,0','115,6','116,2','116,8','117,4',
+         '118,0','118,6','119,2','119,8','120,4','121,0','121,6','122,2','122,8','123,4',
+         '124,0','125,0','125,9','126,9','127,8','128,8','129,7','130,7','131,6','132,6',
+         '133,5','134,5','135,4','136,4','137,3','138,3','139,2','140,2','141,1','142,1',
+         '143,0','144,0','144,9','145,9','146,8','147,8','148,7','149,7','150,6','151,6',
+         '152,5','153,5','154,4','155,4','156,3','157,3','158,2','159,2','160,1','161,1',
+         '162,0','163,0','163,9','164,9','165,8','166,8','167,7','168,7','169,6','170,5',
+         '171,5','172,4','173,4','174,3','175,3','176,2','177,2','178,1','179,1','180,0',
+         '181,0','181,9','182,9','183,8','184,8','185,7','186,7','187,6','188,6','189,5',
+         '190,5','191,4','192,4','193,3','194,3','195,2','196,2','197,1','198,1','199,0', '200,0'];
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, EDUYEAR, SEX, CERTIFICATENUM, CERTIFICATEREGNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+    count_discipline := 0;
+    Params.Item('AVG_MARK').Value := 0;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+  i: Integer;
+begin
+  if (Field.FieldName = 'NewPage') then
+  begin
+    count_discipline := 0;
+    Params.Item('AVG_MARK').Value := 0;
+    if dsStudents.RecNo &lt; dsStudents.RecordCount then
+      Field.Value := '&amp;page&amp;';
+  end
+  else
+  if (Field.FieldName = 'LastYear') then
+    Field.Value := (dsStudents.FieldByName('EDUYEAR').asInteger - 1999)
+  else
+  if Field.FieldName = 'CERTSER' then
+  begin
+    s := Field.DataSet.FieldByName('CERTIFICATENUM').AsString;
+    i := Length(s);
+    while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+    if i = 1 then Field.Value := ''
+    else
+    begin
+      if Pos('№', s) &gt; 0 then
+      begin
+        while s[i] &lt;&gt; '№' do Dec(i);
+        Dec(i);
+      end;
+      Field.Value := Trim(Copy(s, 1, i));
+    end;
+  end
+  else
+  if Field.FieldName = 'CERTNUM' then
+  begin
+    s := Field.DataSet.FieldByName('CERTIFICATENUM').AsString;
+    if Length(s) &gt; 0 then
+    begin
+      i := Length(s);
+      while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+      if i = 1 then Field.Value := s
+      else
+      begin
+        Inc(i);
+        Field.Value := Trim(Copy(s, i, Length(s) - i + 1));
+      end;
+    end;
+  end;
+end;
+
+procedure dsDisciplines_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  RecCnt := 0;
+  Band.Stop := False;
+end;
+
+procedure dsDisciplines_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  inc (RecCnt);
+  Band.Stop := Band.DataSet.Eof and (RecCnt &gt; 24);
+end;
+
+procedure dsDisciplines_OnAfterPrintRec(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+var
+  mark: integer;
+begin
+
+  if (Field.FieldName = 'MARKSTR')and(dsDisciplines.RecNo = RecCnt)  then
+  begin    //showmessage(inttostr(dsDisciplines.RecNo));
+    mark := 0;
+    try
+      mark := strtoint(dsDisciplines.FieldByName('MARKNUM').asstring);
+    except
+    end;
+    if mark &gt; 0 then
+    begin
+      Params.Item('AVG_MARK').Value := Params.Item('AVG_MARK').Value + mark;
+      count_discipline := count_discipline + 1;
+    end;
+  end;
+end;
+
+procedure dsState_OnAfterPrintBand(Band: TDBBandInfo);
+begin
+  if count_discipline &gt; 0 then
+  begin
+    Params.Item('AVG_MARK').Value := round(Params.Item('AVG_MARK').Value*10/count_discipline)/10 ;
+  end;
+  if Params.Item('export_to_200').Value then Params.Item('AVG_MARK').Value := vartostr(Params.Item('AVG_MARK').Value) + ' - ' + arr[Params.Item('AVG_MARK').Value * 10] + ' б';
+end;
+
+procedure dsState_OnGetFieldData(Field: TDBFieldInfo);
+var
+  mark: integer;
+begin
+  if (Field.FieldName = 'MARKSTR')then
+  begin
+    mark := 0;
+    try
+      mark := strtoint(dsState.FieldByName('MARKNUM').asstring);
+    except
+    end;
+    if mark &gt; 0 then
+    begin
+      Params.Item('AVG_MARK').Value := Params.Item('AVG_MARK').Value + mark;
+      count_discipline := count_discipline + 1;
+    end;
+  end;
+end;
+
+procedure dsDisciplines_OnBeforeOpenDataSet(ds: TpFibDataSet);
+begin
+  if Params.Item('PZSO_Only').Value then
+    ds.ParamByName('PZSO_ONLY').AsInteger := 1
+  else
+    ds.ParamByName('PZSO_ONLY').AsInteger := 0;
+end;
+
+procedure dsState_OnBeforeOpenDataSet(ds: TpFibDataSet);
+begin
+  if Params.Item('PZSO_Only').Value then
+    ds.ParamByName('PZSO_ONLY').AsInteger := 1
+  else
+    ds.ParamByName('PZSO_ONLY').AsInteger := 0;
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if Params.Item('COURSE2').Value then
+    Params.Item('COURSE2M').Value := '1,2,3,4'
+  else
+    Params.Item('COURSE2M').Value := '1,2';
+end;
+
+begin
+
+end.</Script></Report>

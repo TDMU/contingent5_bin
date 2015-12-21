@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перевод из другого вуза" ProgressMax="100" EncodeText="False" ID="{DD2BD539-1296-4AFA-AF5B-0394D19F8EEF}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="EnterDate" DisplayLabel="Дата зачисления" ParamType="Date" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="EduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="Speciality" DisplayLabel="Специальность" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SPECIALITYID,
+(CODE || ' - ' || SPECIALITY) as SPECIALITY
+from V_GUIDE_SPECIALITY
+where USE = 1
+order by SPECIALITY" CommonValue="False"/><Parameter Name="EduBasis" DisplayLabel="Основа обучения" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUBASISID, EDUBASIS, EDUBASIS_RUS_CASE9
+from V_GUIDE_EDUBASIS
+where USE = 1
+order by EDUBASIS" CommonValue="False"/><Parameter Name="EduTerm" DisplayLabel="Cрок обучения" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EDUTERM, EDUTERMNAME
+from V_GUIDE_EDUTERM
+order by 1" CommonValue="False"/><Parameter Name="GroupNum" DisplayLabel="№ группы" ParamType="Edit" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="FromVuz" DisplayLabel="С какого ВУЗ" ParamType="Edit" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Stip" DisplayLabel="Стипендия" ParamType="CheckBox" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EduPlanDiff" DisplayLabel="Ликвидировать расхождение в планах до" ParamType="Date" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams=""/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="Vis3" AutoOpen="True" UniDirectional="False" Master=""><Events OnBeforePrintBand="Vis3_OnBeforePrintBand"/></Band></Bands><SQL>select FIO, SEX from STUDENTS
+where STUDENTID in (@@STUDENTSID%0@)
+</SQL><Events OnGetFieldData="dsStudents_OnGetFieldData" OnBeforeOpenDataSet="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/></Band></Bands><Script>function StipIndex(Field: TDBFieldInfo): integer;
+begin
+  if Params.Item('EduBasis_EDUBASISID').Value = 'К' then
+    Result := 1
+  else
+  begin
+    if Params.Item('Stip').Value then Result := 2
+    else Result := 3
+  end;
+end;
+
+
+procedure Vis3_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (StipIndex(nil) = 1);
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,SEX,COUNTRYNAME') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 4);
+end;
+
+
+begin
+end.</Script></Report>

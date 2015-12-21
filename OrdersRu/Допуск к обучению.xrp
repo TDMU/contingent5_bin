@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Допуск к обучению" ProgressMax="100" EncodeText="False" ID="{617F9232-20E3-4E17-826E-099CC4E5E248}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="AccessReason" DisplayLabel="Основание" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="False" Visible="False" Items="в связи с окончанием академотпуска
+в связи с повторным обучением
+в связи с переводом из другого ВУЗа
+в связи с получением разрешения МОЗ
+в связи с восстановлением на обучение" KeyItems="10005
+10006
+3
+10007
+10013" CommonValue="False"/><Parameter Name="FromDate" DisplayLabel="С какой даты" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="NewSemester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="NewEduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="NewGroupNum" DisplayLabel="№ группы" ParamType="Edit" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Stip" DisplayLabel="Стипендия" ParamType="CheckBox" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EduPlanDiff" DisplayLabel="Ликвидировать расхождения в планах до" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="" OnBeforeQueryParams=""/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="Vis3" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Vis3_OnBeforePrintBand"/></Band></Bands><Events OnGetFieldData="dsStudents_OnGetFieldData" OnBeforeOpenDataSet="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL></Band></Bands><Script>procedure Vis3_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Stip').Value;
+end;
+
+
+function StipIndex(Field: TDBFieldInfo): integer;
+begin
+  if Field.DataSet.FieldByName('EDUBASISID').Value = 'К' then
+    Result := 1
+  else
+  begin
+    if Params.Item('Stip').Value then Result := 2
+    else Result := 3;
+  end;
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,CODE,SPECIALITY,' +
+     'EDUBASISID,EDUBASIS_RUS_CASE9') +
+     ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 4);
+end;
+
+
+procedure OnStartReport;
+var
+  AccessReason_KEY: string;
+begin
+  AccessReason_KEY := OrderParams.Item('AccessReason_KEY').Value;
+
+  if (AccessReason_KEY = '') then
+    RaiseException('Необходимо сначала добавить соответствующий заголовок раздела.');
+
+  Params.Item('AccessReason_KEY').Value := AccessReason_KEY;
+
+  Params.Item('AccessReason').Value :=
+    OrderParams.Item('AccessReason').Value;
+end;
+
+
+begin
+end.</Script><Events OnStartReport="OnStartReport"/></Report>

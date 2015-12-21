@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Реестр рассылки" ProgressMax="100" ID="{6F54FA23-F56B-4B4B-A7BB-A155759B828A}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="True" SaveCheckBox="False" Position="poScreenCenter" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Vis1" DisplayLabel="Бухгалтерия" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Vis2" DisplayLabel="Стипендиальная комиссия" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Vis3" DisplayLabel="Приемная комиссия" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Vis4" DisplayLabel="Комиссия по переводам и восстановл." ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Vis5" DisplayLabel="Планово-финансовый отдел" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Vis6" DisplayLabel="Сектор военного учета" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Vis7" DisplayLabel="ДП &quot;Инфоресурс&quot;" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="root" AutoOpen="True" UniDirectional="False" Master=""><Events OnGetFieldData="root_OnGetFieldData"/></Band><Band Name="Vis1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band><Band Name="Vis2" AutoOpen="True" UniDirectional="False" Master=""><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band><Band Name="Vis3" AutoOpen="True" UniDirectional="False" Master=""><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band><Band Name="Vis4" AutoOpen="True" UniDirectional="False" Master=""><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band><Band Name="Vis5" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band><Band Name="Vis6" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band><Band Name="Vis7" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Vis_OnBeforePrintBand"/></Band></Bands><Script>var
+  Num: integer = 1;
+
+procedure root_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'N' then
+  begin
+    Field.Value := Num;
+    Num := Num + 1;
+  end;
+end;
+
+
+procedure Vis_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item(Band.Name).Value;
+end;
+
+
+begin
+end.</Script></Report>

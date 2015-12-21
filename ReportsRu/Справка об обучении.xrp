@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Справка об обучении" ProgressMax="100" EncodeText="False" ID="{4D7BBE01-E973-4FA8-871F-2F7EDDD40FB9}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="GivePlace" DisplayLabel="Справка дана для предоставления в" ParamType="ComboBox" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="по месту требования
+паспортный стол
+военный комиссариат
+управление социального обеспечения граждан
+школу
+детский садик
+отедл субсидий
+ЖЕК" KeyItems="" CommonValue="False"/><Parameter Name="Inspector" DisplayLabel="Исполнитель" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svDontSave" CommonValue="True" ShowCheck="False" SaveCheck="True" Visible="True"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False"><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL(
+    'FIO,SEX,SEMESTER,COURSE,EDUYEARSTR,DEPARTMENT_RUS_CASE2, EMP_POSTFULL, EMP_FIO, ' +
+    'COUNTRYNAME, EDUBASIS_RUS_CASE9, EDUFORM_RUS_CASE2, SPECIALITY_CODE') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+function WordNum(s: string): integer;
+var
+  SL: TStringList;
+begin
+  Result := 0;
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := Trim(s);
+    Result := SL.Count;
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2)
+  else
+  if Field.FieldName = 'FIO' then
+  begin
+    if (WordNum(Field.Value) &lt;= 3) then
+      Field.Value := Utils.GetFIOPadeg(Trim(Field.Value), 0, 3);
+  end
+  else
+  if Field.FieldName = 'NewPage' then
+  begin
+    if ((Field.DataSet.RecNo mod 3) = 0) then
+    begin
+      if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+         Field.Value := '&amp;page&amp;';
+    end
+    else
+      Field.Value := '&amp;par&amp;&amp;par&amp;&amp;par&amp;&amp;par&amp;';
+  end;
+end;
+
+begin
+end.</Script></Report>

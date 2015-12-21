@@ -1,0 +1,319 @@
+<?xml version="1.0"?>
+<Guides>
+  <Folder Caption="Справочники" ImageIndex="2" SelectedIndex="2" CanSelected="0">
+    <Node Caption="Страны" TableName="GUIDE_COUNTRY" KeyField="COUNTRYID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT 
+  COUNTRYID,
+  COUNTRYNAME,
+  COUNTRYNAME_RUS,
+  COUNTRYNAME_ENG,
+  COUNTRYTYPE,
+  A2,
+  A3,
+  CITIZENSHIPTYPEID,
+  USE
+FROM GUIDE_COUNTRY
+order by COUNTRYNAME
+      </SQL>
+    </Node>
+
+    <Node Caption="Области" TableName="GUIDE_REGION" KeyField="REGIONID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+    REGIONID,
+    REGIONNAME,
+    USE
+FROM
+    GUIDE_REGION
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Специальности" TableName="GUIDE_SPECIALITY" KeyField="SPECIALITYID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+    SPECIALITYID,
+    CODE,
+    SPECIALITY,
+	  SPECIALITY_ENG,
+    QUALIFICATION,
+    EDULEVELID,
+    EDUDIRECTIONID as EDUDIRECTIONID_LOOKUP,
+		EDUDIRECTION_RASPID as EDUDIRECTION_RASPID_LOOKUP,
+		STRUCTUREID,
+    USE
+FROM
+    GUIDE_SPECIALITY
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Направления подготовки" TableName="GUIDE_EDUDIRECTION" KeyField="EDUDIRECTIONID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+  EDUDIRECTIONID, EDUDIRECTION, EDUDIRECTION_CODE, USE
+from GUIDE_EDUDIRECTION
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Направления распределения" TableName="GUIDE_EDUDIRECTION_RASP" KeyField="EDUDIRECTION_RASPID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+  EDUDIRECTION_RASPID, EDUDIRECTION_RASP, USE
+from GUIDE_EDUDIRECTION_RASP
+order by 1
+      </SQL>
+    </Node>
+		
+		
+    <Node Caption="Подразделения" TableName="GUIDE_DEPARTMENT" KeyField="DEPARTMENTID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  DEPARTMENTID,
+  DEPARTMENT,
+  DEPARTMENT_ENG,
+  DEPARTMENT_RUS,
+  DEPARTMENT_CASE2,
+  DEPARTMENT_CASE6,
+  DEPARTMENTTYPE,
+  DEPARTMENT_RUS_CASE2,
+  DEPARTMENT_RUS_CASE6,
+  BOSSID,
+  USE
+FROM
+  GUIDE_DEPARTMENT
+order by 1
+      </SQL>
+    </Node>
+
+
+    <Node Caption="Дисциплины" TableName="GUIDE_DISCIPLINE" KeyField="DISCIPLINEID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  DISCIPLINEID,
+  DISCIPLINE,
+  DISCIPLINE_RUS,
+  DISCIPLINE_ENG,
+  DISCIPLINETYPE,
+  USE
+FROM GUIDE_DISCIPLINE
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Места распределения" TableName="GUIDE_APPOINTMENT" KeyField="APPOINTMENTID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  APPOINTMENTID,
+  APPOINTMENT,
+  SUBORDINATION,
+  USE
+FROM GUIDE_APPOINTMENT
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Должности" TableName="GUIDE_POST" KeyField="POSTID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  POSTID,
+  POST,
+  USE
+FROM GUIDE_POST
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Статус учреждения здравоохранения" TableName="GUIDE_HOSPITALSTATUS" KeyField="HOSPITALSTATUSID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  HOSPITALSTATUSID,
+  HOSPITALSTATUS,
+  USE
+FROM GUIDE_HOSPITALSTATUS
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Тип учреждения здравоохранения" TableName="GUIDE_HOSPITALTYPE" KeyField="HOSPITALTYPEID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  HOSPITALTYPEID,
+  HOSPITALTYPE,
+  USE
+FROM GUIDE_HOSPITALTYPE
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Семейное положение" TableName="GUIDE_FAMILYSTATUS" KeyField="FAMILYSTATUS" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  FAMILYSTATUS,
+  FAMILYSTATUSNAME,
+  FAMILYSTATUSNAME_RUS
+FROM GUIDE_FAMILYSTATUS
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Формы обучения" TableName="GUIDE_EDUFORM" KeyField="EDUFORMID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  EDUFORMID,
+  EDUFORM,
+  EDUFORM_CASE2,
+  EDUFORM_CASE4,
+  EDUFORM_CASE5,
+  EDUFORM_CASE6,
+  EDUFORM_RUS,
+  EDUFORM_RUS_CASE2,
+  EDUFORM_RUS_CASE4,
+  USE
+FROM GUIDE_EDUFORM
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Сроки обучения" TableName="GUIDE_EDUTERM" KeyField="EDUTERM" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  EDUTERM,
+  EDUTERMNAME,
+  EDUTERMNAME_RUS,
+  USE
+FROM GUIDE_EDUTERM
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Формы контроля" TableName="GUIDE_FORMREPORT" KeyField="FORMREPORT" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+SELECT
+  FORMREPORT,
+  FORMREPORTNAME,
+  FORMREPORTNAME_RUS,
+  USE
+FROM GUIDE_FORMREPORT
+order by 1
+      </SQL>
+    </Node>
+
+	    <Node Caption="Формы контроля(ECTS)" TableName="GUIDE_FORMREPORT_B" KeyField="FORMREPORT" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select FORMREPORT,
+      FORMREPORTNAME,
+      FORMREPORTNAME_RUS,
+      USE
+ from GUIDE_FORMREPORT_B
+order by 1
+      </SQL>
+    </Node>
+
+	
+    <Node Caption="Руководители" TableName="GUIDE_EMPLOYER" KeyField="EMP_ID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+  EMP_ID,
+  EMP_POST,
+  EMP_POSTFULL,
+  EMP_POSTFULL_ENG,
+  EMP_FIO,
+  EMP_FIO_ENG,
+  EMP_DEGREE
+from GUIDE_EMPLOYER
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Оценки ECTS" TableName="GUIDE_ECTS" KeyField="ECTSID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+  ECTSID,
+  ECTS,
+  ECTS_PERCENT,
+  TRADITIONAL_MARK,
+  CREDITS_MIN
+from GUIDE_ECTS
+order by 1
+      </SQL>
+    </Node>
+
+	    <Node Caption="Традиционные оценки" TableName="GUIDE_TRADITIONAL_MARK" KeyField="TRADITIONAL_MARKID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+   TRADITIONAL_MARKID,
+   TRADITIONAL_MARK,
+   MARKSTR_RUS,
+   MARKSTR_ENG,
+   CREDITS_MIN
+from GUIDE_TRADITIONAL_MARK
+order by 1 desc
+      </SQL>
+    </Node>
+
+	    <Node Caption="Оценки ECTS (доп.)" TableName="GUIDE_MARKTYPE_B" KeyField="MARKID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select 
+    MARKID,
+	MARKNAME, 
+	MARKSTR,
+	MARKNAME_RUS,
+	MARKSTR_RUS,
+	USE
+from GUIDE_MARKTYPE_B
+order by 1 desc
+      </SQL>
+    </Node>
+
+	
+    <Node Caption="Учебные параметры" TableName="EDUPARAMETERS" KeyField="PARAMETERID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select 
+  PARAMETERID, 
+  PARAMETERNAME, 
+  PARAMETERVALUE, 
+  USE
+from EDUPARAMETERS
+order by 1     
+      </SQL>
+    </Node>	
+	
+    <Node Caption="Семестры" TableName="GUIDE_SEMESTER" KeyField="SEMESTER" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+  SEMESTER, USE
+from GUIDE_SEMESTER
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Учебные года" TableName="GUIDE_EDUYEAR" KeyField="EDUYEAR" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select
+  EDUYEAR, EDUYEARSTR, USE
+from GUIDE_EDUYEAR
+order by 1
+      </SQL>
+    </Node>
+
+    <Node Caption="Виды стипендий" TableName="GUIDE_GRANT" KeyField="GRANTID" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select GG.GRANTID, GG.TITLE, GG.SHORTTITLE, GG.SUMMA, GG.TYPEGRANTS
+from GUIDE_GRANT GG
+order by 1
+      </SQL>
+    </Node>
+
+	<Node Caption="КОАТУУ" TableName="GUIDE_KOATUU" KeyField="KOATUUCODE" ImageIndex="0" SelectedIndex="1">
+      <SQL>
+select GG.KOATUUCODE, GG.TYPEKOATUU, GG.TITLE, GG.USE
+from GUIDE_KOATUU GG
+order by 1
+      </SQL>
+    </Node>
+	
+  </Folder>
+</Guides>

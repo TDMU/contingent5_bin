@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перерыв в обучении" ProgressMax="100" EncodeText="False" ID="{FC775A5D-5DEF-443C-9ADF-2ADEE3A4359D}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="С какой даты" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="По дату" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Stip" DisplayLabel="С назначением стипендии" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="StipStopDate" DisplayLabel="Выплату стипендии прекратить с" ParamType="Date" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="True" SaveCheck="False" Visible="True" CommonValue="False"/><Parameter Name="Reason" DisplayLabel="Основание" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="по состоянию здоровья
+по семейным обстоятельствам
+в связи с служебными командировками" KeyItems="3101
+3102
+3103" CommonValue="False"/><Events OnBeforeQueryParams="OnBeforeQueryParams" OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="True" Master=""><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforeOpenDataSet="" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL> 1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,GROUPNUM,CODE,SPECIALITY,EDUBASIS_RUS_CASE9, EDUTERMNAME') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 3)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((FindDataSet('dsStudents').FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+procedure OnBeforeQueryParams;
+begin
+  Params.Item('IntReason_KEY').Value :=
+    OrderParams.Item('IntReason_KEY').Value;
+
+  Params.Item('IntReason').Value :=
+    OrderParams.Item('IntReason').Value;
+
+  if Params.Item('IntReason_KEY').Value &lt;&gt; 0 then
+    Report.UserParams.Delete('Reason');
+
+  if Params.Item('IntReason_KEY').Value &lt;&gt; 3002 then
+    Report.UserParams.Delete('StipStopDate')
+  else
+    Report.UserParams.Delete('Stip')
+end;
+
+
+procedure OnAfterQueryParams;
+begin
+ if Params.Item('IntReason_KEY').Value = 3002 then
+ begin
+  if Params.Item('StipStopDate_Enabled').Value then
+    Params.Item('StipState').Value := 1
+  else
+    Params.Item('StipState').Value := 0;
+ end
+ else
+ begin
+  if Params.Item('Stip').Value then
+    Params.Item('StipState').Value := 2
+  else
+    Params.Item('StipState').Value := 3;
+ end;
+
+end;
+
+begin
+end.</Script></Report>

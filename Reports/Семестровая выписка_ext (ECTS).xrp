@@ -1,0 +1,394 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Семестровая выписка_ext (ECTS)" ProgressMax="100" EncodeText="False" ID="{C17DC1EB-2FAB-42B0-8BA9-406D6E76672F}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="OnEduYear" DisplayLabel="За навчальний рік" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Position" DisplayLabel="Положення на сторінці" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="сверху
+с середины" KeyItems="сверху
+с середины" CommonValue="False"/><Parameter Name="InspPost" DisplayLabel="Посада відповідального" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="True"/><Parameter Name="Inspector" DisplayLabel="ФІО відповідального" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="True"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="Chief" DisplayLabel="Керівник" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="True" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER"/><Parameter Name="Modules" DisplayLabel="З модулями" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ShowAllProtocols" DisplayLabel="Показати усі протоколи" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="OrderByGroupNum" DisplayLabel="сортировать по номеру группы" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ShowDocNum" DisplayLabel="Показувати номер документа" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="Group1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="GroupHeader" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="GroupHeader_OnFirstPrintBand"/></Band><Band Name="GroupHeader1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="GroupHeader1_OnFirstPrintBand"/></Band><Band Name="dsECard" AutoOpen="True" UniDirectional="False" Master="Group1" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select SPSM.DMTITLE as DISCIPLINE, SPSM.ECTS,
+SPSM.CREDITS_AVG, GTM.TRADITIONAL_MARK,
+SPSM.HOURS_ALL, SPSM.HOURS_AUD, SPSM.ITEMTYPE, SPSM.CREDITS,
+SPSM.MODULENUM, SPSM.CREATEDATE, SPSM.TESTDATE,
+SPSM.CREDITS_ALL, SPSM.IS_LASTPROTOCOL, SPSM.CREDITS_CUR, SPSM.CREDITS_IND,
+SPSM.CREDITS_TEST, SPSM.TESTLISTNUM, SPSM.PROTOCOLNUM
+from SP_GET_STUDENTMARKS(:MAS_STUDENTID, :MAS_EDUYEAR, :MAS_SEMESTER,
+  case when 'True' = @@ShowAllProtocols%#FALSE@ then 1 else 0 end
+) SPSM
+left join GUIDE_ECTS GE
+on (GE.ECTS = SPSM.ECTS)
+left join GUIDE_TRADITIONAL_MARK GTM
+on (GTM.TRADITIONAL_MARKID = SPSM.TRADITIONALMARK)
+where ((SPSM.ITEMTYPE = 'D') and (SPSM.ENDEDUPLANID = :MAS_EDUPLANID))
+or ('True' = @@MODULES%#FALSE@ )
+</SQL><Events OnBeforeOpenDataSet="" OnGetFieldData="dsECard_OnGetFieldData"/><Bands><Band Name="grDisciplineOnly" Master="" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintRec="grDisciplineOnly_OnBeforePrintRec" OnGetFieldData=""/></Band><Band Name="grDiscipline" Master="" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="" OnBeforePrintBand="" OnBeforePrintRec="grDiscipline_OnBeforePrintRec" OnAfterPrintRec="" OnGetFieldData=""/></Band><Band Name="grModule" Master="" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="" OnFirstPrintBand="" OnBeforePrintRec="grModule_OnBeforePrintRec" OnAfterPrintRec=""/></Band></Bands></Band><Band Name="Group4" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="Group3" AutoOpen="True" UniDirectional="False" Master="Group1" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GD.DISCIPLINE, GMT.MARKSTR, SPI.PRACTPOST
+from STUDENTMARK SM
+
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = SM.DISCIPLINEID)
+
+inner join GUIDE_MARKTYPE GMT
+on (GMT.MARKID = SM.MARKID)
+
+left join STUDENTPRACTICEINFO SPI
+on (SPI.STUDENTID = SM.STUDENTID)
+and (SPI.PLANID = SM.PLANID)
+and SPI.NUMORDER = SM.NUMORDER
+
+where SM.STUDENTID = ?MAS_STUDENTID
+and SM.PLANID = ?MAS_PLANID
+and SM.DISCIPLINETYPE = ('П')
+--and SM.MARKID &lt;&gt; 10050 --Недопуск
+
+order by SM.NUMORDER
+</SQL><Bands/></Band></Bands><Events OnBeforePrintBand="Group4_OnBeforePrintBand"/></Band><Band Name="dsInfoFirstInNext" Master="Group1" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 O.ORDERNUM, O.ORDERDATE, STO.REASONID
+from HS_MOVEMENT HSM
+
+inner join STUDENTTOORDER STO
+on (STO.ORDERID = HSM.ORDERID)
+and (STO.STUDENTID = HSM.STUDENTID)
+and STO.REASONID between 4000 and 4011
+/*and (
+  or STO.REASONID = 1501
+  or STO.REASONID between 1001 and 1099
+) */
+
+inner join ORDERS O
+on (O.ORDERID = HSM.ORDERID)
+
+where HSM.BEGINDATE = (
+  select first 1 LHMF.ENDDATE
+  from HS_MOVEMENT_FULL LHMF
+  where LHMF.SEMESTER = ?MAS_SEMESTER
+  and LHMF.EDUYEAR = ?MAS_EDUYEAR
+  and LHMF.STUDENTID = HSM.STUDENTID
+  order by LHMF.BEGINDATE desc
+)
+and HSM.STUDENTID = ?MAS_STUDENTID
+order by O.ORDERNUM desc
+</SQL></Band><Band Name="dsInfoLastInCurrent" Master="Group1" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 O.ORDERNUM, O.ORDERDATE, STO.REASONID
+from HS_MOVEMENT_FULL HMF
+     inner join STUDENTTOORDER STO
+           on (STO.ORDERID = HMF.ORDERID and STO.STUDENTID = HMF.STUDENTID)
+     inner join ORDERS O on (O.ORDERID = HMF.ORDERID)
+where HMF.SEMESTER = ?MAS_SEMESTER and
+      HMF.EDUYEAR = ?MAS_EDUYEAR and
+      HMF.STUDENTID = ?MAS_STUDENTID
+order by O.ORDERDATE desc
+</SQL><Bands/></Band><Band Name="dsMovement" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 GD.DEPARTMENT, GD.DEPARTMENTTYPE, GE.EMP_POSTFULL, GE.EMP_FIO
+from HS_MOVEMENT_FULL HSM
+
+left join GUIDE_DEPARTMENT GD
+on (GD.DEPARTMENTID = HSM.DEPARTMENTID)
+
+left join GUIDE_EMPLOYER GE
+on (GE.EMP_ID = GD.BOSSID)
+
+where (HSM.STUDENTID = ?MAS_STUDENTID)and
+      (HSM.SEMESTER = ?MAS_SEMESTER) and
+      (HSM.EDUYEAR = ?MAS_EDUYEAR)
+order by HSM.BEGINDATE desc
+</SQL></Band><Band Name="dsInsp" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsInsp_OnFirstPrintBand" OnBeforePrintBand="dsInsp_OnBeforePrintBand"/><Bands/></Band><Band Name="dsDecan" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsDecan_OnFirstPrintBand" OnBeforePrintBand="dsDecan_OnBeforePrintBand"/></Band></Bands><SQL>select distinct S.STUDENTID, S.FIO, S.SEX,
+       GEY.EDUYEAR, GS.SEMESTER,
+       (case when GS.SEMESTER &lt; 10 then  GEY.EDUYEAR||'0'||GS.SEMESTER
+        else GEY.EDUYEAR||GS.SEMESTER end) as EDUPLANID,
+       GEY.EDUYEARSTR
+from STUDENTS S
+inner join GUIDE_EDUYEAR GEY
+on (GEY.EDUYEAR = ?EDUYEAR)
+inner join GUIDE_SEMESTER GS
+on GS.SEMESTER in (@@SEMESTERLIST%0@)
+where S.STUDENTID in ( @@STUDENTSID%0@  )
+order by @@ORDERSTR@ S.FIO, GS.SEMESTER
+</SQL><Events OnGetFieldData="Group1_OnGetFieldData" OnBeforePrintRec="Group1_OnBeforePrintRec"/></Band></Bands><Script>var
+  LastStudentID: Variant;
+  Num: integer;
+
+procedure OnStartReport;
+begin
+  Params.Item('STUDENTSID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+//  Params.Item('STUDENTSID').Value := '7010000034044';
+end;
+
+
+procedure Group4_OnBeforePrintBand(Band: TDBBandInfo);
+var
+  ds: TpFIBDataSet;
+begin
+  ds := FindDataSet('Group3');
+  if not ds.Active then ds.Active := True;
+  Band.Stop := ds.IsEmpty;
+//  ShowMessage(IntToStr(ds.RecNo));
+//  Band.Stop := (ds.RecordCount = 0);
+end;
+
+
+procedure GroupHeader_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (Params.Item('Position_INDEX').Value = 0);
+end;
+
+
+procedure GroupHeader1_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (Params.Item('Position_INDEX').Value = 1)
+              or
+              (
+                (FindDataSet('Group1').FieldByName('SEMESTER').Value mod 2) = 0
+                and
+                Params.Item('OnEduYear').Value = True
+              );
+end;
+
+
+procedure Group1_OnGetFieldData(Field: TDBFieldInfo);
+Var
+   DsInfoFirstInNext : TpFibDataSet;
+   DsInfoLastInCurrent : TpFibDataSet;
+   ms : String;
+   lrID : Integer;
+  //****************************************
+   Function GetText(DsInfo : TpFibDataSet; RsnID:Integer; Var rID : Integer) : String;
+   Var
+     S, Ending : String;
+   Begin
+      Result := ''; rID := 0;
+      S := '(наказ № '+DsInfo.FieldByName('ORDERNUM').asString +
+           ' від '+DsInfo.FieldByName('ORDERDATE').asString +')';
+      // SEX
+      Ending := 'ий(a)';
+      If (Field.DataSet.FieldByName('SEX').Value = 'Ч') then Ending := 'ий';
+      If (Field.DataSet.FieldByName('SEX').Value = 'Ж') then Ending := 'а';
+      // End SEX
+      If (RsnID = 1501) then
+      Begin
+         Result := 'Відрахован' + Ending + ' з ВНЗ у зв''язку з закінченням терміну навчання ' + S;
+         rID := 1;
+      End
+      Else
+      If ((RsnID &gt;=4000) and (RsnID &lt;=4011)) then
+      Begin
+         Result := 'Переведен' + Ending + ' на наступний семестр ' + S;
+         rID := 2;
+      End
+      else
+      If ((RsnID &gt;= 1001) and (RsnID &lt;= 1099)) then
+      Begin
+         Result := 'Відрахован' + Ending + ' з ВНЗ ' + S;
+         rID := 1;
+      End;
+   End;
+  //****************************************
+begin
+  if Field.FieldName = 'NewStudent' then
+  begin
+    if (Field.DataSet.FieldByName('STUDENTID').Value &lt;&gt; LastStudentID) Then
+    Begin
+      If (Field.DataSet.RecNo &gt; 1) then
+      begin
+        Field.Value := '&amp;page&amp;';
+      end;
+      LastStudentID := FindDataSet('Group1').FieldByName('STUDENTID').Value;
+    End;
+  end
+  else
+  if Field.FieldName = 'Info' Then
+  Begin
+    DsInfoFirstInNext := FindDataSet('dsInfoFirstInNext');
+    DsInfoFirstInNext.Active;
+    DsInfoFirstInNext.Open;
+    Field.Value := GetText (DsInfoFirstInNext, DsInfoFirstInNext.FieldByName('REASONID').asInteger, lrID);
+    If (Field.Value = '') then Begin
+      DsInfoLastInCurrent := FindDataSet('dsInfoLastInCurrent');
+      DsInfoLastInCurrent.Active;
+      DsInfoLastInCurrent.Open;
+      ms := GetText (DsInfoLastInCurrent, DsInfoLastInCurrent.FieldByName('REASONID').asInteger, lrID);
+      If (lrID = 1) then Field.Value := ms;
+    end;
+  end
+  else
+  if Field.FieldName = 'EmptyLines' then
+  begin
+    if ((Group1.FieldByName('SEMESTER').Value mod 2) = 0)
+       and Params.Item('OnEduYear').Value then
+         Field.Value := '&amp;par&amp;&amp;par&amp;&amp;par&amp;&amp;par&amp;&amp;par&amp;';
+  end;
+end;
+
+procedure OnAfterQueryParams;
+Var
+  Sm : Integer;
+  EduYear : Integer;
+begin
+  // OnEduYear Checked
+  //ShowMessage(VarToStr(Params.Item('Modules').Value));
+  Sm := Params.Item('Semester_SEMESTER').Value;
+//StrToInt(Copy(IntToStr(Params.Item('EDUPLANID').Value),5,2));
+  EduYear := Params.Item('EduYear_EDUYEAR').Value;
+//  EduYear := StrToInt(Copy(IntToStr(Params.Item('EDUPLANID').Value),1,4));
+  //
+  If (Params.Item('OnEduYear').Value) then
+  Begin
+     If ((sm mod 2) = 0)
+     then Params.Item('SEMESTERLIST').Value := IntToStr(Sm)+ ', ' + IntToStr(Sm - 1)
+     Else Params.Item('SEMESTERLIST').Value := IntToStr(Sm)+ ', ' + IntToStr(Sm + 1);
+  End Else Begin
+     Params.Item('SEMESTERLIST').Value := IntToStr(Sm);
+  End;
+  Params.Item('EDUYEAR').Value := EduYear;
+  
+  if (Params.Item('OrderByGroupNum').Value) then
+    Params.Item('ORDERSTR').Value := 'S.GROUPNUM, ';
+end;
+
+procedure dsDecan_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+procedure dsDecan_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Chief_Enabled').Value;
+end;
+
+// grDiscipline
+
+procedure grDisciplineOnly_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  if (dsECard.FieldByName('ITEMTYPE').AsString = 'D') and
+    (dsECard.FieldByName('IS_LASTPROTOCOL').AsInteger = 1) then
+      Inc(Num);
+  Band.Visible := (not Params.Item('Modules').Value)
+    and (dsECard.FieldByName('ITEMTYPE').AsString = 'D');
+end;
+
+// grDiscipline
+procedure grDiscipline_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+{  if (dsECard.FieldByName('ITEMTYPE').AsString = 'D') and
+    (dsECard.FieldByName('IS_LASTPROTOCOL').AsInteger = 1) then
+      Inc(Num);}
+  Band.Visible := Params.Item('Modules').Value
+    and (dsECard.FieldByName('ITEMTYPE').AsString = 'D');
+end;
+
+// grModule
+procedure grModule_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  Band.Visible := Params.Item('Modules').Value
+    and (dsECard.FieldByName('ITEMTYPE').AsString = 'M');
+end;
+
+procedure Group1_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  Num := 0;
+end;
+
+procedure dsInsp_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+procedure dsInsp_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('InspPost_Enabled').Value;
+end;
+
+procedure dsECard_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'TRADITIONAL_MARK' then
+  begin
+      if dsECard.FieldByName('ECTS').Value = 'S' then
+      begin
+        Field.Value := 'склав';
+      end;
+      if dsECard.FieldByName('ECTS').Value = 'NS' then
+      begin
+        Field.Value := 'несклав';
+      end;
+  end
+  else
+  if Field.FieldName = 'ECTS' then
+  begin
+      if dsECard.FieldByName('ECTS').Value = 'S' then
+        Field.Value := '';
+      if dsECard.FieldByName('ECTS').Value = 'NS' then
+         Field.Value := '';
+  end
+  else
+  if (Field.FieldName = 'Num') and
+    (dsECard.FieldByName('IS_LASTPROTOCOL').AsInteger = 1) then
+      Field.Value := IntToStr(Num) + '.'
+  else
+  if ((Field.FieldName = 'CREATEDATE') and Params.Item('ShowDocNum').Value) then
+  begin
+    if (not dsECard.FieldByName('CREATEDATE').IsNull) then
+      Field.Value := ' від ' + dsECard.FieldByName('CREATEDATE').AsString;
+  end
+  else
+  if ((Field.FieldName = 'TESTDATE') and Params.Item('ShowDocNum').Value) then
+  begin
+    if (not dsECard.FieldByName('TESTDATE').IsNull) then
+      Field.Value := ' від ' + dsECard.FieldByName('TESTDATE').AsString;
+  end
+  else
+  if (Field.FieldName = 'TESTLISTNUM') then
+  begin
+    if (Params.Item('ShowDocNum').Value) then
+      Field.Value := dsECard.FieldByName('TESTLISTNUM').AsString
+    else
+      Field.Value := '';
+  end
+  else
+  if (Field.FieldName = 'PROTOCOLNUM') then
+  begin
+    if (Params.Item('ShowDocNum').Value) then
+      Field.Value := dsECard.FieldByName('PROTOCOLNUM').AsString
+    else
+      Field.Value := '';
+  end;
+end;
+
+begin
+  LastStudentID := 0;
+end.</Script><Events OnStartReport="OnStartReport"/></Report>

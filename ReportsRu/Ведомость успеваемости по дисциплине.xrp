@@ -1,0 +1,332 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Ведомость успеваемости по дисциплине" ProgressMax="100" EncodeText="False" ID="{BBA20723-2C00-4E1F-AC8A-A498C509D3B6}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="DATEDOC" DisplayLabel="По состоянию на:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnBeforeQueryParams="OnBeforeQueryParams" OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsGroups" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStudents" Master="dsGroups" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select distinct
+  S.FIO,
+  S.RECORDBOOKNUM ,
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || '  (' ||  GMT.MARKSTR || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 1
+  ) as MODULE1,
+
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || '  (' || GMT.MARKSTR  || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 2
+  ) as MODULE2,
+
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || '  (' || GMT.MARKSTR || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 3
+  ) as MODULE3,
+
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || '  (' ||  GMT.MARKSTR || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 4
+  ) as MODULE4,
+
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || '  (' ||  GMT.MARKSTR  || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 5
+  ) as MODULE5,
+
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || ' (' ||  GMT.MARKSTR  || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 6
+  ) as MODULE6,
+
+  (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || ' (' ||  GMT.MARKSTR  || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 7
+  ) as MODULE7,
+
+   (select case when not S2T.TESTRESULTID is null then cast(S2T.CREDITS_ALL as varchar(3)) || ' (' ||  GMT.MARKSTR || ')'  else S2T.CREDITS_ALL end
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+   and VM.MODULENUM = 8
+  ) as MODULE8,
+
+  (select avg( cast(S2T.CREDITS_ALL as numeric(7,2)))
+   from  V_STUDENT2TESTLIST_LASTRETAKE S2T
+   inner join V_STUDENT_MODULES S2M
+   on (S2M.STUDENTID = S2T.STUDENTID)
+   and (S2M.EDUYEAR = S2T.EDUYEAR)
+   and (S2M.SEMESTER = S2T.SEMESTER)
+   and (S2M.VARIANTID = S2T.VARIANTID)
+   inner join B_VARIANT_MODULE VM
+   on (VM.VARIANTID = S2M.VARIANTID)
+   left join V_GUIDE_MARKTYPE_B GMT
+   on (GMT.MARKID = S2T.TESTRESULTID)
+   where S2T.STUDENTID = S.STUDENTID
+   and S2M.PARENTVARIANTID = S2D.VARIANTID
+   and S2M.BEGINEDUYEAR = S2D.EDUYEAR
+   and S2M.BEGINSEMESTER = S2D.SEMESTER
+  ) as AVG_BALLS
+
+from STUDENTS S
+
+inner join HS_GROUPNUM HG
+on (HG.STUDENTID = S.STUDENTID)
+and (HG.BEGINDATE = (
+    select first 1 HG1.BEGINDATE
+    from HS_GROUPNUM HG1
+    where HG1.STUDENTID = S.STUDENTID
+    and HG1.BEGINDATE &lt; :DATEDOC
+    order by HG1.BEGINDATE desc
+  )
+)
+and HG.GROUPNUM = ?MAS_GROUPNUM
+
+inner join V_STUDENT_DISCIPLINES S2D
+on (S2D.STUDENTID = S.STUDENTID)
+and (S2D.DISCIPLINEID = ?DISCIPLINEID)
+and (S2D.EDUYEAR = ?MAS_EDUYEAR)
+
+where
+  S.STUDENTID in (@@STUDENTIDS@)
+
+order by S.FIO
+</SQL><Events OnGetFieldData="dsStudents_OnGetFieldData"/></Band></Bands><SQL>select distinct
+  GD.DISCIPLINE,
+  HG.GROUPNUM,
+  GEY.EDUYEARSTR,
+  GE.EMP_POSTFULL,
+  GE.EMP_FIO,
+  GDP.DEPARTMENT,
+  S2V.EDUYEAR
+
+from STUDENT2VARIANT S2V
+
+inner join B_VARIANT_ITEMS VI
+on (VI.VARIANTID = S2V.VARIANTID)
+
+inner join V_GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = VI.DISCIPLINEID)
+
+inner join HS_GROUPNUM HG
+  on (HG.STUDENTID = S2V.STUDENTID
+  and HG.BEGINDATE = (select first 1 HG1.BEGINDATE
+    from HS_GROUPNUM HG1
+    where HG1.BEGINDATE &lt; :DATEDOC
+      and HG1.STUDENTID = S2V.STUDENTID
+    order by HG1.BEGINDATE desc)
+  )
+
+inner join GUIDE_EDUYEAR GEY
+  on (GEY.EDUYEAR = :EDUYEAR)
+
+left join V_GUIDE_DEPARTMENT GDP
+on GDP.DEPARTMENTID =
+ (select first 1 HMF.DEPARTMENTID
+  from HS_MOVEMENT_FULL HMF
+  where HMF.STUDENTID = S2V.STUDENTID
+  and HMF.BEGINDATE &lt;= :DATEDOC
+  order by HMF.BEGINDATE desc
+ )
+
+left join GUIDE_EMPLOYER GE
+on (GE.EMP_ID = GDP.BOSSID)
+
+where
+  VI.DISCIPLINEID = :DISCIPLINEID
+  and
+   S2V.STUDENTID in (@@STUDENTIDS@)
+  and
+   (S2V.EDUYEAR &lt;= :EDUYEAR
+   and  cast(S2V.EDUYEAR +
+     cast(((S2V.SEMESTER + (
+  select first 1 VI1.SEMESTER_DELTA
+  from B_VARIANT_ITEMS VI1
+  where VI1.PARENTVARIANTID = S2V.VARIANTID
+  order by VI1.SEMESTER_DELTA desc
+)
+ + 1)/2 - 0.5) as smallint) -
+     cast(((S2V.SEMESTER + 1)/2 - 0.5) as smallint)
+    as smallint) &gt;= :EDUYEAR
+)
+</SQL><Events OnGetFieldData="dsGroups_OnGetFieldData"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>procedure OnBeforeQueryParams;
+Var DC : TDateTime;
+begin
+  DC := Date;
+  Report.UserParams.Item('DATEDOC').Value := DC;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  sum : integer;
+  cnt : integer;
+begin
+  if Field.FieldName = 'AVG' then
+  begin
+    sum := 0;
+    cnt := 0;
+    if (ValidInt(dsStudents.FieldByName('MODULE1').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE1').asInteger;
+      inc(cnt);
+    end;
+    if (ValidInt(dsStudents.FieldByName('MODULE2').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE2').asInteger;
+      inc(cnt);
+    end;
+    if (ValidInt(dsStudents.FieldByName('MODULE3').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE3').asInteger;
+      inc(cnt);
+    end;
+    if (ValidInt(dsStudents.FieldByName('MODULE4').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE4').asInteger;
+      inc(cnt);
+    end;
+    if (ValidInt(dsStudents.FieldByName('MODULE5').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE5').asInteger;
+      inc(cnt);
+    end;
+    if (ValidInt(dsStudents.FieldByName('MODULE6').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE6').asInteger;
+      inc(cnt);
+    end;
+        if (ValidInt(dsStudents.FieldByName('MODULE7').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE7').asInteger;
+      inc(cnt);
+    end;
+        if (ValidInt(dsStudents.FieldByName('MODULE8').AsString)) then
+    begin
+      sum := sum + dsStudents.FieldByName('MODULE8').asInteger;
+      inc(cnt);
+    end;
+    if (cnt &gt; 0) then
+      Field.Value := Round(100 * sum / cnt)/100;
+  end;
+  
+end;
+
+procedure dsGroups_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+  begin
+    Field.Value := ((Params.Item('SEMESTER').Value + 1) div 2);
+  end
+  else
+  if Field.FieldName = 'NewPage' then
+  begin
+    if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+      Field.Value := '&amp;page&amp;';
+  end;
+end;
+
+procedure OnAfterQueryParams;
+begin
+  Params.Item('STUDENTIDS').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

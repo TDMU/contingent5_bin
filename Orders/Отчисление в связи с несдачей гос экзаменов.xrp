@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Отчисление в связи с несдачей гос экзаменов" ProgressMax="100" EncodeText="False" ID="{4710C470-A945-4A60-A1F8-1F4B1342BA7E}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/><Parameter Name="FromDate" DisplayLabel="З якої дати" ParamType="Date" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" Master="" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><Bands><Band Name="dsDisciplines" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GD.DISCIPLINE
+from V_LASTRETAKEMARKS VLRM
+inner join STUDENTPLAN SP
+on (SP.STUDENTID = VLRM.STUDENTID)
+and (SP.PLANID = VLRM.PLANID)
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLRM.DISCIPLINEID)
+where VLRM.STUDENTID = ?MAS_STUDENTID
+and (VLRM.DISCIPLINETYPE in ('де', 'дк'))
+and VLRM.MARKID in (0,20,70,100)
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band><Band Name="dsKrok" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GD.DISCIPLINE
+from V_LASTRETAKEMARKS VLRM
+inner join STUDENTPLAN SP
+on (SP.STUDENTID = VLRM.STUDENTID)
+and (SP.PLANID = VLRM.PLANID)
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLRM.DISCIPLINEID)
+where VLRM.STUDENTID = ?MAS_STUDENTID
+and VLRM.DISCIPLINETYPE = 'дк'
+and VLRM.MARKID in (0,20,70,100)
+</SQL><Events OnGetFieldData="dsKrok_OnGetFieldData"/></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO, SEX, COUNTRYNAME,EDULEVEL,CODE,SPECIALITY,EDUTERMNAME') +
+    ' where S.STUDENTID in (@@StudentsID%0@) ' +
+    ' order by 1';
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+begin
+  if Field.FieldName = 'Disciplines' then
+  begin
+    s := '';
+    while not Field.DataSet.Eof do
+    begin
+      if s &lt;&gt; '' then
+        s := s + ', ' + Field.DataSet.FieldByName('DISCIPLINE').AsString
+      else
+        s := Field.DataSet.FieldByName('DISCIPLINE').AsString;
+
+      Field.DataSet.Next;
+    end;
+    
+    Field.Value := s;
+  end;
+end;
+
+
+procedure dsKrok_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+begin
+  if Field.FieldName = 'Krok' then
+  begin
+      if Field.DataSet.FieldByName('DISCIPLINE').AsString &lt;&gt; '' then
+      begin
+        if dsStudents.FieldByName('SEX').AsString = 'Ж' then s := 'не склала'
+        else s := 'не склав';
+        Field.Value := '&quot;' + s + '&quot; ліцензійний інтегрований іспит &quot;' + Field.DataSet.FieldByName('DISCIPLINE').AsString + '&quot;.';
+      end;
+    end;
+end;
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport=""/></Report>

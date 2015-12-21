@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="!Приложение к диплому ДІ" ProgressMax="100" EncodeText="False" ID="{35AD5E29-927E-4686-BE9E-1A7CC2C7F302}"><UserParameters/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsDiscipline" AutoOpen="False" UniDirectional="False" Master="dsStudents" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GM.MARKSTR, GM.MARKSTR_ENG
+from V_LASTPROTOCOL LP
+inner join GUIDE_TRADITIONAL_MARK GM
+  on (GM.TRADITIONAL_MARKID = LP.TRADITIONALMARK)
+
+where LP.STUDENTID = :STUDENTID
+      and LP.DISCIPLINEID = :DISCIPLINEID
+</SQL><Events OnBeforePrintRec="" OnBeforePrintBand="" OnAfterOpenDataSet="" OnAfterCreateDataSet="" OnBeforeOpenDataSet=""/><Bands/></Band></Bands><SQL>1
+</SQL><Events OnBeforePrintRec="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band></Bands><Script>var
+  ua: boolean;
+  
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ua := True;
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, NFIO') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  pos: integer;
+  s: string;
+begin
+  if (Field.FieldName = 'NewPage') then
+  begin
+    if (Field.DataSet.RecNo &gt; 1) then
+    begin
+      Field.Value := '&amp;page&amp;';
+    end;
+  end else if (Field.FieldName = 'FIO') then
+    ua := True
+  else if (Field.FieldName = 'NFIO') then
+    ua := False
+  else
+  begin
+    dsDiscipline.Active := False;
+    dsDiscipline.ParamByName('DISCIPLINEID').Value := copy(Field.FieldName, 6,255);
+    dsDiscipline.Active := True;
+    if ua then
+      Field.Value := dsDiscipline.FieldByName('MARKSTR').asString
+    else
+      Field.Value := dsDiscipline.FieldByName('MARKSTR_ENG').asString;
+  end;
+end;
+
+begin
+end.</Script></Report>

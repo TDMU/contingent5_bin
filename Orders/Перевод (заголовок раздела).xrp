@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перевод (заголовок раздела)" ProgressMax="100" ID="{D8CBA1B8-1568-49E7-87F5-E475FB5B6644}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Reason" DisplayLabel="Переведення" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="False" ShowCheck="False" SaveCheck="False" Visible="True" Items="на інший факультет
+на іншу спеціальність
+на іншу форму фінансування
+на іншу форму навчання
+на інший строк навчання" KeyItems="" CommonValue="False" SQL="select REASONID, REASON, REASONFULL
+from GUIDE_REASON
+where REASONID between 2000 and 2099
+order by REASONID"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands/><Script>procedure OnAfterQueryParams;
+begin
+  OrderParams.Item('Reason_REASONID').Value :=
+    Params.Item('Reason_REASONID').Value;
+
+  OrderParams.Item('Reason_REASON').Value :=
+    Params.Item('Reason_REASON').Value;
+
+  OrderParams.Item('Reason_REASONFULL').Value :=
+    Params.Item('Reason_REASONFULL').Value;
+end;
+
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

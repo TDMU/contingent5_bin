@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" ?>
+<students>
+{~Begin dsStudents~}<student>
+<last_name uk="~SURNAME~" en="~NSURNAME~" />
+<first_name uk="~NAME~" en="~NNAME~" />
+<middle_name uk="~PATRONYMIC~" en="~NPATRONYMIC~" />
+<birthday>~BIRTHDATE~</birthday>
+<sex>~SEX@[Ч#Ж][0#1]~</sex>
+<address country="380" region="~EDBO_KOATUUCODE_REGION~" district="~EDBO_KOATUUCODE_DISTRICT~" city="~EDBO_CITY~" street="~EDBO_STREET~" house="~EDBO_HOUSE~" building="~EDBO_BUILDING~" flat="~EDBO_FLAT~" />
+<receipt_date>~ENTERDATE~</receipt_date>
+<diplom seria="~DIPLOMASER~" number="~DIPLOMANUM~" foreigner="~FOREIGNER@[True#False][1#0]~"/>
+<honor>~HONOURS@[True#False][1#0]~</honor>
+<ipn>~IDCODE~</ipn>
+<payment>~EDUBASISID@[Б#К][0#1]~</payment>
+<person_document ID="1" seria="~PASSPORTSER~" number="~PASSPORTNUM~" issued_by="~PASSPORTGIVEPLACE~" issued_date="~PASSPORTGIVEDATE~" />
+<prev_document ID="~PREVIOUSEDUCATION@[НС#С#СТ#НВ#БВ][1#2#3#5#6]~" seria="~PREVIOUSDOCUMENTSER~" number="~PREVIOUSDOCUMENTNUM~" foreigner=""/>
+<prev_qualification uk=" " en=" "/>
+<prev_speciality uk=" " en=" "/>
+<marks>
+{~Begin dsDisciplines~}<discipline name="~DISCIPLINE~"  mark="~CREDITS_AVG~" national_mark="" ects_mark="" />{~End dsDisciplines~}
+</marks></student>
+{~End dsStudents~}</students>

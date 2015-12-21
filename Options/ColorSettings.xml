@@ -1,0 +1,144 @@
+<?xml version="1.0"?>
+<Grids>
+	<StudentList Caption="Список студентов">
+		<ColorSettings>
+			<elFirstLast Caption="Первая/последняя строка" Type="teTopBottom" BG="65535"/>
+		  <elCurColumn Caption="Текущий столбец" Type="teCurColumn" BG="16777215"/>
+		  <elFixColumn Caption="Фиксированный столбец" Type="teFixColumn" BG="-2147483633"/>
+			<elText Caption="Текст" Type="teDefault" BG="15793151" FG="0" FS="0"/>
+		</ColorSettings>
+		<Pattern>
+			<DATAPACKET Version="2.0">
+				<METADATA>
+					<FIELDS>
+						<FIELD attrname="FIO" fieldtype="string" WIDTH="50"/>
+						<FIELD attrname="GROUPNUM" fieldtype="string" WIDTH="20"/>
+					</FIELDS>
+					<PARAMS/>
+				</METADATA>
+				<ROWDATA>
+					<ROW FIO="Аббасова Севіля Хасанівна" GROUPNUM="11"/>
+					<ROW FIO="Абд.Азиз Мохд. Азрул" GROUPNUM="122"/>
+					<ROW FIO="Абдельмажід Сакран" GROUPNUM="516"/>
+					<ROW FIO="Абдишаєв Ельдар Шевкетович" GROUPNUM="507"/>
+					<ROW FIO="Абдишаєв Ісмет Шевкетович" GROUPNUM="301-лк"/>
+					<ROW FIO="Абдишєва Наталя Юріївна" GROUPNUM="204-ф"/>
+					<ROW FIO="Абдувалієв Марлен Айдерович" GROUPNUM="31"/>
+					<ROW FIO="Абдувалієва Рузана Суюнівна" GROUPNUM="21"/>
+					<ROW FIO="Абдувелієв Арсен Разімович" GROUPNUM="102"/>
+				</ROWDATA>
+			</DATAPACKET>
+		</Pattern>
+	</StudentList>
+
+	<ECard Caption="Успеваемость">
+		<ColorSettings>
+			<elFirstLast Caption="Первая/последняя строка" Type="teTopBottom"/>
+			<elBad Caption="Неудовлетворительная оценка" Type="teInValue" Boolean="OR" FG="128">
+				<Values>
+					<val FieldName="MARKID" Value="20"/>
+					<val FieldName="MARKID" Value="11010"/>
+					<val FieldName="MARKID" Value="10010"/>
+				</Values>
+			</elBad>
+			<elRetake Caption="Пересдача" Type="teValue" FieldName="ISRETAKE" Value="True" FG="255"/>
+			<elAbsent Caption="Неявка" Type="teInValue" Boolean="OR" FG="8388608">
+				<Values>
+					<val FieldName="MARKID" Value="10030"/>
+					<val FieldName="MARKID" Value="10040"/>
+				</Values>
+			</elAbsent>
+			<elFreedom Caption="Освобожден" Type="teValue" FieldName="MARKID" Value="10020" FG="12632256"/>
+			<elNon Caption="Недопуск" Type="teValue" FieldName="MARKID" Value="10050" FG="16711935"/>
+			<elText Caption="Текст" Type="teDefault" BG="-2147483643" FG="0" FS="0"/>
+		</ColorSettings>
+		<Pattern>
+			<DATAPACKET Version="2.0">
+				<METADATA>
+					<FIELDS>
+						<FIELD attrname="DISCIPLINE" fieldtype="string" WIDTH="50"/>
+						<FIELD attrname="MARKID" fieldtype="i2"/>
+						<FIELD attrname="ISRETAKE" fieldtype="boolean"/>
+					</FIELDS>
+					<PARAMS/>
+				</METADATA>
+				<ROWDATA>
+					<ROW DISCIPLINE="Фізичні методи аналізу та метрологія" MARKID="50" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Основи медичної психології" MARKID="40" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Психологія критичного мислення" MARKID="30" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Токсикологічна хімія з клінічною токискологією" MARKID="20" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Токсикологічна хімія з клінічною токискологією" MARKID="40" ISRETAKE="True"/>
+					<ROW DISCIPLINE="Нейропсихологія" MARKID="10030" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Нейропсихологія" MARKID="10040" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Основи тропічної гігієни" MARKID="10020" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Онкологія" MARKID="10050" ISRETAKE="False"/>
+				</ROWDATA>
+			</DATAPACKET>
+		</Pattern>
+	</ECard>
+
+<!--
+	<ECard_B Caption="Успеваемость (ECTS)">
+		<ColorSettings>
+			<elFirstLast Caption="Первая/последняя строка" Type="teTopBottom"/>
+
+			<elRetake Caption="Пересдача" Type="teValue" FieldName="ITEMTYPE" Value="2" FG="255"/>
+			<elDiscipline Caption="Дисциплина" Type="teValue" FieldName="ITEMTYPE" Value="0" FG="255"/>
+			<elModule Caption="Модуль" Type="teValue" FieldName="ITEMTYPE" Value="1" FG="255"/>
+		</ColorSettings>
+		<Pattern>
+			<DATAPACKET Version="2.0">
+				<METADATA>
+					<FIELDS>
+						<FIELD attrname="DISCIPLINE" fieldtype="string" WIDTH="50"/>
+						<FIELD attrname="MARKID" fieldtype="i2"/>
+						<FIELD attrname="ISRETAKE" fieldtype="boolean"/>
+					</FIELDS>
+					<PARAMS/>
+				</METADATA>
+				<ROWDATA>
+					<ROW DISCIPLINE="Ф_зичн_ методи анал_зу та метролог_я" MARKID="50" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Основи медичної психолог_ї" MARKID="40" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Психолог_я критичного мислення" MARKID="30" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Токсиколог_чна х_м_я з кл_н_чною токисколог_єю" MARKID="20" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Токсиколог_чна х_м_я з кл_н_чною токисколог_єю" MARKID="40" ISRETAKE="True"/>
+					<ROW DISCIPLINE="Нейропсихолог_я" MARKID="10030" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Нейропсихолог_я" MARKID="10040" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Основи троп_чної г_г_єни" MARKID="10020" ISRETAKE="False"/>
+					<ROW DISCIPLINE="Онколог_я" MARKID="10050" ISRETAKE="False"/>
+				</ROWDATA>
+			</DATAPACKET>
+		</Pattern>
+	</ECard_B>
+-->
+	<Guides Caption="Справочники">
+		<ColorSettings>
+      <elUse Caption="Элемент не используется" Type="teValue" FieldName="USE" Value="False" FG="-2147483631"/>
+			<elText Caption="Текст" Type="teDefault" BG="15793151" FG="0" FS="0"/>
+		</ColorSettings>
+		<Pattern>
+			<DATAPACKET Version="2.0">
+				<METADATA>
+					<FIELDS>
+					  <FIELD attrname="ID" fieldtype="string" WIDTH="5"/>
+						<FIELD attrname="DISCIPLINE" fieldtype="string" WIDTH="50"/>
+						<FIELD attrname="DISCIPLINETYPE" fieldtype="string" WIDTH="20"/>
+            <FIELD attrname="USE" fieldtype="boolean"/>
+					</FIELDS>
+					<PARAMS/>
+				</METADATA>
+				<ROWDATA>
+					<ROW ID="829" DISCIPLINE="Актуальні питання кардіології" DISCIPLINETYPE="Н" USE="True"/>
+					<ROW ID="830" DISCIPLINE="Актуальні питання нейрохірургії" DISCIPLINETYPE="Н" USE="True"/>
+					<ROW ID="831" DISCIPLINE="Актуальні питання неонатології" DISCIPLINETYPE="Н" USE="False"/>
+					<ROW ID="832" DISCIPLINE="Актуальні питання перинатології" DISCIPLINETYPE="Н" USE="True"/>
+					<ROW ID="833" DISCIPLINE="Актуальні питання ревматології" DISCIPLINETYPE="Н" USE="True"/>
+					<ROW ID="834" DISCIPLINE="Акутальні питання нефрології" DISCIPLINETYPE="Н" USE="False"/>
+					<ROW ID="835" DISCIPLINE="Акутальні питання пульмонології" DISCIPLINETYPE="Н" USE="True"/>
+					<ROW ID="836" DISCIPLINE="Рефлексотерапія в неврології" DISCIPLINETYPE="Е" USE="False"/>
+					<ROW ID="837" DISCIPLINE="Практика медсестринська виробнича" DISCIPLINETYPE="П" USE="True"/>
+				</ROWDATA>
+			</DATAPACKET>
+		</Pattern>
+	</Guides>
+</Grids>

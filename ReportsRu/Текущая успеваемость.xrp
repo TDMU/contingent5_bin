@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Текущая успеваемость" ProgressMax="100" EncodeText="False" ID="{06009A42-631D-4772-96A9-6CE365D23240}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsTitle" AutoOpen="True" UniDirectional="False" Master=""><SQL>select distinct VI.DISCIPLINEID, GD.DISCIPLINE, VM.MODULENUM
+--from V_STUDENT2TESTLIST_LASTRETAKE VSL
+
+from STUDENT2TESTLIST S2T
+
+inner join B_TESTLIST TL
+on (TL.TESTLISTID = S2T.TESTLISTID
+  and TL.TESTLISTID = (
+    select first 1 TL1.TESTLISTID
+    from STUDENT2TESTLIST S2T1
+    inner join B_TESTLIST TL1
+    on (TL1.TESTLISTID = S2T1.TESTLISTID)
+    where S2T1.STUDENTID = S2T.STUDENTID
+    and TL1.VARIANTID = TL.VARIANTID
+    and TL1.TESTDATE &lt;= current_date
+    order by TL1.TESTDATE desc nulls first, TL1.TESTLISTID desc
+  ))
+
+inner join B_VARIANT_ITEMS VI
+on (VI.VARIANTID = TL.VARIANTID)
+
+inner join V_GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = VI.DISCIPLINEID)
+
+inner join B_VARIANT_MODULE VM
+  on (VM.VARIANTID = TL.VARIANTID)
+
+where S2T.STUDENTID in (@@StudentsID@)
+  and VI.DISCIPLINEID = :DISCIPLINEID
+order by VM.MODULENUM
+</SQL></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master="dsStudents"><SQL>select VI.DISCIPLINEID, VM.MODULENUM, S2T.CREDITS_ALL, (coalesce(S2T.CREDITS_CUR, 0) + coalesce(S2T.CREDITS_IND, 0)) as CREDITS_CUR, S2T.CREDITS_TEST
+
+from V_STUDENT2TESTLIST_LASTRETAKE S2T
+
+inner join B_TESTLIST TL
+on (TL.TESTLISTID = S2T.TESTLISTID)
+
+--left join V_STUDENT2TESTLIST_LASTRETAKE VSL
+--on (VSL.STUDENTID = S.STUDENTID
+--  and VSL.SEMESTER = ?Semester
+--  and VSL.EDUYEAR = ?EduYear_EduYear)
+
+inner join B_VARIANT_ITEMS VI
+on (VI.VARIANTID = TL.VARIANTID)
+
+inner join B_VARIANT_MODULE VM
+on (VM.VARIANTID = TL.VARIANTID)
+
+where S2T.STUDENTID = ?MAS_STUDENTID
+      and VI.DISCIPLINEID = :DISCIPLINEID
+
+</SQL></Band></Bands><SQL>1
+</SQL></Band></Bands><Script>const
+  TitleMarkRow = 3;
+  TitleModulesRow = 2;
+  NumCol = 1;
+  FIOCol = 2;
+  GroupNumCol = 3;
+  FirstRow = 4;
+  FirstCol = 4;
+
+procedure OnAfterQueryParams;
+var
+  App : Variant;
+  sheet, range : Variant;
+  Row,Col : Integer;
+  MaxCol: Integer;
+  // Предыдущие значения
+  LastDisciplineId: Integer;
+  LastDisciplineCell: Integer;
+
+    //************************************
+    function GetCol(ModuleNum: Integer): integer;
+    begin
+      dsTitle.Locate('MODULENUM',[ModuleNum],0);
+      Result := dsTitle.RecNo + FirstCol - 1;
+    end;
+    //************************************
+
+begin
+  App := CreateOleObject('Excel.Application');
+  App.Visible := True;
+  App.WorkBooks.Add(Report.TemplateDoc);
+  Report.TemplateDoc := '';
+  Sheet := App.ActiveSheet;
+
+//  Sheet.Cells(1,1).Value := Params.Item('Semester').Value;
+//  Sheet.Cells(2,1).Value := Params.Item('EduYear_EDUYEARSTR').Value;
+//  Sheet.Cells(3,1).Value := Params.Item('OnDate').Value;
+
+//   dsL := FindDataSet('dsList');
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+//  Params.Item('CurrentDate').Value := Params.Item('OnDate').Value;
+//   '7010000034506,7010000034450,7010000034522,7010000034524,7010000034526,7010000034523,7010000033573,7010000034563';
+
+  // ШАПКА Begin
+  dsTitle.Active := True;
+  dsTitle.First;
+  Col := FirstCol;
+//  LastDisciplineId := 0;
+//  LastDisciplineCell := FirstCol;
+  while not dsTitle.Eof do
+  begin
+    Sheet.Columns(Col).ColumnWidth := 5.71;
+    Sheet.Columns(Col).NumberFormat := '0';
+//        range := Sheet.Range(
+//          Sheet.Cells(TitleDisciplineRow,FirstCol), Sheet.Cells(TitleDisciplineRow,Col-1)
+//        );
+//        range.MergeCells := True;
+//       Sheet.Cells(TitleDisciplineRow, Col).Value := dsTitle.FieldByName('DISCIPLINE').asString;
+    Sheet.Cells(TitleModulesRow, Col).Value := dsTitle.FieldByName('MODULENUM').AsString;
+       range := Sheet.Range(
+          Sheet.Cells(TitleModulesRow,Col), Sheet.Cells(TitleModulesRow,Col+1)
+        );
+        range.MergeCells := True;
+
+//      range := Sheet.Range(
+//          Sheet.Cells(TitleModulesRow,Col), Sheet.Cells(TitleModulesRow,Col+2)
+//        );
+//        range.MergeCells := True;
+
+      Sheet.Cells(TitleMarkRow, Col).Value := 'Текущая успеваемость';
+//      Sheet.Cells(TitleMarkRow, Col+1).Value := 'Індивідуальна робота';
+      Sheet.Cells(TitleMarkRow, Col+1).Value := 'Итоговый контроль';
+
+
+    dsTitle.Next;
+    Inc(Col,2);
+  end;
+  
+    Sheet.Cells(1, FirstCol).Value := dsTitle.FieldByName('DISCIPLINE').asString;
+//  range := Sheet.Range(Sheet.Cells(TitleDisciplineRow,FirstCol), Sheet.Cells(TitleDisciplineRow,Col-1));
+//  range.MergeCells := True;
+//  range.Value := dsTitle.FieldByName('DISCIPLINE').asString;
+//  MaxCol := Col;
+  // ШАПКА End
+
+   // Init
+   dsStudents.SelectSQL.Text :=
+   HostAppl.Data.GetSQL('STUDENTID, FIO, GROUPNUM', 1) +
+   ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+   dsStudents.Active := True;
+
+   dsList.Active := True;
+   dsList.First;
+   Row := FirstRow - 1;
+
+
+   while not dsStudents.Eof do
+   begin
+     Inc(Row);
+     Sheet.Cells(Row,NumCol).Value := '''' + IntToStr(Row-3) + '.'; // Номер п.п.
+     Sheet.Cells(Row,FIOCol).Value := dsStudents.FieldByName('FIO').AsString; //ФИО
+     Sheet.Cells(Row,GroupNumCol).Value := dsStudents.FieldByName('GROUPNUM').AsString; //GroupNum
+   Col := FirstCol;
+     while not dsList.Eof do
+     begin
+//       Col := GetCol(dsList.FieldByName('MODULENUM').AsInteger);
+//       showmessage(inttostr(Col));
+       Sheet.Cells(Row,Col).Value := dsList.FieldByName('CREDITS_CUR').AsString ;
+  //     Sheet.Cells(Row,Col + 1).Value := dsList.FieldByName('CREDITS_IND').AsString;
+       Sheet.Cells(Row,Col+1).Value := dsList.FieldByName('CREDITS_TEST').AsString;
+       dsList.Next;
+       Inc(Col,2);
+     end;
+     dsStudents.Next;
+   end;
+   //*************************
+
+{   range := Sheet.Range(Sheet.Cells(TitleMarkRow,NumCol), Sheet.Cells(Row, MaxCol-1));
+   range.Borders(7).LineStyle := 1; //xlContinuous
+   range.Borders(8).LineStyle := 1; //xlContinuous
+   range.Borders(9).LineStyle := 1; //xlContinuous
+   range.Borders(10).LineStyle := 1; //xlContinuous
+   range.Borders(11).LineStyle := 1; //xlContinuous
+   range.Borders(12).LineStyle := 1; //xlContinuous  }
+end;
+
+begin
+end.</Script></Report>

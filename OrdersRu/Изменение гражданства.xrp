@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Изменение гражданства" ProgressMax="100" EncodeText="False" ID="{D04579CC-8ECF-495C-8FBC-E5827F7CA206}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="NewCountry" DisplayLabel="Новое гражданство" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select COUNTRYID, COUNTRYNAME
+from V_GUIDE_COUNTRY
+order by COUNTRYNAME" CommonValue="False"/><Parameter Name="FromDate" DisplayLabel="C какой даты" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ShowTitle" DisplayLabel="Добавить заголовок приказа" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="True" Master=""><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforeOpenDataSet="" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL> 1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,GROUPNUM,CODE,SPECIALITY,COUNTRYNAME') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 4)
+  else
+  if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+begin
+end.</Script></Report>

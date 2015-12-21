@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Отчисление в связи с окончанием" ProgressMax="100" EncodeText="False" ID="{D6FC152F-D84F-48D5-B341-32DBB9343B4A}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="FromDate" DisplayLabel="С какой даты" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ByGroups" DisplayLabel="Список по группам" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsGroups" Master="" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStudents" Master="dsGroups" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="" OnGetFieldData=""/></Band></Bands><Events OnAfterCreateDataSet="" OnFirstPrintBand="dsGroups_OnFirstPrintBand"/><SQL>1
+</SQL></Band><Band Name="grByStudents" AutoOpen="False" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStudents1" Master="" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="" OnGetFieldData=""/></Band></Bands><Events OnFirstPrintBand="grByStudents_OnFirstPrintBand"/></Band><Band Name="dsTitleInfo" AutoOpen="False" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL></Band></Bands><Script>procedure dsGroups_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('ByGroups').Value;
+end;
+
+
+procedure grByStudents_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := Params.Item('ByGroups').Value;
+end;
+
+
+procedure OnAfterQueryParams;
+var
+  ds: TpFibDataSet;
+  s: string;
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+  Params.Item('StudentID').Value := HostAppl.Data.GetData('STUDENTID');
+
+  ds := FindDataSet('dsTitleInfo');
+
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('EDULEVEL,CODE,SPECIALITY,EDUTERMNAME') +
+    ' where S.STUDENTID = ?STUDENTID';
+
+  ds.Active := True;
+  if Params.Item('ByGroups').Value then
+  begin
+    ds := FindDataSet('dsGroups');
+
+    s := HostAppl.Data.GetSQL('GROUPNUM') +
+         ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+    ds.SelectSQL.Text := StringReplace(s, 'select', 'select distinct', 0);
+
+    ds.Active := True;
+
+    ds := FindDataSet('dsStudents');
+
+
+    ds.SelectSQL.Text :=
+      HostAppl.Data.GetSQL('FIO,COUNTRYNAME') +
+      ' where S.STUDENTID in (@@StudentsID%0@) ' +
+      ' and ' + HostAppl.Data.GetAliasForField('GROUPNUM') +
+      '.GROUPNUM = ?MAS_GROUPNUM order by 1';
+
+    ds.Active := True;
+  end
+  else
+  begin
+    ds := FindDataSet('dsStudents1');
+
+    ds.SelectSQL.Text :=
+      HostAppl.Data.GetSQL('FIO,COUNTRYNAME') +
+      ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+    ds.Active := True;
+  end;
+end;
+
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport=""/></Report>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Итоги экзаменационной сессии(ECTS)" ProgressMax="100" EncodeText="False" ID="{4BE1AF9D-C6A2-43E3-8D1F-0023E5F5E98C}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Parameter Name="Department" DisplayLabel="Відділ" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False" SQL="select DEPARTMENTID, DEPARTMENT
+from GUIDE_DEPARTMENT
+where USE = 1
+order by DEPARTMENT"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="Chief" DisplayLabel="Керівник" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER"/></UserParameters><Bands><Band Name="dsProtocol" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsProtocolResult" AutoOpen="True" UniDirectional="False" Master="dsProtocol" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+
+  (select count(1)
+   from V_LASTPROTOCOL VLP1
+   where VLP1.EDUYEAR = RI.EDUYEAR
+        and VLP1.SEMESTER = RI.SEMESTER
+        and VLP1.DISCIPLINEID = RI.DISCIPLINEID
+        and VLP1.STUDENTID in (select S2P.STUDENTID
+                           from STUDENT2PROTOCOL S2P
+                            where S2P.PROTOCOLID = RI.PROTOCOLID)
+    and ((VLP1.ECTS = 'FX') or (VLP1.ECTS='F') or (VLP1.ECTS='-') or (VLP1.ECTS='NS') or (VLP1.ECTS='NR'))
+  ) as FFXCOUNT
+
+from RANKING_PROTOCOLS RI
+where RI.PROTOCOLID = :MAS_PROTOCOLID
+</SQL></Band><Band Name="dsECTSInfo" AutoOpen="True" UniDirectional="False" Master="dsProtocol" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+     (select count(1)
+   from V_LASTPROTOCOL VLP1
+   where VLP1.EDUYEAR = RP.EDUYEAR
+        and VLP1.SEMESTER = RP.SEMESTER
+        and VLP1.DISCIPLINEID = RP.DISCIPLINEID
+        and VLP1.STUDENTID in (select S2P.STUDENTID
+                           from STUDENT2PROTOCOL S2P
+                            where S2P.PROTOCOLID = RI.PROTOCOLID)
+    and (VLP1.ECTS = RI.ECTS)
+  ) as STUDENTCOUNT,
+  RI.ECTS,
+  (case when RI.ECTS = 'A' then 200 else RI.CREDITS_MAX end) as CREDITS_MAX,
+  (case when RI.ECTS = 'E' then 0 else RI.CREDITS_MIN end) as CREDITS_MIN
+--  RI.CREDITS_MIN, RI.CREDITS_MAX
+from RANKING_INFO RI
+inner join RANKING_PROTOCOLS RP
+on RP.PROTOCOLID = RI.PROTOCOLID
+where RI.PROTOCOLID = :MAS_PROTOCOLID
+</SQL><Events OnAfterOpenDataSet="" OnBeforeOpenDataSet="" OnGetFieldData="dsECTSInfo_OnGetFieldData"/></Band></Bands><SQL>select distinct RP.PROTOCOLID, GD.DISCIPLINE,
+      (select count(1)
+   from STUDENT2PROTOCOL SP1
+   where SP1.PROTOCOLID = RP.PROTOCOLID
+  ) as ALLCOUNT
+from RANKING_PROTOCOLS RP
+inner join STUDENT2PROTOCOL S2P
+on S2P.PROTOCOLID = RP.PROTOCOLID
+inner join GUIDE_DISCIPLINE GD
+on GD.DISCIPLINEID = RP.DISCIPLINEID
+where RP.EDUYEAR = :EduYear_EDUYEAR
+      and RP.SEMESTER = :Semester_SEMESTER
+     and S2P.STUDENTID in (@@StudentsID%0@)
+     and RP.PARENTPROTOCOLID is Null
+
+</SQL><Events OnGetFieldData="" OnAfterOpenDataSet="" OnAfterCreateDataSet="dsProtocol_OnAfterCreateDataSet"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>procedure dsProtocol_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsECTSInfo_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'ECTS' then
+  begin
+    Params.Item('REAL_PERCENT').Value :=  round(dsECTSInfo.FieldByName('STUDENTCOUNT').Value / dsProtocol.FieldByName('ALLCOUNT').Value * 10000)/ 100;
+  end;
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if (Params.Item('Semester_SEMESTER').Value mod 2 = 1) then
+  Params.Item('HALFYEAR').Value := 'зимової'
+  else Params.Item('HALFYEAR').Value := 'літньої';
+end;
+
+begin
+end.</Script></Report>

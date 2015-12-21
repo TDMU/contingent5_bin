@@ -1,0 +1,97 @@
+var
+  InfoXML: Variant;
+  OptionsNode: Variant;
+  TablesNode: Variant;
+
+const
+  SelJoin = 'inner join SELECTEDIDS SS ' +
+            'on (SS.SELID = S.STUDENTID) ' +
+            'and (SS.TRANID = current_transaction)';
+
+procedure ExecuteSQL(ASQL: string);
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := ASQL;
+      ExecQuery;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+function GetOptions: Variant;
+
+  procedure AddOption(Name: string; Caption: string; Checked: Boolean);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement(Name);
+    OptionsNode.AppendChild(Node);
+    Node.SetAttribute('Caption', Caption);
+    Node.SetAttribute('Checked', Checked);
+  end;
+  
+begin
+  AddOption('IncludePhoto', _('Экспортировать фотографии'), False);
+
+  Result := OptionsNode;
+end;
+
+function GetOptionAttrValue(NodeName, AttrName: string): Variant;
+var
+  Node, Attr: Variant;
+begin
+  Result := '';
+  Node := OptionsNode.SelectSingleNode(NodeName);
+//  if VarIsEmpty(Node) then Exit;
+  Attr := Node.attributes.getNamedItem(AttrName);
+//  if Attr = nil then Exit;
+  Result := Attr.nodeValue;
+end;
+
+procedure StartExport;
+  procedure ProcessTable(TableName, TableTitle, SQL: string; ExcludeFields: string = '';
+                         AddJoin: Boolean = True; UseServerCount: Boolean = True);
+  var
+    RecCount: integer;
+    FullSQL: string;
+  begin
+    OutMessage(#13#10 + _('Таблица') + ' "' + TableTitle + '"');
+
+    FullSQL := SQL + ' ' + SelJoin;
+
+    Log(FullSQL);
+    RecCount := SQL2XML(FullSQL, TableName + '.xml', ExcludeFields, UseServerCount);
+
+  end;
+
+var
+  s: string;
+  CurJoin: string;
+
+begin
+
+  HostAppl.Data.FillSelectedList(TransactionHandle);
+
+  s := 'DBCODE, PACKAGEID';
+  if GetOptionAttrValue('IncludePhoto', 'Checked') then
+    ProcessTable('STUDENTS', _('Студенты'), 'select S.* from STUDENTS S', s)
+  else
+    ProcessTable('STUDENTS', _('Студенты'), 'select S.* from STUDENTS S', s + ',PHOTO');
+
+end;
+
+
+begin
+  try
+    InfoXML := CreateOleObject('Msxml2.DOMDocument.3.0');
+  except
+    RaiseException(_('В системе не установлена библиотека msxml3'));
+  end;
+  InfoXML.LoadXML('<?xml version="1.0" encoding="windows-1251"?><Info><Options/></Info>');
+  OptionsNode := InfoXML.DocumentElement.SelectSingleNode('Options');
+end.

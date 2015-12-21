@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Учебная карточка студента" ProgressMax="100" EncodeText="False" ID="{86522872-20B1-427B-BA4D-D581600B67F3}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Address" DisplayLabel="Адреса місця проживання:" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" Items="Місце народження
+Місце проживання до вступу
+Місце проживання на даний момент
+Адреса батьків" KeyItems="BIRTHADDRESS
+ADDRESSBEFORE
+ADDRESSNOW
+ADDRESSOFPARENTS" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False"><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL><Bands/></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>1
+</SQL><Bands><Band Name="dsOrder" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False"><SQL>SELECT first 1 O.ORDERID, O.ORDERNUM, O.ORDERDATE, O.CANCELED
+FROM ORDERS O
+    inner join STUDENTTOORDER STO on (STO.ORDERID = O.ORDERID)
+    inner join REASONTOCATEGORY RTC on (RTC.REASONID = STO.REASONID)
+where STO.STUDENTID = ?MAS_STUDENTID
+   and STO.CANCELED = 0
+   and O.CANCELED = 0
+   and RTC.REASONCATEGORYID = 2 -- Зачисления
+order by O.ORDERNUM desc
+</SQL></Band><Band Name="dsOrders" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False"><SQL>SELECT O.ORDERID, O.ORDERNUM, O.ORDERDATE, O.CANCELED, GR.REASONFULL,
+  HMF.SEMESTER
+FROM ORDERS O
+    inner join V_STUDENTORDERS STO on (STO.ORDERID = O.ORDERID)
+    left join REASONTOCATEGORY RC
+    on (RC.REASONID = STO.REASONID)
+    inner join GUIDE_REASON GR on (GR.REASONID = STO.REASONID)
+--    inner join REASONTOCATEGORY RTC on (RTC.REASONID = STO.REASONID)
+    left join HS_MOVEMENT_FULL HMF on (HMF.STUDENTID = ?MAS_STUDENTID
+    and HMF.BEGINDATE &lt;= O.ORDERDATE and HMF.ENDDATE &gt; O.ORDERDATE)
+where STO.STUDENTID = ?MAS_STUDENTID
+   and O.CANCELED = 0
+   and (
+     STO.REASONID in (11009, 11010, 11011, 11018)
+     or (
+       (RC.REASONCATEGORYID = 1)
+       and (not STO.REASONID between 4000 and 4099)
+       and (not STO.REASONID between 13000 and 13099)
+     )
+   )
+order by O.ORDERDATE, O.ORDERNUM
+</SQL><Events OnBeforePrintRec="dsOrders_OnBeforePrintRec" OnAfterPrintBand="" OnAfterPrintRec="dsOrders_OnAfterPrintRec" OnBeforePrintBand="dsOrders_OnBeforePrintBand"/></Band></Bands></Band></Bands><Script>var
+  RecCnt: Integer;
+  
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, COUNTRYNAME, EDUBASISID, DEPARTMENT, '+
+      'SPECIALITY, CODE, EDUFORM, PRIVATEAFFAIRNUM, BIRTHDATE, BIRTHADDRESS, '+
+      'EDUCATIONALINSTITUTION, FAMILYSTATUSNAME, ADDRESSNOW, BIRTHADDRESS, '+
+      'ADDRESSBEFORE, ADDRESSOFPARENTS, ENTERDATE, WORKBOOKNUM, '+
+      'WORKBOOKGIVEDATE, SOCIALORIGIN') +
+      ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'NewPage') then
+  begin
+    if Field.DataSet.RecNo &gt; 1 then Field.Value := '&amp;page&amp;';
+  end
+  else
+  if (Field.FieldName = 'ADDRESS') then
+    Field.Value := Field.Dataset.FieldByName(Params.Item('Address_KEY').Value).asString;
+end;
+
+procedure dsOrders_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  inc (RecCnt);
+  Band.Stop := Band.DataSet.Eof and (RecCnt&gt;10);
+end;
+
+procedure dsOrders_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  RecCnt := 0;
+  Band.Stop := False;
+end;
+
+procedure dsOrders_OnAfterPrintRec(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+begin
+end.</Script></Report>

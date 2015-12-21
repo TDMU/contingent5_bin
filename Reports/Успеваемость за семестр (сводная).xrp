@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Успеваемость за семестр (сводная)" ProgressMax="100" EncodeText="False" ID="{49F04D19-EE97-4083-866A-F86A554C2BA3}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by 1" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="FormControl" DisplayLabel="Контроль" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select FORMREPORT, 0, FORMREPORTNAME
+from GUIDE_FORMREPORT
+order by WEIGHT" CommonValue="False"/><Parameter Name="IncludeRetake" DisplayLabel="Показати перескладання" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="SessionBeginDate" DisplayLabel="Дата початку сесії" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master=""><SQL>select ST.STUDENTID, ST.FIO, G_D.DISCIPLINEID, G_D.DISCIPLINE, G_M.MARKNAME, SM.FORMREPORT,
+(select first 1 HG.GROUPNUM from HS_GROUPNUM HG where HG.STUDENTID = ST.STUDENTID
+  and HG.BEGINDATE &lt;= :SessionBeginDate order by HG.BEGINDATE desc) as GROUPNUM
+
+from STUDENTS ST
+
+left join STUDENTPLAN SP
+on (SP.STUDENTID = ST.STUDENTID)
+and SP.SEMESTER = ?Semester_SEMESTER
+and SP.EDUYEAR = ?EduYear_EduYear
+
+left join @@TableName%STUDENTMARK@ SM
+on SM.STUDENTID = SP.STUDENTID
+and SM.PLANID = SP.PLANID
+and SM.FORMREPORT in (@@FormControl_KEYS@)
+
+left join GUIDE_MARKTYPE G_M
+on (G_M.MARKID = SM.MARKID)
+
+left join GUIDE_DISCIPLINE G_D
+on (G_D.DISCIPLINEID = SM.DISCIPLINEID)
+
+where
+ST.STUDENTID in (@@StudentsID@)
+order by ST.FIO, SM.NUMORDER
+</SQL></Band></Bands><Script>const
+StartCol = 6;
+
+procedure OnAfterQueryParams;
+Var
+  App : Variant;
+  sheet, range : Variant;
+  dsL : TpFibDataSet;
+  Row,Col : Integer;
+  // Предыдущие значения
+  LStudentID : Variant;
+  SL : TStringList;
+  j : Integer;
+    //************************************
+    Function GetCol(Discipline:String):Integer;
+    Var i : Integer;
+    Begin
+       Result := -1;
+       if Length(Discipline) = 0 then Exit;
+       
+       For i := 0 to SL.Count-1 do
+       begin
+          If (SL[i] = Discipline) then Begin
+             Result := i;
+             Break;
+          End;
+       end;
+       If (Result = -1) then Begin
+         Result := SL.Add(Discipline);
+       End;
+       Result := Result + StartCol;
+    End;
+    //************************************
+begin
+   SL := TstringList.Create;
+   App := CreateOleObject('Excel.Application');
+   App.Visible := True;
+   App.WorkBooks.Add(Report.TemplateDoc);
+   Report.TemplateDoc := '';
+   Sheet := App.ActiveSheet;
+   
+   Sheet.Cells(1,1).Value := Params.Item('Semester_SEMESTER').Value;
+   Sheet.Cells(2,1).Value := Params.Item('EduYear_EDUYEARSTR').Value;
+
+   dsL := FindDataSet('dsList');
+   Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+   if Params.Item('IncludeRetake').Value then
+     Params.Item('TableName').Value := 'STUDENTMARK'
+   else
+     Params.Item('TableName').Value := 'V_LASTRETAKEMARKS';
+
+   dsL.Active := True;
+   dsL.First;
+   Row := 2;
+   LStudentID := 0;
+   While not dsL.Eof do Begin
+     If (LStudentID &lt;&gt; dsL.FieldByName('STUDENTID').Value) Then
+     Begin
+       Inc(Row);
+       Sheet.Cells(Row,5).Value := '=AVERAGE(RC[1]:RC[99])';
+       Sheet.Cells(Row,4).Value := dsL.FieldByName('GROUPNUM').AsString;
+       Sheet.Cells(Row,3).Value := dsL.FieldByName('FIO').AsString;
+       Sheet.Cells(Row,2).Value := '''' + IntToStr(Row-2) + '.';
+     End;
+     Col := GetCol(dsL.FieldByName('DISCIPLINE').AsString + ' (' + dsL.FieldByName('FORMREPORT').AsString + ')');
+     if Col &lt;&gt; -1 then
+     begin
+       If (VarToStr(Sheet.Cells(Row,Col).Value) &lt;&gt; '') Then
+         Sheet.Cells(Row,Col).Value := VarToStr(Sheet.Cells(Row,Col).Value) + '; ' + dsL.FieldByName('MARKNAME').AsString
+       Else
+         Sheet.Cells(Row,Col).Value := dsL.FieldByName('MARKNAME').AsString;
+     end;
+     LStudentID := dsL.FieldByName('STUDENTID').Value;
+     dsL.Next;
+   End;
+   //*************************
+   For j := 0 to SL.Count-1 do
+   begin
+      Sheet.Cells(2,j+StartCol).Value := SL[j];
+   end;
+   
+   range := Sheet.Range(Sheet.Cells(2,2), Sheet.Cells(Row, SL.Count + StartCol -1));
+   range.Borders(7).LineStyle := 1; //xlContinuous
+   range.Borders(8).LineStyle := 1; //xlContinuous
+   range.Borders(9).LineStyle := 1; //xlContinuous
+   range.Borders(10).LineStyle := 1; //xlContinuous
+   range.Borders(11).LineStyle := 1; //xlContinuous
+   range.Borders(12).LineStyle := 1; //xlContinuous
+end;
+
+begin
+end.</Script></Report>

@@ -1,0 +1,107 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Отчет для внесения студентов в EDBO" ProgressMax="100" EncodeText="False" ID="{630682C0-9EC4-4438-85A9-3EE49EB42B00}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="cbSortOrder" DisplayLabel="Сортировка" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="по алфавиту
+по группам" KeyItems="FIO
+GROUPNUM, FIO" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>1
+</SQL><Bands><Band Name="dsEnterOrder" AutoOpen="True" UniDirectional="False" Master="dsStudents" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 HM.BEGINDATE, V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+inner join GUIDE_REASON G_RN
+  on (V_STO.REASONID = G_RN.REASONID)
+inner join REASONTOCATEGORY RTC
+  on (G_RN.REASONID = RTC.REASONID)
+inner join HS_MOVEMENT HM
+  on (HM.ORDERID = V_STO.ORDERID and HM.STUDENTID = V_STO.STUDENTID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 2
+order by V_STO.ORDERDATE
+</SQL></Band><Band Name="dsMoveUpOrder" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 HM.BEGINDATE, V_STO.ORDERDATE, V_STO.ORDERNUM, G_RN.REASON
+from V_STUDENTORDERS V_STO
+inner join GUIDE_REASON G_RN
+  on (V_STO.REASONID = G_RN.REASONID)
+inner join HS_MOVEMENT HM
+  on (HM.ORDERID = V_STO.ORDERID and HM.STUDENTID = V_STO.STUDENTID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  (G_RN.REASONID &gt;= 4000 and G_RN.REASONID &lt;= 4013)
+order by HM.BEGINDATE desc
+</SQL></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  sql: string;
+begin
+  sql :=
+   HostAppl.Data.GetSQL('STUDENTID, FIO, PRIVATEAFFAIRNUM, BIRTHDATE, NOTE, ' +
+    'ADDRESSBEFORE, ADDRESSNOW, ADDRESSOFPARENTS, ' +
+    'COUNTRYNAME, PROTOCOLNUM, PROTOCOLDATE, SEX, ' +
+    'PASSPORTNUM, PASSPORTGIVEDATE, PASSPORTGIVEPLACE, ' +
+    'BIRTHADDRESS, IDCODE, PREVIOUSDOCUMENT, PREVIOUSDOCUMENTNUM, ' +
+    'EDUCATIONALINSTITUTION, PRIVILEGE, ' +
+    'EDUFORMID, EDUBASISID, DEPARTMENT, SPECIALITY_CODE, SEMESTER, GROUPNUM '
+    ) +
+   ' where S.STUDENTID in (@@StudentsID%0@) order by @@cbSortOrder_KEY@';
+
+//  if (Params.Item('cbSortOrder_INDEX').Value = 0) then
+//    sql := sql + ' order by FIO'
+//  else
+//    sql := sql + ' order by GROUPNUM, FIO';
+
+  ds.SelectSQL.Text := sql;
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+  i: Integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+    if Num &lt;= SL.Count then
+    begin
+      Result := SL[Num - 1];
+      if (SL.Count &gt; 3) and (Num = 3) then
+      begin
+        for i := Num + 1 to SL.Count do
+          Result := Result + ' ' + SL[i - 1];
+      end
+    end
+    else Result := '';
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'F1') then
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('FIO').AsString)
+  else
+  if (Field.FieldName = 'F2') then
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('FIO').AsString)
+  else
+  if (Field.FieldName = 'F3') then
+    Field.Value := GetWord(3, Field.DataSet.FieldByName('FIO').AsString)
+  else
+  if (Field.FieldName = 'PASS1') then
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('PASSPORTNUM').AsString)
+  else
+  if (Field.FieldName = 'PASS2') then
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('PASSPORTNUM').AsString)
+      + GetWord(3, Field.DataSet.FieldByName('PASSPORTNUM').AsString) // на всякий случай
+  else
+  if (Field.FieldName = 'PREVDOC1') then
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('PREVIOUSDOCUMENTNUM').AsString)
+  else
+  if (Field.FieldName = 'PREVDOC2') then
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('PREVIOUSDOCUMENTNUM').AsString)
+      + GetWord(3, Field.DataSet.FieldByName('PREVIOUSDOCUMENTNUM').AsString) // на всякий случай
+  else
+  if (Field.FieldName = 'COURSE') then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2)
+  else
+  if Field.FieldName = 'NewPage' then
+     Field.Value := '&amp;page&amp;';
+end;
+
+Begin
+End.</Script></Report>

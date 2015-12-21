@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Формуляр читателя" ID="{327B3FC4-3B08-4C4C-BBF7-1E18C242B2E0}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>select S.FIO, extract (year from S.BIRTHDATE) as BIRTHYEAR,
+       S.ADDRESSBEFORE, S.ADDRESSOFPARENTS, GD.DEPARTMENT
+from STUDENTS S
+     left join V_GUIDE_DEPARTMENT GD on(GD.DEPARTMENTID = S.DEPARTMENTID)
+where S.STUDENTID in (@@StudentsID%0@)
+order by 1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+   ds.SelectSQL.Text :=
+   HostAppl.Data.GetSQL('FIO, ADDRESSBEFORE, DEPARTMENT, COURSE, SEMESTER, BIRTHDATE, EDUBASIS') +
+   ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'BIRTHYEAR' then
+    Field.Value := FormatDateTime('yyyy', dsStudents.FieldByName('BIRTHDATE').AsDateTime)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((dsStudents.FieldByName('SEMESTER').AsInteger + 1) / 2);
+end;
+
+Begin
+End.</Script></Report>

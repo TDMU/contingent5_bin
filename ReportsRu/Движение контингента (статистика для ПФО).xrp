@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Движение контингента (статистика для ПФО)" ID="{41A4F0B7-198A-4395-9A53-6857F56FA978}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="C какой даты:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="По какую дату:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EduForm" DisplayLabel="Форма обучения" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUFORMID, EDUFORM
+from V_GUIDE_EDUFORM
+where USE = 1
+order by EDUFORM" CommonValue="False"/><Parameter Name="EduBasis" DisplayLabel="Форма финансирования" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUBASISID, 0, EDUBASIS
+from V_GUIDE_EDUBASIS
+where USE = 1
+order by EDUBASIS" CommonValue="False"/><Parameter Name="Faculty" DisplayLabel="Факультет" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, 0, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE = 1" CommonValue="False"/><Parameter Name="Structure" DisplayLabel="Структура" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select STRUCTUREID, STRUCTURE
+from V_GUIDE_STRUCTURE
+where USE = 1
+order by STRUCTURE" CommonValue="False"/><Parameter Name="InnerMoving" DisplayLabel="Учитывать внутренние переводы" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsIn" AutoOpen="True" UniDirectional="False" Master=""><SQL>select (case when PI.EDUTERM is not null then PI.SPECIALITY ||' - '|| PI.EDUTERM else PI.SPECIALITY end) as SPECIALITY, PI.CA, PI.C1, PI.C2, PI.C3, PI.C4, PI.C5, PI.C6, PI.C6_1, PI.C10, PI.C11, PI.C12,
+       PI.C13, PI.C14, PI.C15, PI.C16, PI.C17, PI.C17_1, PI.C18, PI.C19, PI.C20, PI.C21, PI.C22, PI.C23, PI.C24
+from SP_RP_CONTINGENTMOVING_PFO_IN(?EduForm_EDUFORMID,
+                               ?Faculty_KEYS,
+                               ?EduBasis_KEYS,
+                               ?Structure_STRUCTUREID,
+                               ?FromDate,
+                               ?ToDate,
+                               ?InnerMoving) PI
+
+             
+</SQL><Events OnGetFieldData="dsIn_OnGetFieldData"/></Band><Band Name="dsOut" AutoOpen="True" UniDirectional="False" Master=""><SQL>select (case when PO.EDUTERM is not null then PO.SPECIALITY ||' - '|| PO.EDUTERM else PO.SPECIALITY end) as SPECIALITY, PO.CA, PO.C1, PO.C2, PO.C3, PO.C4, PO.C5, PO.C6, PO.C6_1, PO.C10, PO.C11, PO.C12,
+       PO.C13, PO.C14, PO.C15, PO.C16, PO.C17, PO.C18, PO.C19, PO.C20, PO.C21, PO.C22, PO.C23, PO.C24, PO.C25, PO.C26,
+       PO.C27, PO.C28, PO.C29, PO.C30, PO.C31, PO.C32, PO.C33, PO.C34, PO.C35, PO.C36
+from SP_RP_CONTINGENTMOVING_PFO_OUT(?EduForm_EDUFORMID,
+                                ?Faculty_KEYS,
+                                ?EduBasis_KEYS,
+                                ?Structure_STRUCTUREID,
+                                ?FromDate,
+                                ?ToDate,
+                                ?InnerMoving) PO
+</SQL><Events OnGetFieldData="dsIn_OnGetFieldData"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL><Bands/></Band></Bands><Script>procedure dsIn_OnGetFieldData(Field: TDBFieldInfo);
+begin
+   If (not validint(Field.Value)) and (Field.FieldName &lt;&gt; 'SPECIALITY') Then Field.Value := 0;
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if Params.Item('InnerMoving').Value then
+    Params.Item('InnerMoving').Value := 1
+  else
+    Params.Item('InnerMoving').Value := 0;
+  if (not Params.Item('Department_ENABLED').Value) then
+  begin
+    Params.Item('Department_DEPARTMENTID').Value := null;
+    Params.Item('Department_DEPARTMENT').Value := '';
+  end
+end;
+
+Begin
+End.</Script></Report>

@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Соглашение о подготовке специалистов с высшим образованием" ProgressMax="100" EncodeText="False" ID="{3553170B-098C-4170-B125-9B30C7946228}"><UserParameters/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>.
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+     ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO, COUNTRYNAME, BIRTHDATE, PASSPORTNUM, SPECIALITY, ENTERDATE, DEPARTMENT, QUALIFICATION') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+begin
+end.</Script></Report>

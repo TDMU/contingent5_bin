@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Зачисление на курс (шапка)" ProgressMax="100" ID="{A6495CC4-A3E3-436E-AB3E-16FAF8C3A85F}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="True" SaveCheckBox="False" Position="poScreenCenter" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000
+2001
+2002
+2003
+2004
+2005
+2006
+2007
+2008
+2009" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="Speciality" DisplayLabel="Спецiальнiсть" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" SQL="select S.SPECIALITYID,
+(S.CODE || ' - ' || S.SPECIALITY) as SPECIALITY,
+ED.EDUDIRECTION_CODE,
+ED.EDUDIRECTION,
+EL.EDULEVEL
+from GUIDE_SPECIALITY S
+inner join GUIDE_EDUDIRECTION ED
+  on (ED.EDUDIRECTIONID = S.EDUDIRECTIONID)
+inner join GUIDE_EDULEVEL EL
+  on (EL.EDULEVELID = S.EDULEVELID)
+where S.USE = 1
+order by SPECIALITY" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="True"/><Parameter Name="EduForm" DisplayLabel="Форма навчання" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="True" SQL="select EDUFORMID, EDUFORM, EDUFORM_CASE4
+from GUIDE_EDUFORM
+where USE = 1
+order by EDUFORM" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="False"/><Parameter Name="EduBasis" DisplayLabel="Основа навчання" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="True" SQL="select EDUBASISID, EDUBASIS, EDUBASIS_CASE5
+from GUIDE_EDUBASIS
+where USE = 1
+order by EDUBASIS" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="True"/><Events OnBeforeQueryParams="" OnAfterQueryParams=""/><Parameter Name="Edu2" DisplayLabel="Друга вища освіта" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="root" AutoOpen="True" UniDirectional="False"><Events OnGetFieldData="root_OnGetFieldData"/></Band></Bands><Script>procedure OnEndReport;
+var
+  i: integer;
+begin
+  for i := 0 to Params.Count - 1 do
+    OrderParams.Item(Params.Item(i).Name).Value := Params.Item(i).Value;
+
+  for i := 0 to Report.UserParams.Count - 1 do
+    OrderParams.Item(Report.UserParams.Item(i).Name).Value := Report.UserParams.Item(i).Value;
+end;
+
+
+procedure root_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'Count' then
+    Field.Value := HostAppl.Data.GetSelCount;
+end;
+
+
+begin
+end.</Script><Events OnEndReport="OnEndReport"/></Report>

@@ -1,0 +1,917 @@
+var
+  ProtocolID: variant;
+  OnFirstTestList: integer;
+  Guide_ECTS, Guide_TradMarks: TStringList;
+  GetTradM: boolean;
+
+function MathRound(val: Extended): integer;
+begin
+  Result := Trunc(val);
+  if val - Result >= 0.5 then Inc(Result);
+end;
+
+  
+procedure FillStudentsInfo(List: TList; var EmptyCreditsExists: Boolean; var PositiveCount: integer; ParentProtocolID: integer);
+var
+  s: string;
+  qrStudentInfo: TpFibQuery;
+  info: TStudentInfo;
+begin
+  with TpFibDataSet.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+		GetTradM := false;
+		if ParentProtocolID = null then
+			begin
+				if ProtocolFor = 2 then  // Для выделенных
+	      begin
+	        s := HostAppl.Data.GetSQL('STUDENTID, FIO', 1, -1);
+	        s := s + ' where S.STUDENTID in (@@STUDENTIDS%0@)';
+	      end
+	      else
+	      begin
+	        s := HostAppl.Data.GetSQL('STUDENTID, FIO, SPECIALITYID, DEPARTMENTID, STATUS, EDUYEAR, SEMESTER', 1, -1);
+	        s := s + ' where ' + HostAppl.Data.GetAliasForField('STATUS', 1) + '.STATUS = ''С'' ' +
+	             'and ' + HostAppl.Data.GetAliasForField('EDUYEAR', 1) + '.EDUYEAR = ?EDUYEAR ' +
+	             'and ' + HostAppl.Data.GetAliasForField('SEMESTER', 1) + '.SEMESTER = ?SEMESTER ';
+
+	        if ProtocolFor = 0 then  // Для специальности
+	          s := s + 'and ' + HostAppl.Data.GetAliasForField('SPECIALITYID', 1) + '.SPECIALITYID = ?SPECIALITYID ';
+							 
+	        if ProtocolFor = 1 then  // Для факультета
+	          s := s + 'and ' + HostAppl.Data.GetAliasForField('DEPARTMENTID', 1) + '.DEPARTMENTID = ?DEPARTMENTID';
+	      end;
+			end
+			else
+			begin
+				if ProtocolFor = 1 then  // Для выделенных
+				begin
+					s := HostAppl.Data.GetSQL('STUDENTID, FIO ', 1, -1);
+	        s := s + 'where S.STUDENTID in (@@STUDENTIDS%0@)';
+				end
+				else
+				begin
+					s := HostAppl.Data.GetSQL('STUDENTID, FIO, PROTOCOLID ', 0, -1) +
+					'where ' + HostAppl.Data.GetAliasForField('PROTOCOLID') + '.PROTOCOLID = ?PROTOCOLID ' +
+					'and ' + HostAppl.Data.GetAliasForField('PROTOCOLID') + '.ECTS in (''F'', ''FX'', ''NR'', ''NS'', ''NV'')';
+				end;
+			end;
+			s := s + ' order by 2';
+			
+			SelectSQL.Text := s;
+
+			if Params.FindParam('STUDENTIDS') <> nil then
+				Params.ParamByName('STUDENTIDS').Value := HostAppl.Data.GetSelectedList('STUDENTID', ',');
+
+			if Params.FindParam('EDUYEAR') <> nil then
+				Params.ParamByName('EDUYEAR').Value := EduYear;
+				
+			if Params.FindParam('SEMESTER') <> nil then
+				Params.ParamByName('SEMESTER').Value := Semester;
+				
+			if Params.FindParam('SPECIALITYID') <> nil then
+				Params.ParamByName('SPECIALITYID').Value := SpecialityID;
+			
+			if Params.FindParam('CurDate') <> nil then
+				Params.ParamByName('CurDate').Value := ProtocolCreateDate;
+
+			if Params.FindParam('DEPARTMENTID') <> nil then
+				Params.ParamByName('DEPARTMENTID').Value := DepartmentID;
+				
+			if Params.FindParam('PROTOCOLID') <> nil then
+				Params.ParamByName('PROTOCOLID').Value := ParentProtocolID;
+					
+      Open;
+      FetchAll;
+
+      qrStudentInfo := TpFibQuery.Create(nil);
+      try
+        qrStudentInfo.Database := DB;
+        qrStudentInfo.Transaction := Tran;
+        qrStudentInfo.SQL.Text :=
+           ' select DISCIPLINEEXISTS, CREDITS_AVG, FX_CREDITS, F_CREDITS, EMPTY_CREDITS_EXISTS, STIMULATIONMARKS, FORMREPORT, NOT_RANGE, ONLY_E, SCLAV, TESTLISTS, DISCIPLINE_FINISHED '+
+           ' from SP_GETRESULTSTODATE(:STUDENTID, :DISCIPLINEID, :TODATE, :EDUPLANID, :MAXMODULENUM, :ON_FIRST_TESTLIST) ';
+
+        qrStudentInfo.PN('DISCIPLINEID').Value := DisciplineID;
+        qrStudentInfo.PN('TODATE').Value := ProtocolCreateDate;
+		qrStudentInfo.PN('EDUPLANID').Value := EduPlanID;
+        qrStudentInfo.PN('MAXMODULENUM').Value := MaxModuleNum;
+		qrStudentInfo.PN('ON_FIRST_TESTLIST').Value := OnFirstTestList;
+        PositiveCount := 0;
+        EmptyCreditsExists := False;
+        while not Eof do
+        begin
+          qrStudentInfo.PN('STUDENTID').Value := FieldByName('STUDENTID').Value;
+          qrStudentInfo.ExecQuery;
+		  
+			if (qrStudentInfo.FN('DISCIPLINEEXISTS').AsInteger <> 0) then
+			begin
+				info := TStudentInfo.Create;
+				info.StudentID := FieldByName('STUDENTID').Value;
+				info.StimulationMarks := qrStudentInfo.FN('STIMULATIONMARKS').AsInteger * 100;
+				info.FIO := FieldByName('FIO').Value;
+							info.TestLists := qrStudentInfo.FN('TESTLISTS').Value;
+			{	if (qrStudentInfo.FN('DISCIPLINE_FINISHED').AsInteger = 0) then
+				begin
+	//			  info.Credits_Avg := 0;
+					EmptyCreditsExists := True;
+					OutMessage(info.FIO + ' - ' +
+					Format(_('на %s не существует ведомостей'),[DateToStr(ProtocolCreateDate)]) + #13#10, clRed, 8, clWhite) ;
+				end;}
+				
+				info.Form_Report := qrStudentInfo.FN('FORMREPORT').AsString;
+				
+				if not qrStudentInfo.FN('EMPTY_CREDITS_EXISTS').IsNull          // Если есть ведомости
+				  and (qrStudentInfo.FN('EMPTY_CREDITS_EXISTS').AsInteger = 0)  // И в них нет пропусков (в оценках)
+				then
+				begin
+				  if (info.Form_Report = 'да') then 
+					info.Credits_Avg := 0 // Все Ok, на КРОК баллы не считаются...
+				  else
+					info.Credits_Avg := Trunc(qrStudentInfo.FN('CREDITS_AVG').AsDouble * 100);
+				end
+				else
+				begin
+				  info.Credits_Avg := 0;
+				  info.ECTS := '?';
+				  info.SortOrder := -6;
+				  EmptyCreditsExists := True;
+				  OutMessage(info.FIO + ' - ' +
+					Format(_('на %s результаты не найдены'),[DateToStr(ProtocolCreateDate)]) + #13#10, clRed, 8, clWhite);
+				  
+				  qrStudentInfo.Close;
+				  Next; 
+				  Continue;
+				end;
+				
+			  if ((info.Form_Report = 'мк') or (info.Form_Report = 'де')) then GetTradM := True;
+				
+			  case info.Form_Report of 
+				'зл':
+				  begin  
+
+					if (qrStudentInfo.FN('DISCIPLINE_FINISHED').AsInteger = 0) and (MaxModuleNum = 99) then
+					begin
+					  info.SortOrder := -5;
+					  info.ECTS := 'NV';
+					  info.TraditionalMark := 10010;
+					end
+					else
+					
+					if qrStudentInfo.FN('NOT_RANGE').AsInteger > 0 then
+					begin
+					  info.SortOrder := -4;
+					  info.ECTS := 'NR';
+					  info.TraditionalMark := 10010;
+					end
+					else
+
+					if qrStudentInfo.FN('F_CREDITS').AsInteger > 0 then
+					begin
+					  info.SortOrder := -1;
+					  info.ECTS := 'F';
+						info.TraditionalMark := 10010;
+					end
+					else
+					
+					if (qrStudentInfo.FN('FX_CREDITS').AsInteger > 0) then
+						begin
+						  info.TraditionalMark := 10010;
+							info.SortOrder := -2;
+							info.ECTS := 'FX';
+						end
+						else
+						begin
+							if (info.Full_Credits_Avg <> NULL) then
+							begin
+							info.TraditionalMark := 10000;
+							info.SortOrder := info.Full_Credits_Avg;
+							info.ECTS := '';
+							info.Only_E := qrStudentInfo.FN('ONLY_E').AsInteger;
+							end
+							else info.SortOrder := -3;
+							
+							Inc(PositiveCount);
+						end;
+				  end;  
+				  
+				'мк':
+					begin
+	{						if qrStudentInfo.FN('EMPTY_CREDITS_EXISTS').AsInteger > 0 then
+							begin
+							  EmptyCreditsExists := True;
+							  info.SortOrder := -6;
+							  info.ECTS := '?';
+				  OutMessage(info.FIO + ' - ' +
+						Format(_('на %s баллы не найдены'),[DateToStr(ProtocolCreateDate)]) + #13#10, clRed, 8, clWhite) ;
+							end
+							else }
+							if (qrStudentInfo.FN('DISCIPLINE_FINISHED').AsInteger = 0) and (MaxModuleNum = 99) then
+							begin
+								info.SortOrder := -5;
+								info.ECTS := 'NV';
+								info.TraditionalMark := 11001;
+							end
+							else
+							if qrStudentInfo.FN('NOT_RANGE').AsInteger > 0 then
+							begin
+							  info.SortOrder := -4;
+							  info.ECTS := 'NR';
+							  info.TraditionalMark := 11000;
+							end
+							else
+							if qrStudentInfo.FN('F_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -1;
+							  info.ECTS := 'F';
+							end
+							else
+							if qrStudentInfo.FN('FX_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -2;
+							  info.ECTS := 'FX';
+							end
+							else
+							begin
+							  if (info.Full_Credits_Avg <> NULL) then
+							  begin
+								info.SortOrder := info.Full_Credits_Avg;
+								info.ECTS := '';
+								info.Only_E := qrStudentInfo.FN('ONLY_E').AsInteger;
+							  end
+							  else 
+							  begin
+								info.SortOrder := -3;
+							  end;
+							  Inc(PositiveCount);
+							end;
+					end; 
+
+				'де':
+					begin
+						
+{							if qrStudentInfo.FN('EMPTY_CREDITS_EXISTS').AsInteger > 0 then
+							begin
+							  EmptyCreditsExists := True;
+							  info.SortOrder := -6;
+							  info.ECTS := '?';
+				  OutMessage(info.FIO + ' - ' +
+						Format(_('на %s баллы не найдены'),[DateToStr(ProtocolCreateDate)]) + #13#10, clRed, 8, clWhite) ;
+							end
+							else}
+							if (qrStudentInfo.FN('DISCIPLINE_FINISHED').AsInteger = 0) and (MaxModuleNum = 99) then
+							begin
+								info.SortOrder := -5;
+								info.ECTS := 'NV';
+								info.TraditionalMark := 11001;
+							end
+							else
+							if qrStudentInfo.FN('NOT_RANGE').AsInteger > 0 then
+							begin
+							  info.SortOrder := -4;
+							  info.ECTS := 'NR';
+							  info.TraditionalMark := 11000;
+							end
+							else
+							if qrStudentInfo.FN('F_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -1;
+							  info.ECTS := 'F';
+							end
+							else
+							begin
+							  if (info.Full_Credits_Avg <> NULL) then
+							  begin
+								  if info.Full_Credits_Avg < MathRound(MIN_3 * 100)  then
+									begin
+									  info.SortOrder := -2;
+									  info.ECTS := 'FX';
+									end
+									else
+									begin  
+										info.SortOrder := info.Full_Credits_Avg;
+										info.ECTS := '';
+										info.Only_E := qrStudentInfo.FN('ONLY_E').AsInteger;
+										Inc(PositiveCount);
+									end
+								end
+							  else 
+							  begin
+								info.SortOrder := -3;
+									Inc(PositiveCount);
+							  end;
+							  
+							end;
+					end; 
+
+			'да': 
+				  begin
+					
+					if qrStudentInfo.FN('SCLAV').Value >= 1 then
+						begin
+						  info.SortOrder := -2;
+						  info.ECTS := 'S';
+						  info.Student_Info := Format('%s - ' + _('склав') + #13#10, [info.FIO]);
+						  info.Student_Info_color := clBlack;
+						  info.Student_Info_back_color := clWindow;
+	//						Inc(PositiveCount);
+						end
+						else
+						begin
+						  info.SortOrder := -3;
+						  info.ECTS := 'NS';
+						  info.Student_Info := Format('%s - ' + _('не склав') + #13#10, [info.FIO]);
+						  info.Student_Info_color := clBlack;
+						  info.Student_Info_back_color := clYellow;
+						end;
+							
+				  end;		
+		
+			  end;
+				
+			  List.Add(info);
+			end
+			else  // Дисциплины у студента нет
+			begin
+						
+			  OutMessage(Format('%s - %s'#13#10,
+				  [FieldByName('FIO').Value, _('дисциплина не найдена')]), clRed, 8, clYellow);
+						
+			end;
+				
+		  qrStudentInfo.Close;
+          Next;
+        end; // Цикл по студентам
+      finally
+        qrStudentInfo.Free;
+      end;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure GetGuide_ECTS_Absolut;
+begin
+  with dsGuide_ECTS do
+  begin
+    First;
+    Guide_ECTS := TStringList.Create;
+		OutMessage(#13#10);
+		while not Eof do
+    begin
+      Guide_ECTS.Values[inttostr(MathRound(FN('CREDITS_MAX').Value * 100))] := FN('ECTS').Value;
+			
+			OutMessage(Format(_('%s: мин. балл - %f, макс. балл - %f') + #13#10,
+            [FN('ECTS').Value, FN('CREDITS_MIN').Value,
+             FN('CREDITS_MAX').Value]), clBlack, 8, clWindow);
+
+
+      ExecuteQuery('insert into RANKING_INFO(PROTOCOLID, ECTS, CREDITS_MIN, CREDITS_MAX) ' +
+                       'values (:PROTOCOLID, :ECTS, :CREDITS_MIN, :CREDITS_MAX)',
+                       [ProtocolID, FN('ECTS').Value,
+                        FN('CREDITS_MIN').Value,
+                        FN('CREDITS_MAX').Value]);
+			
+			
+      Next;
+    end;
+  end;
+end;
+
+function GetTraditionalMarkFromECTS(ECTS: string): integer;
+begin
+  Result := 0;
+	with dsGuide_ECTS do
+  begin
+    First;
+		while not Eof do
+    begin
+		  if Trim(FN('ECTS').Value) = Trim(ECTS) then
+			begin
+				Result := FN('TRADITIONAL_MARK').Value;
+				exit;
+			end;
+			Next;
+		end;
+	end;	
+end;
+
+
+procedure GetGuide_TraditionalMark;
+begin
+  if GetTradM then
+		begin
+		if GetTypeTraditionalMark <> 'E' then
+		begin
+			with dsGuideTraditionalMarks do
+	    begin
+	      First;
+				Guide_TradMarks := TStringList.Create;
+	      while not Eof do
+	      begin
+				  
+					if (FN('TRADITIONAL_MARKID').Value <> 2) then 
+					begin
+						Guide_TradMarks.Values[inttostr(MathRound(FN('CREDITS_MAX').Value * 100))] := inttostr(FN('TRADITIONAL_MARKID').Value);
+								 
+						ExecuteQuery('insert into RANKING_INFO_TRAD (PROTOCOLID, MARK, CREDITS_MIN, CREDITS_MAX) ' +
+		                       'values (:PROTOCOLID, :MARK, :CREDITS_MIN, :CREDITS_MAX)',
+		                       [ProtocolID, FN('TRADITIONAL_MARKID').Value,
+		                        FN('CREDITS_MIN').Value,
+		                        FN('CREDITS_MAX').Value]);
+					end;
+					Next;
+	      end;
+	    end;
+		end
+		else
+		begin
+			ExecuteQuery('insert into RANKING_INFO_TRAD (PROTOCOLID, MARK, CREDITS_MIN, CREDITS_MAX) select distinct RI.PROTOCOLID, GE.TRADITIONAL_MARK, (select min(RI1.CREDITS_MIN) from RANKING_INFO RI1 inner join GUIDE_ECTS GE1 on RI1.ECTS = GE1.ECTS where RI1.PROTOCOLID = RI.PROTOCOLID and GE1.TRADITIONAL_MARK = GE.TRADITIONAL_MARK) as CREDITS_MIN,(select max(RI1.CREDITS_MAX) from RANKING_INFO RI1 inner join GUIDE_ECTS GE1 on RI1.ECTS = GE1.ECTS where RI1.PROTOCOLID = RI.PROTOCOLID and GE1.TRADITIONAL_MARK = GE.TRADITIONAL_MARK) as CREDITS_MAX from RANKING_INFO RI inner join GUIDE_ECTS GE on RI.ECTS = GE.ECTS where (RI.PROTOCOLID = :PROTOCOLID) and (GE.TRADITIONAL_MARK <> 2)', [ProtocolID]);
+	        
+		end;
+	end;
+end;
+
+
+procedure GetGuide_ECTS_Relative(List: TList; PositiveCount: integer);
+var
+  CurrentECTS: string;
+  CurrentPercent: integer;
+  ECTSPos: integer;
+  Pos: integer;
+  UpCount, DownCount: integer;
+  LastMaxAvg, CurrentMaxAvg: integer;
+begin
+  if List.Count = 0 then Exit;
+  if (PositiveCount = 0) then
+  begin
+//	OutMessage(_('Нет студентов с положительными оценками') + #13#10);
+	Exit;
+  end;
+  
+  with TpFibQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select ECTS, ECTS_PERCENT from GUIDE_ECTS where not ECTS_PERCENT is null order by ECTSID';
+      ExecQuery;
+      Pos := 0;
+      CurrentPercent := 0;
+	    Guide_ECTS := TStringList.Create;
+      LastMaxAvg := TStudentInfo(List[Pos]).Full_Credits_Avg;
+
+	  OutMessage(#13#10);
+			while not Eof do
+      begin
+        CurrentECTS := FN('ECTS').Value;
+        CurrentPercent := CurrentPercent + FN('ECTS_PERCENT').Value;
+        ECTSPos := MathRound(PositiveCount * CurrentPercent / 100) - 1;
+        DownCount := EqCount(List, ECTSPos, True);
+        HostAppl.Log(' DownCount = ' + IntToStr(DownCount));
+
+
+        CurrentMaxAvg := TStudentInfo(List[ECTSPos]).Full_Credits_Avg;
+
+        if (CurrentPercent <> 100) then
+        begin
+
+          ECTSPos := ECTSPos + DownCount;
+        end;
+        if (LastMaxAvg >= CurrentMaxAvg) then
+        begin
+        
+          OutMessage(Format(_('%s: мин. балл - %f, макс. балл - %f, реально - %f %%') + #13#10,
+            [CurrentECTS, CurrentMaxAvg / 100,
+             LastMaxAvg / 100,
+             (ECTSPos - Pos + 1) * 100 / PositiveCount]), clBlack, 8, clWindow);
+
+
+          ExecuteQuery('insert into RANKING_INFO(PROTOCOLID, ECTS, CREDITS_MIN, CREDITS_MAX, REAL_PERCENT) ' +
+                       'values (:PROTOCOLID, :ECTS, :CREDITS_MIN, :CREDITS_MAX, :REAL_PERCENT)',
+                       [ProtocolID, CurrentECTS,
+                        CurrentMaxAvg / 100,
+                        LastMaxAvg / 100,
+                        (ECTSPos - Pos + 1) * 100 / PositiveCount]);
+		Guide_ECTS.Values[inttostr(LastMaxAvg)] := CurrentECTS;
+		
+        end
+        else
+        begin
+          if Trim(CurrentECTS) = 'E' then
+          begin
+            OutMessage(Format(_('%s: мин. балл - %f, макс. балл - %f, реально - %f %%') + #13#10,
+              [CurrentECTS, 0.0,
+               LastMaxAvg / 100,
+               0.0]), clBlack, 8, clWindow);
+
+
+            ExecuteQuery('insert into RANKING_INFO(PROTOCOLID, ECTS, CREDITS_MIN, CREDITS_MAX, REAL_PERCENT) ' +
+                         'values (:PROTOCOLID, :ECTS, :CREDITS_MIN, :CREDITS_MAX, :REAL_PERCENT)',
+                         [ProtocolID, CurrentECTS,
+                          0.0,
+                          LastMaxAvg / 100,
+                          0.0]);
+			Guide_ECTS.Values[inttostr(LastMaxAvg)] := CurrentECTS;
+          end;
+        end;
+
+        Pos := ECTSPos + 1;
+        LastMaxAvg := CurrentMaxAvg - 1;
+        Next;
+      end;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure GetECTS(info: TStudentInfo);
+var
+  i: integer;
+begin
+  if info.ECTS = '' then
+	begin
+		if (UseOnlyE = 1) and (info.Only_E > 0) then 
+	  info.ECTS := 'E'
+		else
+		begin
+			i := 0;
+			while (info.Full_Credits_Avg <= strtoint(Guide_ECTS.Names[i]))  do
+			begin
+				info.ECTS := Guide_ECTS.Values[Guide_ECTS.Names[i]];
+			  if (i = Guide_ECTS.count -1) then exit
+				else i := i + 1;
+			end;
+		end;
+	end;
+end;
+
+procedure GetTradMark(info: TStudentInfo);
+var
+  i: integer;
+begin
+	
+  case info.Form_Report of 
+			
+	'зл':
+		  begin
+				if info.TraditionalMark = 10010 then
+				begin
+					info.Student_Info := Format(' %s - %s(%f)  %s'#13#10, [info.FIO, info.ECTS, info.Full_Credits_Avg / 100, _('незачтено')]);
+					info.Student_Info_color := clBlack;
+				  info.Student_Info_back_color := clYellow;
+				end
+				else
+				begin
+					info.Student_Info := Format(' %s - %s(%f)  %s'#13#10, [info.FIO, info.ECTS, info.Full_Credits_Avg / 100, _('зачтено')]);
+				  info.Student_Info_color := clBlack;
+				  info.Student_Info_back_color := clWindow;
+				end;
+				
+			end;
+	
+	'мк':
+	begin
+	case Trim(info.ECTS) of 
+			
+			'F':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;					
+				end;
+			
+			'FX':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;			
+				end;
+				
+			'NR':
+			  begin
+					info.TraditionalMark := 11000;
+					info.Student_Info := Format(' %s - %s'#13#10, [info.FIO, _('не ранжировался')]);
+					info.Student_Info_color := clGreen;
+					info.Student_Info_back_color := clWindow;			
+				end;
+				
+			'NV':
+			  begin
+					info.TraditionalMark := 11001;
+					info.Student_Info := Format(_(' %s - не ранжировался. Нет ведомостей')+#13#10, [info.FIO]);
+					info.Student_Info_color := clRed;
+					info.Student_Info_back_color := clWindow;			
+				end;	
+				
+			else
+			begin
+				if GetTypeTraditionalMark = 'E' then
+				begin
+				  info.TraditionalMark := GetTraditionalMarkFromECTS(info.ECTS);
+				end
+				else
+				begin
+					i := 0;
+					while (info.Full_Credits_Avg <= strtoint(Guide_TradMarks.Names[i]))  do
+					begin
+						info.TraditionalMark := strtoint(Guide_TradMarks.Values[Guide_TradMarks.Names[i]]);
+					  if (i = Guide_TradMarks.count -1) then break
+						else i := i + 1;
+					end;
+				end;
+				if info.Full_Credits_Avg <> NULL then 
+				begin
+				  info.Student_Info := Format(' %s - %s(%f)  %d'#13#10, [info.FIO, info.ECTS, info.Full_Credits_Avg / 100, info.TraditionalMark]);
+				  info.Student_Info_color := clBlack;
+				  info.Student_Info_back_color := clWindow;
+				end
+				else
+				begin
+				  info.Student_Info := Format(' %s '#13#10, [info.FIO]);
+				  info.Student_Info_color := clGreen;
+				  info.Student_Info_back_color := clWindow;
+
+				end;
+			end;
+		end;
+	end;
+	
+	'де':
+	begin
+	case Trim(info.ECTS) of 
+			
+			'F':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;					
+				end;
+			
+			'FX':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;			
+				end;
+				
+			'NR':
+			  begin
+					info.TraditionalMark := 11000;
+					info.Student_Info := Format(' %s - %s'#13#10, [info.FIO, _('не ранжировался')]);
+					info.Student_Info_color := clGreen;
+					info.Student_Info_back_color := clWindow;			
+				end;
+			
+			'NV':
+			  begin
+					info.TraditionalMark := 11001;
+					info.Student_Info := Format(_(' %s - не ранжировался. Нет ведомостей')+#13#10, [info.FIO]);
+					info.Student_Info_color := clRed;
+					info.Student_Info_back_color := clWindow;			
+				end;	
+
+				
+			else
+			begin
+				if GetTypeTraditionalMark = 'E' then
+				begin
+				  info.TraditionalMark := GetTraditionalMarkFromECTS(info.ECTS);
+				end
+				else
+				begin
+					i := 0;
+					while (info.Full_Credits_Avg <= strtoint(Guide_TradMarks.Names[i]))  do
+					begin
+						info.TraditionalMark := strtoint(Guide_TradMarks.Values[Guide_TradMarks.Names[i]]);
+					  if (i = Guide_TradMarks.count -1) then break
+						else i := i + 1;
+					end;
+				end;
+				if info.Full_Credits_Avg <> NULL then 
+				begin
+				  info.Student_Info := Format(' %s - %s(%f)  %d'#13#10, [info.FIO, info.ECTS, info.Full_Credits_Avg / 100, info.TraditionalMark]);
+				  info.Student_Info_color := clBlack;
+				  info.Student_Info_back_color := clWindow;
+				end
+				else
+				begin
+				  info.Student_Info := Format(' %s '#13#10, [info.FIO]);
+				  info.Student_Info_color := clGreen;
+				  info.Student_Info_back_color := clWindow;
+
+				end;
+			end;
+		end;
+	end;
+	
+	
+	end;
+end;
+  
+
+procedure BasicRanking(ProtocolType: string; OnFirstTestL: Boolean; ParentProtocolID: variant);
+var
+  Students: TList;
+  i: integer;
+  info: TStudentInfo;
+  PositiveCount: integer;
+  EmptyCreditsExists: Boolean;
+	Selectedtype: string;
+begin
+  if OnFirstTestL then OnFirstTestList := 1
+	else OnFirstTestList := 0;
+  
+	case Trim(ProtocolType) of 
+			
+		'R':
+			begin
+				OutMessage(_('Создание протокола относительного ранжирования') + #13#10, clBlue, 8, clWindow);
+			
+			end;
+
+			'A':
+			begin
+				OutMessage(_('Создание протокола абсолютного ранжирования') + #13#10, clBlue, 8, clWindow);
+			end;
+			
+			'K':
+			begin
+				OutMessage(_('Создание протокола итогов государственной аттестации') + #13#10, clBlue, 8, clWindow);
+			end;
+	end;
+    
+  if Tran.InTransaction then Tran.Rollback;
+  Tran.StartTransaction;
+  
+	if ParentProtocolID = null then
+	begin
+	case ProtocolFor of 
+			
+		0:
+			begin
+				Selectedtype := 'S';
+			end;
+
+		1:
+			begin
+				Selectedtype := 'D';
+			end;
+			
+		2:
+			begin
+				Selectedtype := 'V';
+			end;
+	end;
+	end
+	else
+	begin
+		case ProtocolFor of 
+			
+		0:
+			begin
+				Selectedtype := 'P';
+			end;
+
+		1:
+			begin
+				Selectedtype := 'V';
+			end;
+			
+		end;
+	end;
+    
+	
+  ProtocolID := DB.QueryValue('select ID from SP_GEN_UID');
+  ExecuteQuery('insert into RANKING_PROTOCOLS(PROTOCOLID, PARENTPROTOCOLID, EDUYEAR, SEMESTER, DISCIPLINEID, SPECIALITYID, DEPARTMENTID, CREATEDATE, PROTOCOLTYPE, BEGINEDUPLANID, MIN_3, ONFIRSTTESTLIST, ONLY_E, TRADMARKTYPE, SELECTEDTYPE, NOTE) ' +
+               'values (:PROTOCOLID, :PARENTPROTOCOLID, :EDUYEAR, :SEMESTER, :DISCIPLINEID, :SPECIALITYID, :DEPARTMENTID, :CREATEDATE, :PROTOCOLTYPE, :BEGINEDUPLANID, :MIN_3, :ONFIRSTTESTLIST, :ONLY_E, :TRADMARKTYPE, :SELECTEDTYPE, :NOTE)',
+               [ProtocolID, ParentProtocolID, EduYear, Semester, DisciplineID, SpecialityID, DepartmentID, ProtocolCreateDate, ProtocolType, EduPlanID, MIN_3, OnFirstTestList, UseOnlyE, GetTypeTraditionalMark, Selectedtype, Note]);
+               
+  EmptyCreditsExists := False;
+  PositiveCount := 0;
+  
+  Students := TList.Create;
+  try
+    FillStudentsInfo(Students, EmptyCreditsExists, PositiveCount, ParentProtocolID);
+
+    if EmptyCreditsExists then RaiseException(_('Внимание! У некоторых студентов не проставлены баллы.'));
+ {   if EmptyCreditsExists then
+    begin
+	    
+      for i := 0 to Students.Count - 1 do
+      begin
+        info := TStudentInfo(Students[i]);
+        if info.ECTS = '?' then
+        OutMessage(Format('%d. %s',
+			   [i + 1, info.FIO]), clWhite, 8, clRed) ;
+         
+
+      end;
+      RaiseException(_('Внимание! У некоторых студентов не проставлены баллы.'));
+    end;  }
+		
+		
+    if Students.Count = 0 then 
+		begin
+			if ParentProtocolID = null then RaiseException(_('В протокол не включен ни один студент.'))
+			else RaiseException(_('В основном протоколе нет неранжированных студентов или студентов с оценками F, FX.'));
+		end;
+
+    if (ProtocolType = 'R') and (PositiveCount < 5) then RaiseException(_('Найдено мало студентов, успешно завершивших изучение дисциплины.'));
+
+    SortList(Students);
+	
+	if ((ProtocolType = 'R') or (ProtocolType = 'K')) then
+	begin
+//					OutMessage('Before GetGuide_ECTS_Relative');
+      GetGuide_ECTS_Relative(Students, PositiveCount);
+//					OutMessage('After GetGuide_ECTS_Relative');
+	end
+	else
+	begin
+      GetGuide_ECTS_Absolut;
+	end;
+		
+	 GetGuide_TraditionalMark;
+	 
+	 OutMessage(#13#10, clBlack, 8, clWindow);
+	 for i := 0 to Students.Count - 1 do
+    begin
+      info := TStudentInfo(Students[i]);
+			
+			GetECTS(info);
+			GetTradMark(info);
+			
+			
+			
+			OutMessage(Format('%d. %s',
+			   [i + 1, info.Student_Info]), info.Student_Info_color, 8, info.Student_Info_back_color) ;
+
+
+      if not EmptyCreditsExists then
+        ExecuteQuery('insert into STUDENT2PROTOCOL(STUDENTID, PROTOCOLID, CREDITS_AVG, ECTS, STIMULATIONMARKS, TRADITIONALMARK, TESTLISTS) ' +
+                     'values (:STUDENTID, :PROTOCOLID, :CREDITS_AVG, :ECTS, :STIMULATIONMARKS, :TRADITIONALMARK, :TESTLISTS)',
+                     [info.StudentID, ProtocolID, info.Credits_Avg / 100, info.ECTS, info.StimulationMarks / 100, info.TraditionalMark, info.TestLists]);
+    
+		end;
+    
+    OutMessage(#13#10, clBlue, 8, clWindow);
+    OutMessage(_('Ранжирование завершено успешно.'), clBlue, 8, clWindow);
+  finally
+    for i := 0 to Students.Count - 1 do
+      Students[i].Free;
+      
+    Students.Free;
+  end;
+end;
+
+function EqCount(List: TList; Pos: integer; Forward: Boolean): integer;
+var
+  i: integer;
+  Value: integer;
+begin
+  Result := 0;
+  i := Pos;
+  Value := TStudentInfo(List[i]).Full_Credits_Avg;
+  
+  if Forward then Inc(i);
+
+  while (i > 0) and (i < List.Count) and (TStudentInfo(List[i]).Full_Credits_Avg = Value) do
+  begin
+    if Forward then Inc(i)
+    else Dec(i);
+    
+    Inc(Result);
+  end;
+end;
+
+
+procedure ExecuteQuery(ASQL: string; ParamValues: array of variant);
+var
+  i: integer;
+begin
+  with TpFibQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := ASQL;
+      for i := 0 to Params.Count - 1 do
+        Params[i] := ParamValues[i];
+      ExecQuery;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+begin
+end.

@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Выполнение плана трудоустройства" ProgressMax="100" EncodeText="False" ID="{E0F2C9A2-FF1B-435B-81BB-E6F10438CE39}" ShowReport="True" ShowFinalMessage="True" UpdateFields="True"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="PlanYear" DisplayLabel="Рік випуску:" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" SQL="select EDUYEAR, EDUYEAR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="Departments" DisplayLabel="Підроздели:" ParamType="Grid" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, 0, DEPARTMENT
+from GUIDE_DEPARTMENT
+where USE=1
+order by DEPARTMENT" CommonValue="False" Height=""/><Parameter Name="RectorName" DisplayLabel="Прізвище ректора" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="True"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsAppointment" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsPost" Master="dsAppointment" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select POST, C3, C4, C5, C6, C7, C8, C9, C10, C11, C12, C13
+from SP_RP_PLANRASPSTAT(:MAS_PLANRASPID, ?Departments_KEYS)
+</SQL><Events OnGetFieldData="dsPost_OnGetFieldData"/></Band></Bands><SQL>select distinct PR.PLANRASPID, GA.APPOINTMENT, GA.APPOINTMENTID,
+       PR.MEDICALCRAFT, PR.PEDIATRICS, PR.PROFILACTICCRAFT,
+       PR.STOMATOLOGY, PR.PHARMACY,
+       (PR.MEDICALCRAFT + PR.PEDIATRICS + PR.PROFILACTICCRAFT +
+        PR.STOMATOLOGY + PR.PHARMACY) as CP8
+from PLANRASP PR
+    inner join GUIDE_APPOINTMENT GA on (GA.APPOINTMENTID = PR.APPOINTMENTID)
+where PR.PLANYEAR = :PLANYEAR_EDUYEAR
+--  and (S.DEPARTMENTID in (@@Departments_KEYS%0@))
+order by 1
+</SQL><Events OnGetFieldData="dsAppointment_OnGetFieldData"/></Band><Band Name="root" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnGetFieldData="root_OnGetFieldData"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="dsAllCou" AutoOpen="True" UniDirectional="False" Master=""><SQL>select count (S.STUDENTID) as AllCou
+from STUDENTS S
+     inner join PLANRASP PR on (PR.PLANRASPID = S.PLANRASPID)
+where PR.PLANYEAR = :PLANYEAR_EDUYEAR
+  and (',' || @@Departments_KEYS%#0@ || ',' containing ',' || cast (S.DEPARTMENTID as varchar(10)) || ',')
+</SQL></Band></Bands><Script>Var
+  AI  : Array[3..13] of Integer;
+  AIP : Array[3..8] of Integer;
+
+procedure OnAfterQueryParams;
+Var
+   i : Integer;
+begin
+   For i := 3 to 13 do Begin
+     AI[i] := 0;
+     if i &lt;= 8 then AIP[i] := 0;
+   End;
+end;
+
+procedure dsAppointment_OnGetFieldData(Field: TDBFieldInfo);
+begin
+        if (Field.FieldName = 'MEDICALCRAFT') then AIP[3] := AIP[3] + Field.Value
+   else if (Field.FieldName = 'PEDIATRICS') then AIP[4] := AIP[4] + Field.Value
+   else if (Field.FieldName = 'PROFILACTICCRAFT') then AIP[5] := AIP[5] + Field.Value
+   else if (Field.FieldName = 'STOMATOLOGY') then AIP[6] := AIP[6] + Field.Value
+   else if (Field.FieldName = 'PHARMACY') then AIP[7] := AIP[7] + Field.Value
+   else if (Field.FieldName = 'CP8') then AIP[8] := AIP[8] + Field.Value;
+end;
+
+
+procedure dsPost_OnGetFieldData(Field: TDBFieldInfo);
+begin
+        if (Field.FieldName = 'C3') then AI[3] := AI[3] + Field.Value
+   else if (Field.FieldName = 'C4') then AI[4] := AI[4] + Field.Value
+   else if (Field.FieldName = 'C5') then AI[5] := AI[5] + Field.Value
+   else if (Field.FieldName = 'C6') then AI[6] := AI[6] + Field.Value
+   else if (Field.FieldName = 'C7') then AI[7] := AI[7] + Field.Value
+   else if (Field.FieldName = 'C8') then AI[8] := AI[8] + Field.Value
+   else if (Field.FieldName = 'C9') then AI[9] := AI[9] + Field.Value
+   else if (Field.FieldName = 'C10') then AI[10] := AI[10] + Field.Value
+   else if (Field.FieldName = 'C11') then AI[11] := AI[11] + Field.Value
+   else if (Field.FieldName = 'C12') then AI[12] := AI[12] + Field.Value
+   else if (Field.FieldName = 'C13') then AI[13] := AI[13] + Field.Value;
+end;
+
+procedure root_OnGetFieldData(Field: TDBFieldInfo);
+begin
+        if (Field.FieldName = 'I3') then Field.Value := AI[3]
+   else if (Field.FieldName = 'I4') then Field.Value := AI[4]
+   else if (Field.FieldName = 'I5') then Field.Value := AI[5]
+   else if (Field.FieldName = 'I6') then Field.Value := AI[6]
+   else if (Field.FieldName = 'I7') then Field.Value := AI[7]
+   else if (Field.FieldName = 'I8') then Field.Value := AI[8]
+   else if (Field.FieldName = 'I9') then Field.Value := AI[9]
+   else if (Field.FieldName = 'I10') then Field.Value := AI[10]
+   else if (Field.FieldName = 'I11') then Field.Value := AI[11]
+   else if (Field.FieldName = 'I12') then Field.Value := AI[12]
+   else if (Field.FieldName = 'I13') then Field.Value := AI[13]
+   else if (Field.FieldName = 'IP3') then Field.Value := AIP[3]
+   else if (Field.FieldName = 'IP4') then Field.Value := AIP[4]
+   else if (Field.FieldName = 'IP5') then Field.Value := AIP[5]
+   else if (Field.FieldName = 'IP6') then Field.Value := AIP[6]
+   else if (Field.FieldName = 'IP7') then Field.Value := AIP[7]
+   else if (Field.FieldName = 'IP8') then Field.Value := AIP[8];
+end;
+
+
+procedure OnEndReport;
+begin
+  Report.ShowType := 7; //ShowReport + ShowMessage + UpdateFields
+end;
+
+begin
+end.</Script><Events OnEndReport="OnEndReport"/></Report>

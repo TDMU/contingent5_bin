@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Крок" ProgressMax="100" EncodeText="False" ID="{80A77E32-530F-4240-8138-7D9A298D141D}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="TestCode" DisplayLabel="Код екзамену" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="Крок 1 Загальна лікарська підготовка
+Крок 2 Загальна лікарська підготовка
+Крок 1 Стоматологія
+Крок 2 Стоматологія
+Крок 1 Фармація
+Крок 2 Фармація
+Крок М Сестринська справа
+Крок 2 Лабораторна діагностика" KeyItems="1
+2
+6
+4
+11
+5
+9
+17" CommonValue="False"/><Parameter Name="TestDate" DisplayLabel="Дата складання" ParamType="Date" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/></UserParameters><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master=""><Events OnAfterCreateDataSet="dsList_OnAfterCreateDataSet" OnGetFieldData="dsList_OnGetFieldData"/><SQL>1
+</SQL></Band><Band Name="dsParams" AutoOpen="True" UniDirectional="False" Master=""><SQL>select cast (PARAMETERVALUE as SmallInt) as OrgName from PARAMETERS where PARAMETERNAME = 'OrgCode'
+</SQL></Band></Bands><Script>procedure dsList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,NFIO,F1,F2,F3,F4,F5,F6,F7,F8,F9,FF1,' +
+    'BIRTHDATE,SEX,OLDCOUNTRYID,GROUPNUM,DEPARTMENTID,SEMESTER,' +
+    'SPECIALITYID, EDUBASISID, KROKID, ZNOMARK'
+    ) +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+  i: Integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+    if Num &lt;= SL.Count then
+    begin
+      Result := SL[Num - 1];
+      if (SL.Count &gt; 3) and (Num = 3) then
+      begin
+        for i := Num + 1 to SL.Count do
+          Result := Result + ' ' + SL[i - 1];
+      end
+    end
+    else Result := '';
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure dsList_OnGetFieldData(Field: TDBFieldInfo);
+Var FIO : String;
+begin
+   If (Field.FieldName = 'SEX') Then Begin
+     If (Field.Value = 'Ч') Then Field.Value := 1
+     else If (Field.Value = 'Ж') Then Field.Value := 2
+     else Field.Value := '';
+   End
+   else
+   If (Field.FieldName = 'BIRTHDATE') Then Begin
+     if ValidDate(VarToStr(Field.Value)) then
+       Field.Value := FormatDateTime('dd-mm-yy',StrToDate(Field.Value));
+   End
+   else
+   If (Field.FieldName = 'F1') Then Begin
+      Field.Value := GetWord(1, Field.DataSet.FieldByName('FIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F2') Then Begin
+      Field.Value := GetWord(2, Field.DataSet.FieldByName('FIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F3') Then Begin
+      Field.Value := GetWord(3, Field.DataSet.FieldByName('FIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F4') Then Begin
+      Field.Value := GetWord(1, Field.DataSet.FieldByName('NFIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F5') Then Begin
+      Field.Value := GetWord(2, Field.DataSet.FieldByName('NFIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F6') Then Begin
+      Field.Value := GetWord(3, Field.DataSet.FieldByName('NFIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'DEPARTMENTID') Then Begin // Коды факультетов
+      Case Field.DataSet.FieldByName('DEPARTMENTID').AsInteger of
+         1 : Field.Value := 1;
+         2 : Field.Value := 2;
+         3 : Field.Value := 3;
+         4 : Field.Value := 4;
+         5 : Field.Value := 5;
+         6 : Field.Value := 6;
+         7 : Field.Value := '';
+         8 : Field.Value := '';
+         9 : Field.Value := '';
+        10 : Field.Value := 9;
+        11 : Field.Value := 8;
+        12 : Field.Value := '';
+        13 : Field.Value := 7;
+        14 : Field.Value := 11;
+        15 : Field.Value := '';
+        16 : Field.Value := '';
+        17 : Field.Value := '';
+        18 : Field.Value := '';
+        19 : Field.Value := '';
+        20 : Field.Value := '';
+        21 : Field.Value := 10;
+        22 : Field.Value := '';
+        23 : Field.Value := 12;
+        24 : Field.Value := 11;
+        25 : Field.Value := '';
+        26 : Field.Value := '';
+        27 : Field.Value := '';
+        53 : Field.Value := 2;
+        else Field.Value := '';
+      End; // Case
+   End
+   else
+   If (Field.FieldName = 'SPECIALITYID') Then Begin // Коды факультетов
+      Case Field.DataSet.FieldByName('SPECIALITYID').AsInteger of
+         6,59 : Field.Value := 1; // Лікувальна справа
+         9,60 : Field.Value := 4; // Педіатрія
+         8,61 : Field.Value := 5; // Медико-профілактична справа
+         13,14,63,56 : Field.Value := 6; // Стоматологія
+         19,69 : Field.Value := 7;  //7.12020101	Фармація
+         15,72 : Field.Value := 8;  // 7.12020104	Технологія парфумерно-косметичних засобів
+         5,70 : Field.Value := 9;   // 7.12020102	Клінічна фармація
+         30,62 : Field.Value := 10; // 7.12010004	Медична психологія
+         50 : Field.Value := 11;    // 6.120201	Фармація
+         else Field.Value := '';
+      End; // Case
+   End
+   else
+   If (Field.FieldName = 'EDUBASISID') Then Begin // Форма финансирования
+      If Field.DataSet.FieldByName('EDUBASISID').AsString = 'Б'
+         Then Field.Value := 1
+      else
+      If Field.DataSet.FieldByName('EDUBASISID').AsString = 'К'
+         Then Field.Value := 2
+      else Field.Value := '';
+   End
+   Else
+   If (Field.FieldName = 'F7') Then Begin
+      Field.Value := FormatDateTime('dd-mm-yy',StrToDate(Report.UserParams.Item('TestDate').Value));
+   End
+   Else
+   If (Field.FieldName = 'F8') Then Begin
+      Field.Value := Field.DataSet.RecNo;
+   End
+   Else
+      If (Field.FieldName = 'F9') Then Begin
+      if Params.Item('TestCode_KEY').Value in [2,4,5,17]
+       then Field.Value := Field.DataSet.FieldByName('KROKID').AsString;
+   End;
+
+end;
+
+Begin
+
+End.</Script></Report>

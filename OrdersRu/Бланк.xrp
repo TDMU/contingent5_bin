@@ -1,0 +1,130 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Бланк" ProgressMax="100" ID="{B0EF9024-6BB8-4DA6-8BDE-4C194FA080BA}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnBeforeQueryParams="OnBeforeQueryParams" OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="Department" DisplayLabel="Подразделение" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" SQL="select DEPARTMENTID, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE = 1
+order by DEPARTMENT"/><Parameter Name="EduForm" DisplayLabel="Форма обучения" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUFORMID, EDUFORM, EDUFORM_RUS_CASE4
+from V_GUIDE_EDUFORM
+where USE = 1
+order by EDUFORM" CommonValue="False"/></UserParameters><Bands><Band Name="root" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="" OnGetFieldData="root_OnGetFieldData"/><SQL>select
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='OrgName') as ORGNAME,
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='OrgCity') as ORGCITY,
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='Ministry') as MINISTRY,
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='Address') as ADDRESS
+from RDB$DATABASE
+</SQL></Band><Band Name="ds" AutoOpen="False" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL></Band></Bands><Script>procedure SetParamsBySQL(ParamName, SQL: string);
+var
+  ds: TpFibDataSet;
+  i: integer;
+  Field: TField;
+begin
+  ds := FindDataSet('ds');
+  if ds = nil then RaiseException('DataSet &quot;ds&quot; not found');
+  ds.Active := False;
+  ds.SelectSQL.Text := SQL;
+  ds.Active := True;
+  OrderParams.Item(ParamName).Value := ds.Fields[1].Value;
+  for i := 0 to ds.FieldCount - 1 do
+  begin
+    Field := ds.Fields[i];
+    OrderParams.Item(ParamName + '_' + Field.FieldName).Value := Field.Value;
+    Params.Item(ParamName + '_' + Field.FieldName).Value := Field.Value;
+  end;
+end;
+
+procedure OnBeforeQueryParams;
+var
+  FID: integer;
+  EFID: string;
+  SQL: string;
+begin
+  FID := HostAppl.UserOptions.Item('Department_ID').Value;
+  if (FID &lt;&gt; 0) then
+  begin
+    Report.UserParams.Delete('Department');
+    SQL := 'select DEPARTMENTID, DEPARTMENT, DEPARTMENT_RUS_CASE2 from V_GUIDE_DEPARTMENT where DEPARTMENTID = ' + IntToStr(FID);
+    SetParamsBySQL('Department', SQL);
+  end;
+  
+  EFID := HostAppl.UserOptions.Item('EduForm_ID').Value;
+  if ((EFID &lt;&gt; '0') and (EFID &lt;&gt; '')) then
+  begin
+    Report.UserParams.Delete('EduForm');
+    SQL := Format('select EDUFORMID, EDUFORM, EDUFORM_RUS_CASE4 '+
+                  'from V_GUIDE_EDUFORM where EDUFORMID = ''%s''', [EFID]);
+    SetParamsBySQL('EduForm', SQL);
+  end;
+end;
+
+
+procedure OnAfterQueryParams;
+var
+  FID: integer;
+  EFID: string;
+  SQL: string;
+begin
+  FID := Params.Item('Department_DEPARTMENTID').Value;
+  if (FID &lt;&gt; 0) then
+  begin
+    SQL := 'select DEPARTMENTID, DEPARTMENT from V_GUIDE_DEPARTMENT where DEPARTMENTID = ' + IntToStr(FID);
+    SetParamsBySQL('Department', SQL);
+  end;
+
+  EFID := Params.Item('EduForm_EDUFORMID').Value;
+  if (EFID &lt;&gt; '0') then
+  begin
+    SQL := Format('select EDUFORMID, EDUFORM, EDUFORM_RUS_CASE4 '+
+                  'from V_GUIDE_EDUFORM where EDUFORMID = ''%s''', [EFID]);
+    SetParamsBySQL('EduForm', SQL);
+  end;
+end;
+
+
+procedure root_OnGetFieldData(Field: TDBFieldInfo);
+var
+  i,lastprobel,lastperenos: integer;
+  s: string;
+
+begin
+  if Field.FieldName = 'EDUFORM' then
+    Field.Visible := HostAppl.UserOptions.Item('ShowEduForm').Value
+  else if Field.FieldName = 'OrgName' then
+  begin
+//    ShowMessage(Field.Value);
+    if Field.Value &lt;&gt; '' then
+    begin
+      s := Uppercase(Field.Value);
+      try
+        lastperenos := 0;
+        lastprobel := 0;
+        i := 1;
+        repeat
+          if s[i]=' ' then lastprobel := i;
+          if (i - lastperenos) &gt;= 55 then
+          begin
+            lastperenos := lastprobel;
+          end;
+          i := i + 1;
+        until (i &gt;= Length(s));
+
+        i := Pos(' ИМ.', s);
+        if i = 0 then i := Pos(' ИМЕНИ', s);
+        if i = 0 then Exit;
+        if ((Length(s) - lastperenos) &gt;= (Length(s) - i)) then Exit;
+
+        Insert('&amp;par&amp;', s, i);
+      finally
+        Field.Value := s;
+      end;
+    end;
+  end
+  else if Field.FieldName = 'Ministry' then
+    Field.Value := Uppercase(Field.Value);
+end;
+
+procedure OnEndReport;
+begin
+//  Report.SaveToFile('d:\temp\test1.rtf');
+end;
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport="OnEndReport"/></Report>

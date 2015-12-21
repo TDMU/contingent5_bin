@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Продление академического отпуска" ProgressMax="100" EncodeText="False" ID="{D2997D29-0560-4000-B9D1-30E18BFFEC1D}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="ToDate" DisplayLabel="По яку дату" ParamType="Date" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Stip" DisplayLabel="З призначенням стипендії" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnBeforeQueryParams=""/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="True" Master=""><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforeOpenDataSet="" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL> 1
+</SQL><Bands><Band Name="dsOrder" Master="dsStudents" AutoOpen="True" UniDirectional="False"><SQL>select first 1 O.ORDERNUM, O.ORDERDATE
+from STUDENTTOORDER STO
+inner join ORDERS O
+on (O.ORDERID = STO.ORDERID)
+where STO.STUDENTID = ?MAS_STUDENTID
+and STO.REASONID between 3000 and 3049 -- академ. отпуск
+and O.ORDERDATE &lt; ?ToDate
+order by O.ORDERDATE desc
+</SQL></Band></Bands></Band></Bands><Script>function StipIndex(Field: TDBFieldInfo): integer;
+begin
+  if Field.DataSet.FieldByName('EDUBASISID').Value = 'К' then
+    Result := 1
+  else
+    if Params.Item('Stip').Value then Result := 2
+    else Result := 3;
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,GROUPNUM,CODE,SPECIALITY,EDUBASISID,EDUBASIS_CASE5') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+     
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 3)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((FindDataSet('dsStudents').FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+begin
+end.</Script></Report>

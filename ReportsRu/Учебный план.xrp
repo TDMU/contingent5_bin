@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Учебный план" ProgressMax="100" EncodeText="False" ID="{59608F84-1AC9-4D49-BC2C-2620C4683CE4}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsEduplanTitle" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsDiscipline" Master="dsEduplanTitle" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsModule" Master="dsDiscipline" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands/><SQL>select VM.MODULENUM,
+  VM.CREDITS,
+  VM.MODULETHEME,
+  VM.HOURS_AUD_LECT, VM.HOURS_AUD_PRACT,
+  VM.HOURS_AUD_LAB, VM.HOURS_AUD_SEMINAR, VM.HOURS_SELF
+from B_VARIANT_ITEMS VI
+inner join B_VARIANT_MODULE VM
+on (VM.VARIANTID = VI.VARIANTID)
+where VI.PARENTVARIANTID = :MAS_VARIANTID
+order by VM.MODULENUM
+</SQL><Events OnGetFieldData="dsModule_OnGetFieldData"/></Band></Bands><SQL>select EPI.VARIANTID, VD.DISCIPLINETYPE, GD.DISCIPLINE,
+(
+ select cast(sum(VM1.CREDITS) as numeric(5,2))
+ from B_VARIANT_ITEMS VI1
+ inner join B_VARIANT_MODULE VM1
+ on (VM1.VARIANTID = VI1.VARIANTID)
+ where VI1.PARENTVARIANTID = EPI.VARIANTID
+) as CREDITS,
+(
+ select cast(sum(VM1.HOURS_AUD_LECT) as smallint)
+ from B_VARIANT_ITEMS VI1
+ inner join B_VARIANT_MODULE VM1
+ on (VM1.VARIANTID = VI1.VARIANTID)
+ where VI1.PARENTVARIANTID = EPI.VARIANTID
+) as HOURS_AUD_LECT,
+(
+ select cast(sum(VM1.HOURS_AUD_PRACT) as smallint)
+ from B_VARIANT_ITEMS VI1
+ inner join B_VARIANT_MODULE VM1
+ on (VM1.VARIANTID = VI1.VARIANTID)
+ where VI1.PARENTVARIANTID = EPI.VARIANTID
+) as HOURS_AUD_PRACT,
+(
+ select cast(sum(VM1.HOURS_AUD_LAB) as smallint)
+ from B_VARIANT_ITEMS VI1
+ inner join B_VARIANT_MODULE VM1
+ on (VM1.VARIANTID = VI1.VARIANTID)
+ where VI1.PARENTVARIANTID = EPI.VARIANTID
+) as HOURS_AUD_LAB,
+(
+ select cast(sum(VM1.HOURS_AUD_SEMINAR) as smallint)
+ from B_VARIANT_ITEMS VI1
+ inner join B_VARIANT_MODULE VM1
+ on (VM1.VARIANTID = VI1.VARIANTID)
+ where VI1.PARENTVARIANTID = EPI.VARIANTID
+) as HOURS_AUD_SEMINAR,
+(
+ select cast(sum(VM1.HOURS_SELF) as smallint)
+ from B_VARIANT_ITEMS VI1
+ inner join B_VARIANT_MODULE VM1
+ on (VM1.VARIANTID = VI1.VARIANTID)
+ where VI1.PARENTVARIANTID = EPI.VARIANTID
+) as HOURS_SELF
+
+from B_EDUPLAN_ITEMS EPI
+inner join B_VARIANT_ITEMS VI
+on (VI.VARIANTID = EPI.VARIANTID)
+inner join B_VARIANT_DISCIPLINE VD
+on (VD.VARIANTID = EPI.VARIANTID)
+inner join V_GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VI.DISCIPLINEID)
+
+where EPI.EDUPLANID =  ?MAS_EDUPLANID
+order by EPI.ITEMNUM
+</SQL><Events OnGetFieldData="dsDiscipline_OnGetFieldData"/></Band></Bands><SQL>SELECT EPT.EDUPLANID, GEY.EDUYEARSTR, EPT.SEMESTER, (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY, EPT.STREAM,
+  EPT.ABOUT, EPT.ORDERNUM, EPT.ORDERDATE
+FROM B_EDUPLAN_TITLE EPT
+inner join GUIDE_SPECIALITY GS
+  on(GS.SPECIALITYID = EPT.SPECIALITYID)
+inner join GUIDE_EDUYEAR GEY
+  on(GEY.EDUYEAR = EPT.EDUYEAR)
+where EPT.EDUPLANID in ( @@EDUPLANIDS@ )
+</SQL><Events OnGetFieldData="dsEduplanTitle_OnGetFieldData"/></Band></Bands><Script>procedure dsEduplanTitle_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'NewPage' then
+  begin
+    if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+      Field.Value := '&amp;page&amp;';
+  end;
+end;
+
+procedure dsModule_OnGetFieldData(Field: TDBFieldInfo);
+var
+  sum : Integer;
+begin
+  if Field.FieldName = 'ALL' then
+  begin
+    sum := dsModule.FieldByName('HOURS_AUD_LECT').asInteger +
+           dsModule.FieldByName('HOURS_AUD_PRACT').asInteger +
+           dsModule.FieldByName('HOURS_AUD_LAB').asInteger +
+           dsModule.FieldByName('HOURS_AUD_SEMINAR').asInteger +
+           dsModule.FieldByName('HOURS_SELF').asInteger;
+    Field.Value := sum;
+  end;
+end;
+
+procedure dsDiscipline_OnGetFieldData(Field: TDBFieldInfo);
+var
+  sum : Integer;
+begin
+  if Field.FieldName = 'ALL' then
+  begin
+    sum := dsDiscipline.FieldByName('HOURS_AUD_LECT').asInteger +
+           dsDiscipline.FieldByName('HOURS_AUD_PRACT').asInteger +
+           dsDiscipline.FieldByName('HOURS_AUD_LAB').asInteger +
+           dsDiscipline.FieldByName('HOURS_AUD_SEMINAR').asInteger +
+           dsDiscipline.FieldByName('HOURS_SELF').asInteger;
+    Field.Value := sum;
+  end;
+end;
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

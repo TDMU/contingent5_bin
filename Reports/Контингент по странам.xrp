@@ -1,0 +1,47 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Контингент по странам" ProgressMax="100" EncodeText="False" ID="{B5261994-C617-4C4C-AD40-DE35CFFE5C6B}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="OnDate" DisplayLabel="На дату" ParamType="Date" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Department" DisplayLabel="Факультет" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" SQL="select VGD.DEPARTMENTID, 0, VGD.DEPARTMENT
+from V_GUIDE_DEPARTMENT VGD
+where VGD.USE = 1
+order by VGD.DEPARTMENT"/></UserParameters><Bands><Band Name="Group1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands/><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet="Group1_OnBeforeOpenDataSet" OnGetFieldData="Group1_OnGetFieldData"/><SQL>select SS.COUNTRYNAME, count(SS.STUDENTID) as COUNTRYCOUNT
+from
+  (select
+     (select first 1 GC.COUNTRYNAME
+      from HS_COUNTRY HC
+      inner join V_GUIDE_COUNTRY GC
+        on (GC.COUNTRYID = HC.COUNTRYID)
+      where HC.STUDENTID = S.STUDENTID
+        and HC.BEGINDATE &lt;= :ONDATE
+      order by HC.BEGINDATE desc
+     ) as COUNTRYNAME,
+    S.STUDENTID
+   from STUDENTS S
+   inner join HS_MOVEMENT_FULL HMF
+     on HMF.STUDENTID = S.STUDENTID
+       and HMF.BEGINDATE &lt;= :ONDATE and HMF.ENDDATE &gt; :ONDATE
+       and HMF.STATUS in ('С','А','П')
+   where
+     ',' || cast(:DEPARTMENT_KEYS as varchar(200)) || ',' containing ',' || HMF.DEPARTMENTID || ','
+   ) SS
+group by 1
+order by 1
+</SQL></Band><Band Name="Departments" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select list(VGD.DEPARTMENT, ', ') as DEPARTMENTLIST
+from V_GUIDE_DEPARTMENT VGD
+where ',' || cast(:DEPARTMENT_KEYS as varchar(200)) || ',' containing ',' || VGD.DEPARTMENTID || ','
+</SQL></Band></Bands><Script>var
+  Npp: Integer;
+  
+procedure Group1_OnBeforeOpenDataSet(ds: TpFibDataSet);
+begin
+  Npp := 1;
+end;
+
+procedure Group1_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'N') then
+  begin
+    Field.Value := IntToStr(Npp);
+    inc(Npp);
+  end;
+end;
+
+begin
+end.</Script></Report>

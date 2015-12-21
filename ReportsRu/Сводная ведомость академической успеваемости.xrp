@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Сводная ведомость академической успеваемости" ProgressMax="100" EncodeText="False" ID="{F193B785-DD8E-4249-87B0-5197EC00DE8B}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Exclude_1k" DisplayLabel="Исключить 1-ый курс" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Exclude_PZSO" DisplayLabel="Исключить дисциплины уровня полного общ.ср.обр." ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="alfa_order" DisplayLabel="Дисциплины по алфавиту" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Header" DisplayLabel="Утверждение" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svDontSave" CommonValue="True" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER"/><Parameter Name="Footer" DisplayLabel="Подпись" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svDontSave" CommonValue="True" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsState" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select DISCIPLINE, MARKSTR
+from SP_RP_DIPLOM_STATE(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+</SQL><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/></Band><Band Name="dsDisciplines" AutoOpen="True" UniDirectional="False" Master="dsStudents" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select DISCIPLINE, MARKSTR, HOURS from SP_RP_DIPLOM(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+</SQL><Events OnBeforePrintRec="" OnBeforePrintBand="" OnAfterOpenDataSet="" OnAfterCreateDataSet="" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/></Band><Band Name="dsDisciplinesElect" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select DISCIPLINE, MARKSTR, HOURS from SP_RP_DIPLOM_ELECT(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+</SQL><Events OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/></Band><Band Name="dsPractica" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select DISCIPLINE, MARKSTR, HOURS
+from SP_RP_DIPLOM_PRACTIC(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+</SQL><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/></Band></Bands><SQL>1
+</SQL><Events OnBeforePrintRec="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>function datetostrukr(dt: TDateTime): string;
+var
+  Y, M, D: Word;
+  ma: array[1..12] of string;
+begin
+  ma[1] := 'января';
+  ma[2] := 'февраля';
+  ma[3] := 'марта';
+  ma[4] := 'апреля';
+  ma[5] := 'мая';
+  ma[6] := 'июня';
+  ma[7] := 'июля';
+  ma[8] := 'августа';
+  ma[9] := 'сентября';
+  ma[10] := 'октября';
+  ma[11] := 'ноября';
+  ma[12] := 'декабря';
+  DecodeDate(dt, Y, M, D);
+  if (D &lt;= 9 ) then
+    result := '0' + IntToStr(D) + ' ' + ma[M] + ' ' + IntToStr(Y)
+  else
+    result := IntToStr(D) + ' ' + ma[M] + ' ' + IntToStr(Y);
+end;
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, EDUFORM, BIRTHDATE, PREVIOUSDOCUMENT, PREVIOUSDOCUMENTNUM, ENTERCLAUSE, CODE, SPECIALITY, EDULEVEL, SEX') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsDisciplines_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+end;
+
+procedure dsDisciplines_OnBeforeOpenDataSet(ds: TpFibDataSet);
+begin
+//  ShowMessage(Params.Item('alfa_order').Value);
+  if (Params.Item('alfa_order').Value) then
+    ds.SelectSQL.Text := ds.SelectSQL.Text + ' order by DISCIPLINE collate WIN1251_UA';
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'BIRTHDATE') then
+    Field.Value := datetostrukr(dsStudents.FieldByName('BIRTHDATE').asDateTime)
+  else
+  if (Field.FieldName = 'NewPage') then
+    if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+      Field.Value := '&amp;page&amp;';
+end;
+
+begin
+
+end.</Script></Report>

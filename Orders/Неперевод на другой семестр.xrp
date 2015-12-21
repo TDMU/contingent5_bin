@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Неперевод на другой семестр" ProgressMax="100" ID="{C027A51D-0038-4AA5-8090-1287F40FDAC5}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="True" SaveCheckBox="False" Position="poScreenCenter" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnBeforeQueryParams=""/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Events OnAfterOpenDataSet="" OnBeforeOpenDataSet="" OnGetFieldData="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL><Bands><Band Name="dsDisciplines" Master="dsStudents" AutoOpen="True" UniDirectional="False"><SQL>select GD.DISCIPLINE
+from V_LASTRETAKEMARKS VLRM
+inner join STUDENTPLAN SP
+on (SP.STUDENTID = VLRM.STUDENTID)
+and (SP.PLANID = VLRM.PLANID)
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLRM.DISCIPLINEID)
+where VLRM.STUDENTID = ?MAS_STUDENTID
+and SP.SEMESTER = ?MAS_SEMESTER
+and SP.EDUYEAR = ?MAS_EDUYEAR
+and VLRM.FORMREPORT &lt;&gt; '-'
+and VLRM.MARKID in (0,20,10010,10030,10040,10050)
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,GROUPNUM,SEMESTER,EDUYEAR') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+     
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure OnStartReport;
+var
+  NewSemester, NewEduYear, NewEduYearStr: string;
+begin
+  NewSemester := OrderParams.Item('NewSemester_SEMESTER').Value;
+  NewEduYear := OrderParams.Item('NewEduYear_EDUYEAR').Value;
+  NewEduYearStr := OrderParams.Item('NewEduYear_EDUYEARSTR').Value;
+
+  if (NewSemester = '') or (NewEduYear = '') then
+    RaiseException('Необхідно спочатку додати відповідну шапку наказу.');
+
+  Params.Item('NewSemester').Value := NewSemester;
+  Params.Item('NewEduYear_EDUYEAR').Value := NewEduYear;
+  Params.Item('NewEduYear_EDUYEARSTR').Value := NewEduYearStr;
+  Params.Item('DEPARTMENT_CASE2').Value := OrderParams.Item('DEPARTMENT_CASE2').Value;
+  Params.Item('EDUFORM_CASE2').Value := OrderParams.Item('EDUFORM_CASE2').Value;
+  Params.Item('EDULEVEL').Value := OrderParams.Item('EDULEVEL').Value;
+  Params.Item('SPECIALITY').Value := OrderParams.Item('SPECIALITY').Value;
+  Params.Item('CODE').Value := OrderParams.Item('CODE').Value;
+  Params.Item('EDUDIRECTION').Value := OrderParams.Item('EDUDIRECTION').Value;
+  Params.Item('EDUDIRECTION_CODE').Value := OrderParams.Item('EDUDIRECTION_CODE').Value;
+  Params.Item('EDUBASIS_CASE5').Value := OrderParams.Item('EDUBASIS_CASE5').Value;
+  Params.Item('EDUTERMNAME').Value := OrderParams.Item('EDUTERMNAME').Value;
+  Params.Item('COURSE').Value := ((OrderParams.Item('SEMESTER').Value + 1) div 2);
+  Params.Item('SEMESTER').Value := OrderParams.Item('SEMESTER').Value;
+  Params.Item('EDUYEARSTR').Value := OrderParams.Item('EDUYEARSTR').Value;
+
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+begin
+  if Field.FieldName = 'Disciplines' then
+  begin
+    s := '';
+    while not Field.DataSet.Eof do
+    begin
+      if s &lt;&gt; '' then
+        s := s + ', ' + Field.DataSet.FieldByName('DISCIPLINE').Value
+      else
+        s := Field.DataSet.FieldByName('DISCIPLINE').Value;
+
+      Field.DataSet.Next;
+    end;
+    
+    Field.Value := s
+  end;
+end;
+
+
+begin
+end.</Script><Events OnStartReport="OnStartReport"/></Report>

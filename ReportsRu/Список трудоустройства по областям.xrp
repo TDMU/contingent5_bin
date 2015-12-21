@@ -1,0 +1,162 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список трудоустройства по областям" ID="{68196341-A137-4A8B-8790-715C9EA89341}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="RectorName" DisplayLabel="Фамилия ректора" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="True"/><Parameter Name="TypeCalc" DisplayLabel="Академ.успеваемость с перс.карты (иначе - с протокола ранжирования)" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsAppointment" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="dsAppointment" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>select
+       cast((coalesce(S.RANK_AKADEM, 0)  * 0.7 + coalesce(S.RANK_SCIENCE, 0) * 0.15 + coalesce(S.RANK_CIVIL, 0) * 0.15) as numeric(4,2)) as P1, -- рассчет коэф.
+       cast(
+       coalesce(
+        (select  avg(cast(S2P.TRADITIONALMARK as numeric(4, 2)))
+         from STUDENT2PROTOCOL S2P
+         left join RANKING_PROTOCOLS RP
+           on (RP.PROTOCOLID = S2P.PROTOCOLID)
+         inner join V_LASTPROTOCOL VLP
+           on (S2P.PROTOCOLID = VLP.PROTOCOLID
+             and VLP.STUDENTID = S2P.STUDENTID
+             and VLP.EDUYEAR = RP.EDUYEAR
+             and VLP.SEMESTER = RP.SEMESTER
+             and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+         where (S2P.STUDENTID = S.STUDENTID)
+          and (S2P.TRADITIONALMARK in (2,3,4,5))
+        ), 0)  * 0.7 + coalesce(S.RANK_SCIENCE, 0) * 0.15 + coalesce(S.RANK_CIVIL, 0) * 0.15 as numeric(4,2)) as P2, -- рассчет коэф.
+
+       S.RANK_AKADEM,
+
+       cast(
+        (
+          select  avg(cast(S2P.TRADITIONALMARK as numeric(4, 2)))
+          from STUDENT2PROTOCOL S2P
+          left join RANKING_PROTOCOLS RP
+            on (RP.PROTOCOLID = S2P.PROTOCOLID)
+          inner join V_LASTPROTOCOL VLP
+            on (S2P.PROTOCOLID = VLP.PROTOCOLID
+              and VLP.STUDENTID = S2P.STUDENTID
+              and VLP.EDUYEAR = RP.EDUYEAR
+              and VLP.SEMESTER = RP.SEMESTER
+              and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+          where (S2P.STUDENTID = S.STUDENTID)
+           and S2P.TRADITIONALMARK in (2,3,4,5)
+       ) as numeric(4,2) )as AVGMARK,
+
+       S.RANK_SCIENCE,
+       S.RANK_CIVIL,
+
+       S.FIO, extract (year from S.BIRTHDATE) as BIRTHYEAR,
+       S.FAMILY, S.ADDRESSNOW, S.ADDRESSOFPARENTS, (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY,
+       PR.PLANYEAR, PR.PLANRASPNUM, PR.MEDICALCRAFT,
+       PR.PEDIATRICS, PR.PROFILACTICCRAFT, PR.STOMATOLOGY, PR.PHARMACY,
+       GA.APPOINTMENT, GFS.FAMILYSTATUSNAME, GM.MINISTRY, GP.POST,
+       S.HOSPITAL, S.HABITATION, GR.REGIONNAME, GD.DEPARTMENT,
+       S.FAMILYSTATUS, S.RATING, GA.SUBORDINATION
+from STUDENTS S
+     left join PLANRASP PR on (PR.PLANRASPID = S.PLANRASPID)
+     left join GUIDE_SPECIALITY GS on (GS.SPECIALITYID = S.SPECIALITYID)
+     left join GUIDE_APPOINTMENT GA on (GA.APPOINTMENTID = PR.APPOINTMENTID)
+     left join V_GUIDE_DEPARTMENT GD on(GD.DEPARTMENTID = S.DEPARTMENTID)
+     left join V_GUIDE_FAMILYSTATUS GFS on (GFS.FAMILYSTATUS = S.FAMILYSTATUS)
+     left join GUIDE_MINISTRY GM on (GM.MINISTRYID = S.MINISTRYID)
+     left join GUIDE_POST GP on (GP.POSTID = S.POSTID)
+     left join V_GUIDE_REGION GR on (GR.REGIONID = S.DIRECTIONPLACEID)
+where S.STUDENTID in (@@StudentsID%0@)
+      and PR.APPOINTMENTID = ?MAS_APPOINTMENTID
+@@Order%???@
+</SQL></Band></Bands><Events OnGetFieldData="dsAppointment_OnGetFieldData"/><SQL>select distinct GA.APPOINTMENTID, GA.APPOINTMENT
+from GUIDE_APPOINTMENT GA
+     inner join PLANRASP PR on (PR.APPOINTMENTID = GA.APPOINTMENTID)
+     inner join STUDENTS S on (S.PLANRASPID = PR.PLANRASPID)
+where S.STUDENTID in (@@StudentsID%0@)
+order by GA.APPOINTMENT
+</SQL></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL><Events OnGetFieldData="dsParameters_OnGetFieldData"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsAppointment_OnGetFieldData(Field: TDBFieldInfo);
+begin
+   if (Field.FieldName = 'NewPage') then
+   begin
+      if (Field.Dataset.RecNo &gt; 1) //and (Field.Dataset.RecNo &lt; Field.Dataset.RecordCount)
+        then Field.Value := '&amp;page&amp;'
+   end;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  v,
+  a, b, c: Real;
+  bs, cs: String;
+begin
+  if (Field.FieldName='ADDRESSOFPARENTS') then
+  begin
+    if (dsStudents.FieldByName('ADDRESSOFPARENTS').AsString = dsStudents.FieldByName('ADDRESSNOW').AsString) then
+       Field.Value := ''
+  end
+  else
+  if Field.FieldName = 'MARK' then // Такое же поле добавлено в отчет &quot;Список трудоустройства по областям.xrp&quot;
+  begin
+    if (Params.Item('TypeCalc').Value) then
+    begin
+      Field.Value := FormatFloat('#0.00', dsStudents.FieldByName('P1').Value);
+    end
+    else
+    begin
+      Field.Value := FormatFloat('#0.00', dsStudents.FieldByName('P2').Value);
+    end;
+  end
+  else
+  if Field.FieldName = 'AKADEM_S' then // Такое же поле добавлено в отчет &quot;Список трудоустройства по областям.xrp&quot;
+  begin
+    a := 0;
+    if (Params.Item('TypeCalc').Value) then
+    begin
+      if (not dsStudents.FieldByName('RANK_AKADEM').IsNull) then a := dsStudents.FieldByName('RANK_AKADEM').Value;
+    end
+    else
+    begin
+      if (not dsStudents.FieldByName('AVGMARK').IsNull) then a := dsStudents.FieldByName('AVGMARK').Value;
+    end;
+    Field.Value := FormatFloat('#0.00', a);
+  end
+  else
+  if Field.FieldName = 'SCIENCE_S' then // Такое же поле добавлено в отчет &quot;Список трудоустройства по областям.xrp&quot;
+  begin
+    b := 0;
+    if (not dsStudents.FieldByName('RANK_SCIENCE').IsNull) then
+      b := dsStudents.FieldByName('RANK_SCIENCE').Value;
+    Field.Value := FormatFloat('#0.00', b);
+  end
+  else
+  if Field.FieldName = 'CIVIL_S' then // Такое же поле добавлено в отчет &quot;Список трудоустройства по областям.xrp&quot;
+  begin
+    c := 0;
+    if (not dsStudents.FieldByName('RANK_CIVIL').IsNull) then
+      c := dsStudents.FieldByName('RANK_CIVIL').Value;
+    Field.Value := FormatFloat('#0.00', c);
+  end;
+end;
+
+procedure dsParameters_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'MarkSRC') then
+  begin
+    if (Params.Item('TypeCalc').Value) then
+      Field.Value := '** Оценка академической успеваемости получена с личной карты'
+    else
+      Field.Value := '** Оценка академической успеваемости получена с протокола ранжирования';
+  end
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if (Params.Item('TypeCalc').Value) then
+  begin // from student card
+    dsStudents.ParamByName('Order').Value := 'order by 1 desc, 3 desc';
+  end
+  else
+  begin // from ranking protocols
+    dsStudents.ParamByName('Order').Value := 'order by 2 desc, 4 desc';
+  end;
+end;
+
+Begin
+End.</Script></Report>

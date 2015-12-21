@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Непроставленные оценки" ID="{5CAA971D-7F8D-4676-9620-D46D55805633}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 2"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.FIO, VLSM.SEMESTER, GEY.EDUYEARSTR, GD.DISCIPLINE
+from STUDENTS S
+
+inner join V_LASTSESSIONMARKS VLSM
+on (VLSM.STUDENTID = S.STUDENTID)
+
+inner join GUIDE_EDUYEAR GEY
+on (GEY.EDUYEAR = VLSM.EDUYEAR)
+
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLSM.DISCIPLINEID)
+
+where S.STUDENTID in (@@StudentsID%0@)
+and ((@@Semester_SEMESTER%0@ = 0) or (VLSM.SEMESTER = @@Semester_SEMESTER%0@))
+--and (VLSM.EDUYEAR = ?EduYear or cast(?EduYear as smallint) is null)
+and VLSM.FORMREPORT &lt;&gt; '-'
+and VLSM.MARKID = 0
+
+order by S.FIO, VLSM.SEMESTER
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+begin
+end.</Script></Report>

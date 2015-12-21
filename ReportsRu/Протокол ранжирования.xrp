@@ -1,0 +1,284 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Протокол ранжирования" ProgressMax="100" EncodeText="False" ID="{A84E3120-E1D3-42F5-BE2F-3E015985E509}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="ShowTestlists" DisplayLabel="С доп. инф. (ведомости) " ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="UseGroup" DisplayLabel="По группам" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="Prorector1" DisplayLabel="Проректор" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Chief" DisplayLabel="Руководитель" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svDontSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER"/><Parameter Name="Inspector" DisplayLabel="Должность ответственного" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="True"/><Parameter Name="InspFio" DisplayLabel="ФИО ответственного" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="True"/></UserParameters><Bands><Band Name="dsProtocol" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsECTSInfo" AutoOpen="True" UniDirectional="False" Master="dsProtocol" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>SELECT RI.PROTOCOLID, RI.ECTS, RI.CREDITS_MIN, RI.CREDITS_MAX, RI.REAL_PERCENT,
+(select COUNT(1)
+ from STUDENT2PROTOCOL SP
+ where SP.PROTOCOLID = :MAS_PROTOCOLID
+   and SP.ECTS = RI.ECTS
+) as STUDENTCOUNT
+FROM RANKING_INFO RI
+where RI.PROTOCOLID = :MAS_PROTOCOLID
+</SQL><Events OnAfterOpenDataSet="" OnBeforeOpenDataSet=""/></Band><Band Name="dsStudents1" AutoOpen="True" UniDirectional="False" Master="dsProtocol" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+  S.FIO, SP.STUDENTID, S.RECORDBOOKNUM, SP.CREDITS_AVG + coalesce(SP.STIMULATIONMARKS, 0) as CREDITS_AVG,
+  GE.ECTS, GTM.TRADITIONAL_MARK, RP.ONLY_E,
+  (case when SP.TESTLISTS = '' then 0 else SP.TESTLISTS end) as TESTLISTS,
+ (select first 1 HG.GROUPNUM
+  from HS_GROUPNUM HG
+  where HG.STUDENTID = SP.STUDENTID
+    and HG.BEGINDATE &lt;= :MAS_CREATEDATE
+  order by HG.BEGINDATE desc) as GROUPNUM
+from STUDENT2PROTOCOL SP
+inner join STUDENTS S
+  on (S.STUDENTID = SP.STUDENTID)
+inner join RANKING_PROTOCOLS RP
+  on (RP.PROTOCOLID = SP.PROTOCOLID)
+left join GUIDE_ECTS GE
+  on (GE.ECTS = SP.ECTS)
+left join GUIDE_TRADITIONAL_MARK GTM
+  on (GTM.TRADITIONAL_MARKID = SP.TRADITIONALMARK)
+where SP.PROTOCOLID = :MAS_PROTOCOLID
+order by S.FIO
+</SQL><Events OnGetFieldData="dsStudents_OnGetFieldData"/><Bands><Band Name="dsTestlists" Master="dsStudents1" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select ST.STUDENTID, ST.TESTLISTID, ST.CREDITS_CUR, ST.CREDITS_IND,
+coalesce(ST.CREDITS_TEST, ST.CREDITS_TEST, (select GM.MARKNAME from GUIDE_MARKTYPE_B GM where GM.MARKID = ST.TESTRESULTID)) as CREDITS_TEST,
+ST.TESTRESULTID, ST.CREDITS_ALL, T.TESTLISTNUM, T.TESTDATE, BVM.MODULENUM,
+ (case when ((ST.ONLY_E = 1) and (:MAS_ONLY_E = 1)) then 'E' else '' end) as ONLY_E,
+ (case when T.ISRETAKE = 1 then 'П' else 'С' end) as ISRETAKE
+from STUDENT2TESTLIST ST
+inner join B_TESTLIST T
+on T.TESTLISTID = ST.TESTLISTID
+inner join B_VARIANT_MODULE BVM
+on BVM.VARIANTID = T.VARIANTID
+where   (ST.TESTLISTID in (@@MAS_TESTLISTS%0@)) and
+      (ST.STUDENTID = :MAS_STUDENTID)
+order by MODULENUM
+</SQL><Events OnBeforeOpenDataSet="dsTestlists_OnBeforeOpenDataSet"/></Band></Bands></Band><Band Name="dsGroups" Master="dsProtocol" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStudentsByGroup" Master="dsGroups" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.FIO, SP.STUDENTID, S.RECORDBOOKNUM, SP.CREDITS_AVG + coalesce(SP.STIMULATIONMARKS, 0) as CREDITS_AVG,
+  SP.ECTS, (case when SP.TESTLISTS = '' then 0 else SP.TESTLISTS end) as TESTLISTS,
+   RP.ONLY_E, GTM.TRADITIONAL_MARK
+from STUDENT2PROTOCOL SP
+
+inner join HS_GROUPNUM HG
+on (HG.STUDENTID = SP.STUDENTID
+    and HG.BEGINDATE = (select first 1 HG1.BEGINDATE
+                         from HS_GROUPNUM HG1
+                         where HG1.STUDENTID = SP.STUDENTID
+                           and HG1.BEGINDATE &lt;= :MAS_CREATEDATE
+                         order by HG1.BEGINDATE desc)
+   )
+inner join STUDENTS S
+  on (S.STUDENTID = SP.STUDENTID)
+inner join RANKING_PROTOCOLS RP
+  on (RP.PROTOCOLID = SP.PROTOCOLID)
+inner join GUIDE_ECTS GE
+  on (GE.ECTS = SP.ECTS)
+left join GUIDE_TRADITIONAL_MARK GTM
+  on (GTM.TRADITIONAL_MARKID = SP.TRADITIONALMARK)
+where SP.PROTOCOLID = :MAS_PROTOCOLID
+and HG.GROUPNUM = :MAS_GROUPNUM
+order by S.FIO
+</SQL><Events OnGetFieldData="dsStudentsByGroup_OnGetFieldData"/><Bands><Band Name="dsTestlistsG" Master="dsStudentsByGroup" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select ST.STUDENTID, ST.TESTLISTID, ST.CREDITS_CUR, ST.CREDITS_IND,
+coalesce(ST.CREDITS_TEST, ST.CREDITS_TEST, (select GM.MARKNAME from GUIDE_MARKTYPE_B GM where GM.MARKID = ST.TESTRESULTID)) as CREDITS_TEST,
+ST.TESTRESULTID, ST.CREDITS_ALL, T.TESTLISTNUM, T.TESTDATE, BVM.MODULENUM,
+ (case when ((ST.ONLY_E = 1) and (:MAS_ONLY_E = 1)) then 'E' else '' end) as ONLY_E,
+ (case when T.ISRETAKE = 1 then 'П' else 'С' end) as ISRETAKE
+from STUDENT2TESTLIST ST
+inner join B_TESTLIST T
+on T.TESTLISTID = ST.TESTLISTID
+inner join B_VARIANT_MODULE BVM
+on BVM.VARIANTID = T.VARIANTID
+where   (ST.TESTLISTID in (@@MAS_TESTLISTS%0@)) and
+      (ST.STUDENTID = :MAS_STUDENTID)
+order by MODULENUM
+</SQL></Band></Bands></Band></Bands><SQL>select distinct
+ (select first 1 HG.GROUPNUM from HS_GROUPNUM HG where HG.STUDENTID = SP.STUDENTID
+  and HG.BEGINDATE &lt;= :MAS_CREATEDATE order by HG.BEGINDATE desc) as GROUPNUM,
+  SP.PROTOCOLID, RP.PROTOCOLDATE, RP.CREATEDATE
+from STUDENT2PROTOCOL SP
+inner join RANKING_PROTOCOLS RP
+on (RP.PROTOCOLID = SP.PROTOCOLID)
+where SP.PROTOCOLID = :MAS_PROTOCOLID
+order by 1
+</SQL></Band><Band Name="dsTradInfo" Master="dsProtocol" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select IT.PROTOCOLID, IT.MARK, IT.CREDITS_MIN,
+  IT.CREDITS_MAX
+from RANKING_INFO_TRAD IT
+where IT.PROTOCOLID = :MAS_PROTOCOLID
+order by IT.MARK desc
+</SQL></Band><Band Name="dsTradInfoECTS" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand=""/><SQL>select GE.ECTS, GE.TRADITIONAL_MARK
+from GUIDE_ECTS GE
+where GE.ECTS &lt;= 'E'
+</SQL></Band></Bands><SQL>SELECT RP.PROTOCOLID,
+RP.PARENTPROTOCOLID, RP.PROTOCOLDATE, RP.PROTOCOLNUM, RP.PROTOCOLTYPE, RP.CREATEDATE, RP.ONLY_E, RP.TRADMARKTYPE,
+  RP.EDUYEAR, RP.SEMESTER, RP.DISCIPLINEID, RP.SPECIALITYID, RP.DEPARTMENTID, RP.ONFIRSTTESTLIST,
+  RP.CREATED_USERID, RP.APPROVED_USERID, RP.SELECTEDTYPE, RP.NOTE,
+  (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY, GE.EDUYEARSTR, GD.DISCIPLINE,
+  GDT.DEPARTMENT,
+  (select count(1)
+   from STUDENT2PROTOCOL SP
+   where SP.PROTOCOLID = :PROTOCOLID
+  ) as ALLCOUNT,
+  (select count(1)
+   from STUDENT2PROTOCOL SP
+   where SP.PROTOCOLID = :PROTOCOLID
+    and ((SP.ECTS = 'FX') or (SP.ECTS='F') or (SP.ECTS='-') or (SP.ECTS='NS'))
+  ) as FFXCOUNT,
+  (select count(1)
+   from STUDENT2PROTOCOL SP
+   where SP.PROTOCOLID = :PROTOCOLID
+    and ((SP.ECTS = 'NR') or (SP.ECTS='NV'))
+  ) as NRNVCOUNT,
+  RP1.PROTOCOLNUM as PARENTPROTOCOLNUM,
+  RP1.PROTOCOLDATE as PARENTPROTOCOLDATE,
+  (select first 1 1
+   from RANKING_INFO_TRAD IT
+   where IT.PROTOCOLID = :PROTOCOLID
+  ) as TRADINFOPRESENT
+FROM RANKING_PROTOCOLS RP
+left join GUIDE_SPECIALITY GS
+  on(GS.SPECIALITYID = RP.SPECIALITYID)
+inner join GUIDE_EDUYEAR GE
+  on(GE.EDUYEAR = RP.EDUYEAR)
+inner join V_GUIDE_DISCIPLINE GD
+  on(GD.DISCIPLINEID = RP.DISCIPLINEID)
+left join V_GUIDE_DEPARTMENT GDT
+  on(GDT.DEPARTMENTID = RP.DEPARTMENTID)
+left join RANKING_PROTOCOLS RP1
+  on(RP1.PROTOCOLID = RP.PARENTPROTOCOLID)
+where RP.PROTOCOLID = :PROTOCOLID
+</SQL><Events OnGetFieldData="dsProtocol_OnGetFieldData" OnAfterOpenDataSet=""/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="grRang" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grRang_OnBeforePrintBand"/></Band><Band Name="grItog" Master="dsProtocol" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grItog_OnBeforePrintBand"/></Band><Band Name="grSpeciality" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grSpeciality_OnBeforePrintBand"/></Band><Band Name="grGroupOff" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grGroupOff_OnBeforePrintBand"/></Band><Band Name="grGroupOn" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grGroupOn_OnBeforePrintBand"/></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="dsProtocol" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.FIO, S.RECORDBOOKNUM, SP.CREDITS_AVG, SP.ECTS, GE.TRADITIONAL_MARK
+from STUDENT2PROTOCOL SP
+inner join STUDENTS S
+  on (S.STUDENTID = SP.STUDENTID)
+inner join GUIDE_ECTS GE
+  on (GE.ECTS = SP.ECTS)
+where SP.PROTOCOLID = :MAS_PROTOCOLID
+order by S.FIO
+</SQL></Band><Band Name="grTestlists" Master="grTradInfo" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grTestlists_OnBeforePrintBand"/></Band><Band Name="grTradInfo" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grTradInfo_OnBeforePrintBand"/><Bands/></Band><Band Name="grTradInfoAbsolut" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grTradInfoAbsolut_OnBeforePrintBand"/></Band><Band Name="grTradInfoECTS" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grTradInfoECTS_OnBeforePrintBand"/></Band><Band Name="Vis1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis1_OnFirstPrintBand"/></Band><Band Name="dsInsp" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsInsp_OnFirstPrintBand" OnBeforePrintBand="dsInsp_OnBeforePrintBand"/><Bands/></Band><Band Name="dsDecan" Master="Group1" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsDecan_OnFirstPrintBand" OnBeforePrintBand="dsDecan_OnBeforePrintBand"/></Band><Band Name="grDepartment" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="grDepartment_OnBeforePrintBand"/></Band></Bands><Script>procedure dsProtocol_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+  begin
+    Field.Value := Round((dsProtocol.FieldByName('SEMESTER').AsInteger / 2) + 0.1);
+  end
+  else
+  if Field.FieldName = 'PROTOCOLTYPENAME' then
+  begin
+    case dsProtocol.FieldByName('PROTOCOLTYPE').AsString of
+      'R':
+        begin
+          Field.Value := 'Относительное';
+        end;
+
+       'A':
+         begin
+           if dsProtocol.FieldByName('PARENTPROTOCOLID').Value = null then
+             Field.Value := 'Абсолютное'
+           else Field.Value := 'Абсолютное на основании протокола ' + dsProtocol.FieldByName('PARENTPROTOCOLNUM').AsString + ' від ' + dsProtocol.FieldByName('PARENTPROTOCOLDATE').AsString + ' р.';
+         end;
+
+       'C':
+         begin
+           Field.Value := 'Абсолютное на основании протокола ' + dsProtocol.FieldByName('PARENTPROTOCOLNUM').AsString + ' від ' + dsProtocol.FieldByName('PARENTPROTOCOLDATE').AsString + ' р.';
+         end;
+    end;
+  end
+  else
+  if Field.FieldName = 'NOTE' then
+    Field.Value := StringReplace(Field.Value, #13#10, '&amp;par&amp;', rfReplaceAll);
+
+
+end;
+
+procedure grRelative_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsProtocol.FieldByName('PROTOCOLTYPE').AsString &lt;&gt; 'R';
+end;
+
+
+procedure grDepartment_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsProtocol.FieldByName('DEPARTMENTID').IsNull;
+end;
+
+procedure grGroupOff_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := Params.Item('UseGroup').Value;
+end;
+
+procedure grGroupOn_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('UseGroup').Value;
+end;
+
+procedure grItog_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsProtocol.FieldByName('PROTOCOLTYPE').AsString &lt;&gt; 'K';
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if dsProtocol.FieldByName('PROTOCOLTYPE').AsString = 'K' then
+  begin
+//    if Field.FieldName = 'CREDITS_AVG' then Field.Value := '-';
+    if Field.FieldName = 'ECTS' then Field.Value := '-';
+    if Field.FieldName = 'TRADITIONAL_MARK' then
+    begin
+     if dsStudents1.FieldByName('ECTS').Value = 'S' then Field.Value := 'сдал';
+     if dsStudents1.FieldByName('ECTS').Value = 'NS' then Field.Value := 'не сдал';
+    end;
+  end;
+end;
+
+procedure dsStudentsByGroup_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if dsProtocol.FieldByName('PROTOCOLTYPE').AsString = 'K' then
+  begin
+//    if Field.FieldName = 'CREDITS_AVG' then Field.Value := '-';
+    if Field.FieldName = 'ECTS' then Field.Value := '-';
+    if Field.FieldName = 'TRADITIONAL_MARK' then
+    begin
+     if dsStudentsByGroup.FieldByName('ECTS').Value = 'S' then Field.Value := 'сдал';
+     if dsStudentsByGroup.FieldByName('ECTS').Value = 'NS' then Field.Value := 'не сдал';
+    end;
+  end;
+end;
+
+procedure grTradInfo_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsProtocol.FieldByName('TRADINFOPRESENT').IsNull;
+end;
+
+procedure grTradInfoAbsolut_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := ((dsProtocol.FieldByName('TRADMARKTYPE').Value = 'E') );
+end;
+
+procedure grTradInfoECTS_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := ((dsProtocol.FieldByName('TRADMARKTYPE').Value = 'A') or (dsProtocol.FieldByName('TRADMARKTYPE').Value = null));
+end;
+
+procedure grRang_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (dsProtocol.FieldByName('PROTOCOLTYPE').AsString[1] = 'K');
+end;
+
+procedure grTestlists_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('ShowTestlists').Value;
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if Params.Item('ShowTestlists').Value then
+  begin
+    if Params.Item('UseGroup').Value then dsTestlistsG.Open
+    else
+    dsTestlists.Open;
+  end;
+end;
+
+procedure Vis1_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Prorector1_Enabled').Value;
+end;
+
+procedure grSpeciality_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := dsProtocol.FieldByName('SPECIALITYID').IsNull;
+end;
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

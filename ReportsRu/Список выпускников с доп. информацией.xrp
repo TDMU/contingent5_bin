@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список выпускников с доп. информацией" ProgressMax="100" EncodeText="False" ID="{630682C0-9EC4-4438-85A9-3EE49EB42B00}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="YEAR" DisplayLabel="Год выпуска" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR as EDUYEAR, EDUYEAR as EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>select S.FIO, GL.EDULEVEL, GS.CODE||' '||GS.SPECIALITY  as SPECIALITY , GED.EDUDIRECTION_CODE || ' ' || GED.EDUDIRECTION as EDUDIRECTION, GC.COUNTRYNAME,
+(select first 1 V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join V_GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = S.STUDENTID and
+  RTC.REASONCATEGORYID = 2
+order by V_STO.ORDERDATE )  as FIRSTORDERNUM,
+
+(select first 1 V_STO.ORDERDATE
+from V_STUDENTORDERS V_STO
+     inner join V_GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = S.STUDENTID and
+  RTC.REASONCATEGORYID = 2
+order by V_STO.ORDERDATE )  as FIRSTORDERDATE,
+
+(select first 1 O.ORDERNUM
+ from ORDERS O
+ inner join STUDENTTOORDER SO
+ on SO.ORDERID = O.ORDERID
+ inner join REASONTOCATEGORY RC
+ on RC.REASONID = SO.REASONID
+where SO.STUDENTID = S.STUDENTID
+     and RC.REASONCATEGORYID = 1
+order by O.ORDERDATE desc )  as LASTORDERNUM,
+
+(select first 1 O.ORDERDATE
+ from ORDERS O
+ inner join STUDENTTOORDER SO
+ on SO.ORDERID = O.ORDERID
+ inner join REASONTOCATEGORY RC
+ on RC.REASONID = SO.REASONID
+where SO.STUDENTID = S.STUDENTID
+     and RC.REASONCATEGORYID = 1
+order by O.ORDERDATE desc )  as LASTORDERDATE
+
+from STUDENTS S
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join V_GUIDE_EDULEVEL GL
+on GL.EDULEVELID = GS.EDULEVELID
+inner join GUIDE_EDUDIRECTION GED
+on GED.EDUDIRECTIONID = GS.EDUDIRECTIONID
+inner join V_GUIDE_COUNTRY GC
+on GC.COUNTRYID = S.COUNTRYID
+where S.STUDENTID in (@@StudentsID%0@)
+order by S.FIO
+</SQL><Bands/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'FIRSTORDER') Then
+  Begin
+    Field.Value := Field.DataSet.FieldByName('FIRSTORDERNUM').Value + ' від ' +
+     Field.DataSet.FieldByName('FIRSTORDERDATE').asstring;
+  end;
+  if (Field.FieldName = 'LASTORDER') Then
+  Begin
+    Field.Value := Field.DataSet.FieldByName('LASTORDERNUM').Value + ' від ' +
+     Field.DataSet.FieldByName('LASTORDERDATE').asstring;
+  end;
+end;
+
+Begin
+End.</Script></Report>

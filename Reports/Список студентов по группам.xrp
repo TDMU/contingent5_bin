@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов по группам" ProgressMax="100" EncodeText="False" ID="{B5261994-C617-4C4C-AD40-DE35CFFE5C6B}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Use_NFIO" DisplayLabel="ПІБ на іноземній мові" ParamType="CheckBox" Required="False" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="Group1" AutoOpen="False" UniDirectional="False" Master=""><Bands><Band Name="Group2" Master="Group1" AutoOpen="False" UniDirectional="False"><Events OnAfterCreateDataSet="Group2_OnAfterCreateDataSet" OnGetFieldData="Group2_OnGetFieldData"/><SQL>1
+</SQL></Band></Bands><Events OnAfterCreateDataSet="Group1_OnAfterCreateDataSet"/><SQL>1
+</SQL></Band></Bands><Script>procedure Group1_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  s: string;
+begin
+  s := HostAppl.Data.GetSQL('GROUPNUM') +
+       ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+  ds.SelectSQL.Text := StringReplace(s, 'select', 'select distinct', 0);
+  
+  ds.Active := True;
+end;
+
+
+procedure OnAfterQueryParams;
+var
+  s: string;
+begin
+  if Params.Item('Use_NFIO').Value then s := 'NFIO'
+  else s := 'FIO';
+
+  FindDataSet('Group2').SelectSQL.Text :=
+    HostAppl.Data.GetSQL(s + ',COUNTRYNAME,GROUPNUM') +
+      ' where S.STUDENTID in (@@StudentsID%0@) ' +
+      ' and ' + HostAppl.Data.GetAliasForField('GROUPNUM') +
+      '.GROUPNUM = ?MAS_GROUPNUM order by 1';
+      
+  FindDataSet('Group2').Active := True;
+end;
+
+
+procedure Group2_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'FIO') and (Params.Item('Use_NFIO').Value) then
+    Field.Value := Field.DataSet.FieldByName('NFIO').AsString;
+end;
+
+
+begin
+end.</Script></Report>

@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Журнал посещений" ProgressMax="100" EncodeText="False" ID="{9D6EA0A6-2492-4102-80FE-1AD0AA1A09BB}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Use_NFIO" DisplayLabel="ФИО на иностранном языке" ParamType="CheckBox" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="Group1" AutoOpen="False" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="Group2" Master="Group1" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="Group2_OnAfterCreateDataSet" OnGetFieldData="Group2_OnGetFieldData"/><SQL>1
+</SQL></Band></Bands><Events OnAfterCreateDataSet="Group1_OnAfterCreateDataSet" OnGetFieldData="Group1_OnGetFieldData"/><SQL>1
+</SQL></Band></Bands><Script>procedure OnAfterQueryParams;
+var
+  s: string;
+begin
+  if Params.Item('Use_NFIO').Value then s := 'NFIO'
+  else s := 'FIO';
+
+  FindDataSet('Group2').SelectSQL.Text :=
+    HostAppl.Data.GetSQL(s + ',GROUPNUM') +
+      ' where S.STUDENTID in (@@StudentsID%0@) ' +
+      ' and ' + HostAppl.Data.GetAliasForField('GROUPNUM') +
+      '.GROUPNUM = ?MAS_GROUPNUM order by 1';
+
+  FindDataSet('Group2').Active := True;
+end;
+
+procedure Group2_OnGetFieldData(Field: TDBFieldInfo);
+begin
+    if (Field.FieldName = 'FIO') and (Params.Item('Use_NFIO').Value) then
+    Field.Value := Field.DataSet.FieldByName('NFIO').AsString;
+end;
+
+
+procedure Group1_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  s: string;
+
+begin
+  s := HostAppl.Data.GetSQL('GROUPNUM, DEPARTMENT, SEMESTER, EDUYEARSTR, SPECIALITY') +
+       ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+  ds.SelectSQL.Text := StringReplace(s, 'select', 'select distinct', 0);
+
+  ds.Active := True;
+end;
+
+procedure Group1_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+  begin
+    Field.Value := ((Field.DataSet.FieldByName('SEMESTER').Value + 1) div 2);
+  end
+  else
+  if Field.FieldName = 'NewPage' then
+  begin
+    if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+      Field.Value := '&amp;page&amp;';
+  end;
+end;
+
+begin
+end.</Script></Report>

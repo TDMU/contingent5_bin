@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Назначение именных стипендий" ProgressMax="100" EncodeText="False" ID="{0E69CB59-190F-490E-A8A9-B2612A576EB7}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="ProtocolNum" DisplayLabel="На основании протокола" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svDontSave" CommonValue="True" ShowCheck="False" SaveCheck="False" Visible="True" SQL="select A.ACCOUNTINGID,
+ case
+  when A.PROTOCOLNUM is null then ('ID ' || A.ACCOUNTINGID)
+  else  ('№ '|| A.PROTOCOLNUM ||'  вiд  ' || A.PROTOCOLDATE)
+end as TITLE,
+  GE.EDUYEARSTR,
+   coalesce(A.PROTOCOLDATE, '________') as PROTOCOLDATE,
+    coalesce(A.PROTOCOLNUM, '_______') as PROTOCOLNUM
+from ACCOUNTING A
+left join GUIDE_EDUYEAR GE
+on GE.EDUYEAR = A.EDUYEAR
+
+
+where -- not(A.CONFIRMUSERID is null)
+--and
+(
+  (current_user = 'SYSDBA')
+  or (exists(
+     select 1
+     from SEC_USERS_HISTORY SUH
+     inner join SEC_USERSGROUPS  SU
+     on (SU.UGNAME=SUH.USERNAME)
+     inner join VW_USERACCESS  VU
+     on (VU.UGNAME = SUH.USERNAME)
+     where (SUH.USERID = A.CREATEUSERID)
+  )
+)
+)
+--and (A.CONFIRMUSERID = ?Order_DEPARTMENTID)
+order by 1"/></UserParameters><Bands><Band Name="dsStudent" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL> select distinct S.FIO, G.STUDENTID, G.ACCOUNTINGID,
+ S.SEX, S.SEMESTER, GE.EDUYEARSTR, S.GROUPNUM, S.SPECIALITYID, GS.CODE, GS.SPECIALITY, GG.TITLE, cast((((S.SEMESTER + 1)+1)/2 - 0.5) as smallint) as COURSE
+
+
+from ACCOUNTING A
+
+inner join GRANTS G
+on (A.ACCOUNTINGID = G.ACCOUNTINGID)
+inner join STUDENTS S
+on   S.STUDENTID = G.STUDENTID
+inner join GUIDE_EDUYEAR GE
+on (GE.EDUYEAR = A.EDUYEAR)
+inner join GUIDE_SPECIALITY GS
+on GS.SPECIALITYID = S.SPECIALITYID
+inner join GUIDE_GRANT GG
+on GG.GRANTID = G.GRANTID
+where (G.ACCOUNTINGID = ?ProtocolNum_ACCOUNTINGID)
+     and(GG.TYPEGRANTS = 'И')
+</SQL><Events OnAfterCreateDataSet="" OnGetFieldData="dsStudent_OnGetFieldData" OnAfterOpenDataSet=""/></Band></Bands><Script>procedure dsStudent_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+  begin
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 3);
+  end;
+end;
+
+begin
+end.</Script></Report>

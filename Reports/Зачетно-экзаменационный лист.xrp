@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Зачетно-экзаменационный лист" ProgressMax="100" EncodeText="False" ID="{3D56F5AA-BD5A-46CD-A9F8-C0606E98A9B5}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="CurDate" DisplayLabel="Дата видачi направлення  " ParamType="Date" Required="True" AutoSize="-1" SaveValue="0" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Events OnAfterQueryParams="" OnBeforeQueryParams="OnBeforeQueryParams"/><Parameter Name="ToDate" DisplayLabel="Дійсне до" ParamType="Date" Required="True" AutoSize="-1" SaveValue="False" ShowCheck="0" SaveCheck="0" Visible="-1" CommonValue="False"/></UserParameters><Bands><Band Name="Group1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False"><SQL>SELECT
+   G_D.DEPARTMENT,
+   cast(((SP.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+   ST.GROUPNUM,
+   /* Chair */
+   G_DS.DISCIPLINE,
+   ST.SEMESTER,
+   (select EDUYEARSTR from GUIDE_EDUYEAR where EDUYEAR = ST.EDUYEAR) as EDUYEARSTR,
+   ST.FIO,
+   ST.RECORDBOOKNUM,
+   SM.LISTNUM,
+   GE.EMP_FIO,
+   (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName
+FROM
+   STUDENTS ST
+   inner join STUDENTPLAN SP
+   on (SP.STUDENTID = ST.STUDENTID)
+   
+   inner join STUDENTMARK SM
+   on (SM.STUDENTID = ST.STUDENTID)
+   and (SM.PLANID = SP.PLANID)
+   
+   inner join GUIDE_DEPARTMENT G_D
+   on (ST.DEPARTMENTID = G_D.DEPARTMENTID)
+
+   left join GUIDE_EMPLOYER GE
+   on (GE.EMP_ID = G_D.BOSSID)
+
+   inner join GUIDE_DISCIPLINE G_DS
+   on (G_DS.DISCIPLINEID = SM.DISCIPLINEID)
+WHERE ST.STUDENTID in (@@STUDENTSID@)
+  and SP.PLANID = ?PLANID
+  and SM.DISCIPLINEID = ?DISCIPLINEID
+  and SM.NUMORDER = (
+    select first 1 SM1.NUMORDER
+    from STUDENTMARK SM1
+    where SM1.STUDENTID = ST.STUDENTID
+    and SM1.PLANID = ?PLANID
+    and SM1.DISCIPLINEID = ?DISCIPLINEID
+    order by SM1.NUMORDER desc
+  )
+</SQL><Events OnGetFieldData="Group1_OnGetFieldData" OnAfterCreateDataSet="Group1_OnAfterCreateDataSet"/></Band></Bands><Script>procedure OnBeforeQueryParams;
+Var DC : TDateTime;
+    i : Integer;
+begin
+  DC := Date;
+  
+  Report.UserParams.Item('CurDate').Value := DC;
+   
+  {StrToDate(Params.Item('CurDate').Value);}
+  i := 0;
+  Repeat
+     DC := DC + 1;
+     If (DayOfWeek(DC) in [2..6]) Then Inc(i);
+  Until (i &gt;= 3);
+
+  Report.UserParams.Item('ToDate').Value := DC;
+//  ShowMessage(Report.UserParams.Item('ToDate').Value);
+end;
+
+
+procedure Group1_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'NewPage' then
+    if Field.DataSet.RecNo &gt; 1 then Field.Value := '&amp;page&amp;';
+end;
+
+
+procedure Group1_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+{  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,DEPARTMENT,COURSE,GROUPNUM', 1) +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+}
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+begin
+end.</Script></Report>

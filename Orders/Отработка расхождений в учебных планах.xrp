@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Отработка расхождений в учебных планах" ProgressMax="100" EncodeText="False" ID="{31963B24-70A2-44C0-9CE7-D3428087C610}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="ToDate" DisplayLabel="До якої дати" ParamType="Date" Required="True" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudentList" Master="" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 STUDENTID, FIO
+from STUDENTS
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet" OnGetFieldData="grStudentList_OnGetFieldData"/><Bands/></Band></Bands><Script>procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,' +
+    'GROUPNUM,CODE,SPECIALITY,EDUBASIS_CASE5') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+//  Params.Item('StudentID').Value := HostAppl.Data.GetData('STUDENTID');
+end;
+
+
+procedure grStudentList_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.DataSet.FieldByName('FIO').AsString, 0, 3)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').AsInteger + 1) / 2);
+end;
+
+
+begin
+end.</Script></Report>

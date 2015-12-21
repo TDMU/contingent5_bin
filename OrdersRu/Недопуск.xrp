@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Недопуск" ProgressMax="100" EncodeText="False" ID="{E584FB66-229A-4041-B973-520E4A7A6507}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/></UserParameters><Bands><Band Name="grGroupNum" AutoOpen="True" UniDirectional="True" Master=""><Bands><Band Name="grStudentList" Master="grGroupNum" AutoOpen="True" UniDirectional="True"><SQL>1
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet"/></Band></Bands><SQL>1
+</SQL><Events OnAfterCreateDataSet="grGroupNum_OnAfterCreateDataSet"/></Band></Bands><Script>procedure grGroupNum_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  s: string;
+begin
+  Params.Item('StudentsID').Value :=
+    HostAppl.Data.GetSelectedList('STUDENTID');
+  
+  s := HostAppl.Data.GetSQL('GROUPNUM') +
+       ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  ds.SelectSQL.Text := StringReplace(s, 'select', 'select distinct', 0);
+end;
+
+
+procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,COUNTRYNAME,GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) ' +
+    ' and ' + HostAppl.Data.GetAliasForField('GROUPNUM') +
+    '.GROUPNUM = ?MAS_GROUPNUM order by 1';
+end;
+
+
+procedure OnStartReport;
+var
+  AccessType_KEY: string;
+begin
+  AccessType_KEY := OrderParams.Item('AccessType_KEY').Value;
+  if (AccessType_KEY &lt;&gt; '12000')
+     and (AccessType_KEY &lt;&gt; '12002')
+     and (AccessType_KEY &lt;&gt; '12004')
+     and (AccessType_KEY &lt;&gt; '12006')
+     and (AccessType_KEY &lt;&gt; '12008')
+     and (AccessType_KEY &lt;&gt; '12010')
+     and (AccessType_KEY &lt;&gt; '12012') then
+        RaiseException('Необходимо сначала добавить соответствующую шапку приказа.');
+
+  Params.Item('AccessType_KEY').Value := AccessType_KEY;
+
+  Params.Item('AccessType').Value :=
+    OrderParams.Item('AccessType').Value;
+end;
+
+
+begin
+end.</Script><Events OnStartReport="OnStartReport" OnEndReport=""/></Report>

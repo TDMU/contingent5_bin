@@ -1,0 +1,274 @@
+const
+  cPackVersion = 3;
+
+var
+  InfoXML: Variant;
+  PackageInfoNode: Variant;
+  OptionsNode: Variant;
+  TablesNode: Variant;
+
+const
+  SelJoin = 'inner join SELECTEDIDS SS ' +
+            'on (SS.SELID = S.STUDENTID) ' +
+            'and (SS.TRANID = current_transaction)';
+            
+  AllJoin = 'inner join VW_USERACCESS2 VWUA ' +
+            'on (VWUA.STUDENTID = S.STUDENTID)';
+
+
+function GetParameter(ParameterName: string): string;
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = ''' + ParameterName + '''';
+      ExecQuery;
+      Result := Fields[0].AsString;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure ExecuteSQL(ASQL: string);
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := ASQL;
+      ExecQuery;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure SetPackageInfo(ParameterName: string; ParameterValue: variant);
+var
+  Node: Variant;
+begin
+  Node := InfoXML.CreateElement(ParameterName);
+  PackageInfoNode.AppendChild(Node);
+  Node.Text := ParameterValue;
+end;
+
+function GetOptions: Variant;
+
+  procedure AddOption(Name: string; Caption: string; Checked: Boolean);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement(Name);
+    OptionsNode.AppendChild(Node);
+    Node.SetAttribute('Caption', Caption);
+    Node.SetAttribute('Checked', Checked);
+  end;
+  
+begin
+  AddOption('OnlySelected', _('Только выделенных'), True);
+  AddOption('Delete', _('Удалить студентов после создания пакета'), False);
+  AddOption('IncludePhoto', _('Включить в пакет фотографии'), True);
+  AddOption('IncludeOrdersText', _('Включить в пакет тексты приказов'), True);
+
+  Result := OptionsNode;
+end;
+
+function GetOptionAttrValue(NodeName, AttrName: string): Variant;
+var
+  Node, Attr: Variant;
+begin
+  Result := '';
+  Node := OptionsNode.SelectSingleNode(NodeName);
+//  if VarIsEmpty(Node) then Exit;
+  Attr := Node.attributes.getNamedItem(AttrName);
+//  if Attr = nil then Exit;
+  Result := Attr.nodeValue;
+end;
+
+procedure ValidateOptions;
+begin
+  if GetOptionAttrValue('Delete', 'Checked') then
+  begin
+     if not HasRight('actStudentListDeleteSelected') then
+       RaiseException(_('У Вас нет прав на удаление студентов.'));
+                        
+     if not GetOptionAttrValue('IncludePhoto', 'Checked')
+        or not GetOptionAttrValue('IncludeOrdersText', 'Checked')
+     then
+       RaiseException(_('При перемещении студентов необходимо отметить:'#13#10 +
+                        '"Включить в пакет фотографии" и "Включить в пакет тексты приказов"'));
+
+
+     if not MsgConfirmation(_('Внимание! После создания пакета будут удалены соответствующие студенты.' +
+                              #13#10'Продолжить создание пакета?'))
+     then Abort;
+  end;
+end;
+
+procedure StartExport;
+
+  procedure AddTableInfo(TableName, TableTitle: string; RecordCount: integer);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement('Table');
+    TablesNode.AppendChild(Node);
+    Node.SetAttribute('Name', TableName);
+    Node.SetAttribute('Title', TableTitle);
+    Node.SetAttribute('RecordCount', RecordCount);
+  end;
+
+  procedure ProcessTable(TableName, TableTitle, SQL: string; ExcludeFields: string = '';
+                         AddJoin: Boolean = True; UseServerCount: Boolean = True);
+  var
+    RecCount: integer;
+    FullSQL: string;
+  begin
+    OutMessage(#13#10 + _('Таблица') + ' "' + TableTitle + '"');
+
+
+    if AddJoin then
+    begin
+      if GetOptionAttrValue('OnlySelected', 'Checked') then  {Selected}
+        FullSQL := SQL + ' ' + SelJoin
+      else
+        if UserName <> 'SYSDBA' then
+          FullSQL := SQL + ' ' + AllJoin
+        else
+          FullSQL := SQL;
+    end
+    else
+      FullSQL := SQL;
+
+    Log(FullSQL);
+    RecCount := SQL2XML(FullSQL, TableName + '.xml', ExcludeFields, UseServerCount);
+
+    AddTableInfo(TableName, TableTitle, RecCount);
+  end;
+
+var
+  s: string;
+  CurJoin: string;
+
+begin
+  SetPackageInfo('PackageType', 'Students');
+  SetPackageInfo('Version', cPackVersion);
+  SetPackageInfo('OrgCode', GetParameter('OrgCode'));
+  SetPackageInfo('DBCode', GetParameter('DBCode'));
+  SetPackageInfo('CreateDate', FormatDateTime('dd.mm.yyyy hh:mm:ss', Now));
+  SetPackageInfo('OrgName', GetParameter('OrgName'));
+  SetPackageInfo('ARMName', GetRegValue(rgContKey, rgARMName));
+
+
+  if GetOptionAttrValue('OnlySelected', 'Checked') then
+  begin
+    HostAppl.Data.FillSelectedList(TransactionHandle);
+    CurJoin := SelJoin;
+  end
+  else
+  begin
+    if UserName = 'SYSDBA' then CurJoin := ''
+    else CurJoin := AllJoin;
+  end;
+
+  s := 'DBCODE, SEMESTER, EDUYEAR, SPECIALITYID, DEPARTMENTID, GROUPNUM, PACKAGEID';
+  if GetOptionAttrValue('IncludePhoto', 'Checked') then
+    ProcessTable('STUDENTS', _('Студенты'), 'select S.* from STUDENTS S', s)
+  else
+    ProcessTable('STUDENTS', _('Студенты'), 'select S.* from STUDENTS S', s + ',PHOTO');
+
+
+  ProcessTable('SEC_USERS_HISTORY', _('Пользователи'),
+    'select distinct SUH.USERID, SUH.USERNAME, SUH.FIO, SUH.DESCRIPTION ' +
+    'from SEC_USERS_HISTORY SUH ' +
+    'inner join ORDERS O ' +
+    'on (O.USERID = SUH.USERID) ' +
+    'inner join STUDENTTOORDER S ' +
+    'on (S.ORDERID = O.ORDERID) ' + CurJoin, '', False, False);
+
+
+  if GetOptionAttrValue('IncludeOrdersText', 'Checked') then s := 'DBCODE, PACKAGEID'
+  else s := 'DBCODE, ORDERTEXT, PACKAGEID';
+
+  ProcessTable('ORDERS', _('Приказы'),
+    'select O.* from ORDERS O ' +
+    'where Exists ( ' +
+    '  select 1 from STUDENTTOORDER S ' + CurJoin +
+    '  where (S.ORDERID = O.ORDERID) ' +
+    ')', s, False);
+
+  ProcessTable('HS_COUNTRY', _('Гражданство (история)'), 'select S.* from HS_COUNTRY S', 'PACKAGEID');
+  ProcessTable('HS_FAMILYSTATUS', _('Семейное положение (история)'), 'select S.* from HS_FAMILYSTATUS S', 'PACKAGEID');
+  ProcessTable('HS_FIO', _('ФИО (история)'), 'select S.* from HS_FIO S', 'PACKAGEID');
+  ProcessTable('HS_GROUPNUM', _('Группа (история)'), 'select S.* from HS_GROUPNUM S', 'PACKAGEID');
+  ProcessTable('HS_HOSTEL', _('Общежитие (история)'), 'select S.* from HS_HOSTEL S', 'PACKAGEID');
+  ProcessTable('HS_ORPHAN', _('Сирота (история)'), 'select S.* from HS_ORPHAN S', 'PACKAGEID');
+  ProcessTable('HS_STREAM', _('Поток (история)'), 'select S.* from HS_STREAM S', 'PACKAGEID');
+
+  ProcessTable('STUDENTTESTLIST', _('Ведомости'),
+    'select STL.* from STUDENTTESTLIST STL ' +
+    'where Exists ( ' +
+    'select 1 from STUDENTMARK S ' + CurJoin +
+    'where (S.TESTLISTID = STL.TESTLISTID) ' +
+    ')', 'PACKAGEID', False);
+
+
+  ProcessTable('STUDENTPLAN', _('Планы'), 'select S.* from STUDENTPLAN S', 'PACKAGEID');
+  ProcessTable('STUDENTMARK', _('Оценки'), 'select S.* from STUDENTMARK S', 'PACKAGEID');
+  ProcessTable('STUDENTPRACTICEINFO', _('Практики'), 'select S.* from STUDENTPRACTICEINFO S', 'PACKAGEID');
+
+  ProcessTable('STUDENTTOORDER', _('Студенты - приказы'), 'select S.* from STUDENTTOORDER S', 'PACKAGEID');
+  ProcessTable('HS_MOVEMENT', _('Движение студентов'), 'select S.* from HS_MOVEMENT S', 'PACKAGEID');
+
+// -----------------  Справочники  ---------------------
+
+{  OutMessage(#13#10);
+
+  ProcessTable('GUIDE_COUNTRY', _('Страны'),
+    'select GC.* from GUIDE_COUNTRY GC ' +
+    'where Exists ( ' +
+    '  select 1 from HS_COUNTRY S ' + CurJoin +
+    '  where (S.COUNTRYID = GC.COUNTRYID) ' +
+    ')', s, False);
+
+ }
+  InfoXML.Save(TempDir + '\info.xml');
+
+  OutMessage(#13#10#13#10 + _('Архивирование'));
+  Compress(ArchFileName, TempDir + '\*.*');
+  
+  if GetOptionAttrValue('Delete', 'Checked') then
+  begin
+    OutMessage(#13#10#13#10 + _('Удаление студентов ... '));
+    if GetOptionAttrValue('OnlySelected', 'Checked') then
+      ExecuteSQL('delete from STUDENTS S where Exists(select SELID from SELECTEDIDS SS where SS.SELID = S.STUDENTID)')
+    else
+      ExecuteSQL('delete from STUDENTS S where Exists(select 1 from VW_USERACCESS2 VWUA where VWUA.STUDENTID = S.STUDENTID)');
+      
+//    OutMessage(_('ОК'));
+  end;
+  
+  ExecuteSQL('delete from SELECTEDIDS SS where SS.TRANID = current_transaction');
+  Tran.Commit;
+  
+  if GetOptionAttrValue('Delete', 'Checked') then
+    HostAppl.Data.Refresh(True);
+
+end;
+
+
+begin
+  try
+    InfoXML := CreateOleObject('Msxml2.DOMDocument.3.0');
+  except
+    RaiseException(_('В системе не установлена библиотека msxml3'));
+  end;
+  InfoXML.LoadXML('<?xml version="1.0" encoding="windows-1251"?><Info><PackageInfo/><Options/><Tables/></Info>');
+  PackageInfoNode := InfoXML.DocumentElement.SelectSingleNode('PackageInfo');
+  OptionsNode := InfoXML.DocumentElement.SelectSingleNode('Options');
+  TablesNode := InfoXML.DocumentElement.SelectSingleNode('Tables');
+end.

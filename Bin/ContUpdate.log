@@ -1,0 +1,11 @@
+15.03.2015 20:15:38 [EXCEPTION] [6028] Нарушение доступа по адресу 004619B4 в модуле 'ContUpdate.exe'. Read по адресу 00000180
+16.03.2015 8:44:02 [EXCEPTION] [8296] Операция прервана
+16.03.2015 8:46:03 [EXCEPTION] [6824] Нарушение доступа по адресу 004619B4 в модуле 'ContUpdate.exe'. Read по адресу 00000180
+22.03.2015 14:58:03 [EXCEPTION] [3860] Execute:
+INSERT INTO GUIDE_DISCIPLINE (DISCIPLINEID, DISCIPLINE, DISCIPLINETYPE, GROUPDISCIPLINEID, USE, DISCIPLINE_ENG, DISCIPLINE_RUS) VALUES (2543, 'Дитяча ортопедія', 'Н', NULL, 0, NULL, NULL)
+Error:
+DM.DB:
+Invalid insert or update value(s): object columns are
+constrained - no 2 table rows can have duplicate column values.
+Violation of PRIMARY or UNIQUE KEY constraint "PK_GUIDE_DISCIPLINE" on table "GUIDE_DISCIPLINE".
+

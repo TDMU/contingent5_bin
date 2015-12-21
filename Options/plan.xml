@@ -1,0 +1,7 @@
+
+<Plan>
+	<event Name="NewYear" ExecApp="ImageViewer.exe img\newyear1.jpg" WaitExec="True" Begin="29.12.2014" End="30.12.2014" NumShow="" DaysOfWeek="" DaysOfMonth=""/>
+	<event Name="NewYear" ExecApp="ImageViewer.exe img\newyear2.jpg" WaitExec="True" Begin="31.12.2014" End="01.01.2015" NumShow="" DaysOfWeek="" DaysOfMonth=""/>
+	<event Name="NewYear" ExecApp="ImageViewer.exe img\newyear3.jpg" WaitExec="True" Begin="02.01.2015" End="05.01.2015" NumShow="" DaysOfWeek="" DaysOfMonth=""/>
+	<event Name="NewYear" ExecApp="ImageViewer.exe img\newyear4.jpg" WaitExec="True" Begin="06.01.2015" End="12.01.2015" NumShow="" DaysOfWeek="" DaysOfMonth=""/>
+</Plan>

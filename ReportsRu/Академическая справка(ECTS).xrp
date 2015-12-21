@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Академическая справка(ECTS)" ProgressMax="100" EncodeText="False" ID="{9A6BE2B9-81E6-48EB-8A41-6E12E10F455E}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="SortOrder" DisplayLabel="Сортировка" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="По алфавиту
+По семестру начала изучения дисциплин
+По семестру окончания изучения дисциплин" KeyItems="ALPHABET_INDEX
+BEGINSEMESTER, ALPHABET_INDEX
+ENDSEMESTER, ALPHABET_INDEX" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsVariantItems" Master="dsStudents" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select ITEMTYPE, DMTITLE, SEMESTER, CREDITS_ECTS, HOURS_ALL, HOURS_AUD,
+  CREDITS, ECTS, TRADITIONAL_MARK, DOC_NUM, DOC_DATE, MODULENUM
+from SP_GET_STUDENTMARKS_AS(:MAS_STUDENTID)
+order by @@SortOrder_KEY@
+
+  
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/><Bands><Band Name="discipline" Master="dsVariantItems" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintRec="discipline_OnBeforePrintRec"/></Band><Band Name="module" Master="dsVariantItems" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintRec="module_OnBeforePrintRec"/></Band></Bands></Band><Band Name="dsEnter" Master="dsStudents" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join V_GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 2
+order by V_STO.ORDERDATE
+</SQL></Band><Band Name="dsOut" Master="dsStudents" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join V_GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 3
+order by V_STO.ORDERDATE desc
+</SQL></Band></Bands><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnAfterOpenDataSet="" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, SEX, DEPARTMENT, SPECIALITY') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'NewPage' then
+  if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+     Field.Value := '&amp;page&amp;';
+end;
+
+procedure discipline_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+    Band.Visible := (dsVariantItems.FieldByName('ITEMTYPE').AsString = 'D');
+end;
+
+procedure module_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+    Band.Visible := (dsVariantItems.FieldByName('ITEMTYPE').AsString = 'M');
+end;
+
+begin
+end.</Script></Report>

@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Разрешение на обучение по индивидуальному графику" ProgressMax="100" EncodeText="False" ID="{03FEDEA8-B32C-41D3-BA73-0630B75788F0}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="OrderReason" DisplayLabel="Дозвіл" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="на навчання
+на складання сесії" KeyItems="11022
+11025" CommonValue="False"/><Parameter Name="Reason" DisplayLabel="Підстава" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="у зв'язку з хворобою
+за сімейними обставинами
+у зв'язку з службовими відрядженнями
+у зв'язку з доглядом за дитиною
+у зв'язку з призивом на строкову військову службу
+у зв'язку з вагітністю" KeyItems="у зв'язку з хворобою
+за сімейними обставинами
+у зв'язку з службовими відрядженнями
+у зв'язку з доглядом за дитиною
+у зв'язку з призивом на строкову військову службу
+у зв'язку з вагітністю" CommonValue="False"/><Parameter Name="ShowTitle" DisplayLabel="Додати заголовок наказу" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudent" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudent_OnAfterCreateDataSet" OnGetFieldData="dsStudent_OnGetFieldData" OnAfterOpenDataSet="dsStudent_OnAfterOpenDataSet"/></Band></Bands><Script>procedure dsStudent_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,GROUPNUM,CODE,SPECIALITY,EDUBASIS_CASE5') +
+                         ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudent_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO_CASE3' then
+    Field.Value := Utils.GetFIOPadeg(Field.DataSet.FieldByName('FIO').Value, 0, 3)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+begin
+end.</Script></Report>

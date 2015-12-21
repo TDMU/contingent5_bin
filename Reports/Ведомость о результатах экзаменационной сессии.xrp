@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Ведомость о результатах экзаменационной сессии" ProgressMax="100" EncodeText="False" ID="{F720F5AC-49EF-499B-944A-380F2B8ECDB3}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Faculty" DisplayLabel="Факультет" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, DEPARTMENT
+from GUIDE_DEPARTMENT
+where USE = 1" CommonValue="False"/><Parameter Name="EduBase" DisplayLabel="Форма фінансування" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUBASISID, EDUBASIS
+FROM GUIDE_EDUBASIS
+where USE = 1" CommonValue="False"/><Parameter Name="EduForm" DisplayLabel="Форма навчання" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUFORMID, EDUFORM
+FROM GUIDE_EDUFORM
+where USE = 1" CommonValue="False"/><Parameter Name="EduTerm" DisplayLabel="Термін навчання" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EDUTERM, EDUTERMNAME
+from GUIDE_EDUTERM
+where USE = 1" CommonValue="False"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUYEAR, EDUYEARSTR
+FROM GUIDE_EDUYEAR
+where USE = 1" CommonValue="False"/><Parameter Name="Semester" DisplayLabel="За семестри" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SEMESTER, 0, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1" CommonValue="False"/><Parameter Name="NumGroup" DisplayLabel="Группа" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="CountryTypes" DisplayLabel="Громадяни" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT distinct COUNTRYTYPE, 0, COUNTRYTYPE
+FROM GUIDE_COUNTRY
+where USE = 1" CommonValue="False"/><Parameter Name="SessionBeginDate" DisplayLabel="Дата початку сесії" ParamType="Date" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="SessionEndDate" DisplayLabel="Дата підсумка результатів сесії" ParamType="Date" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL><Bands/></Band><Band Name="dsSpeciality" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select distinct HMF.SPECIALITYID, (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY
+from HS_MOVEMENT_FULL HMF
+inner join GUIDE_SPECIALITY GS on (GS.SPECIALITYID = HMF.SPECIALITYID)
+where
+  HMF.DEPARTMENTID = :Faculty_DEPARTMENTID
+  and HMF.EDUBASISID = :EduBase_EDUBASISID
+  and HMF.EDUFORMID = :EduForm_EDUFORMID
+  and HMF.EDUYEAR = :EduYear_EDUYEAR
+  and (not(:EDUTERM_CHECKED = 1) or (HMF.EDUTERM = :EduTerm_EDUTERM))
+  and (not(:NumGroup_CHECKED = 1) or
+         ((select first 1 HG.GROUPNUM
+           from HS_GROUPNUM HG
+           where HG.STUDENTID = HMF.STUDENTID
+              and HG.BEGINDATE &lt;= :SessionEndDate
+           order by HG.BEGINDATE desc ) = :NumGroup))
+  and HMF.SEMESTER in (@@Semester_KEYS@)
+  and HMF.BEGINDATE &lt;= :SessionBeginDate
+  and HMF.ENDDATE &gt; :SessionBeginDate
+order by GS.SPECIALITY
+
+
+
+
+
+</SQL><Bands><Band Name="dsStat" Master="dsSpeciality" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select C2, C3, C4, C5, C6, C7, C8, C9, C10, C11,
+       C12, C13, C14, C15, C16, C17, C18, C19,
+       C20, C21, C22, C23
+from SP_RP_SESSIONRESULT(
+  :NumGroup_CHECKED,
+  :EDUTERM_CHECKED,
+  :NumGroup,
+  :EduTerm_EDUTERM,
+  :Faculty_DEPARTMENTID,
+  :MAS_SPECIALITYID,
+  :EduBase_EDUBASISID,
+  :EduForm_EDUFORMID,
+  :EduYear_EDUYEAR,
+  :Semester_KEYS,
+  :CountryTypes_KEYS,
+  :SessionBeginDate,
+  :SessionEndDate)
+</SQL><Events OnBeforePrintRec="" OnGetFieldData="dsStat_OnGetFieldData" OnBeforePrintBand="dsStat_OnBeforePrintBand"/></Band></Bands><Events OnGetFieldData="dsSpeciality_OnGetFieldData" OnBeforeOpenDataSet=""/></Band><Band Name="dsAddParam" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="dsAddParam_OnFirstPrintBand" OnBeforePrintBand="dsAddParam_OnBeforePrintBand"/></Band></Bands><Script>procedure IncParam(ParamName: string; Value: Integer);
+begin
+  Params.Item(ParamName).Value :=
+      Params.Item(ParamName).Value + Value;
+end;
+
+procedure OnEndReport;
+begin
+  Report.ShowType := 7;
+end;
+
+procedure dsStat_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'C9') then IncParam('S9', Field.Value)
+  else
+  if (Field.FieldName = 'C10') or (Field.FieldName = 'C11')
+      then IncParam('S1011', Field.Value)
+  else
+  if (Field.FieldName = 'C5') then IncParam('S5', Field.Value)
+  else
+  if (Field.FieldName = 'C20')
+      and (Field.Dataset.FieldByName('C5').Value &gt; 0)
+  then
+  begin
+    IncParam('Sum20', Field.Value);
+    IncParam('Num20', 1);
+  end;
+end;
+
+procedure dsSpeciality_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'S18') then
+  begin
+    if (Params.Item('S5').Value &gt; 0) then
+      Field.Value := FormatFloat('0.00',Params.Item('S9').Value / Params.Item('S5').Value)
+    else
+      Field.Value := '0.00';
+  end
+  else
+  if (Field.FieldName = 'S19') then
+  begin
+    if (Params.Item('S5').Value &gt; 0) then
+      Field.Value := FormatFloat('0.00',Params.Item('S1011').Value / Params.Item('S5').Value)
+    else
+      Field.Value := '0.00';
+  end
+  else
+  if (Field.FieldName = 'S20') then
+  begin
+    if (Params.Item('Num20').Value &gt; 0) then
+      Field.Value := FormatFloat('0.00',Params.Item('Sum20').Value / Params.Item('Num20').Value)
+    else
+      Field.Value := '0.00';
+  end;
+end;
+
+procedure dsStat_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Params.Item('S9').Value := 0;
+  Params.Item('S1011').Value := 0;
+  Params.Item('S5').Value := 0;
+  Params.Item('Sum20').Value := 0;
+  Params.Item('Num20').Value := 0;
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if Params.Item('EduTerm_ENABLED').Value then Params.Item('EDUTERM_CHECKED').Value := 1
+  else Params.Item('EDUTERM_CHECKED').Value := 0;
+  if Params.Item('NumGroup_ENABLED').Value then Params.Item('NumGroup_CHECKED').Value := 1
+  else Params.Item('NumGroup_CHECKED').Value := 0;
+//  showmessage(Params.Item('NumGroup').Value);
+end;
+
+procedure dsAddParam_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := False;
+end;
+
+procedure dsAddParam_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  if not Params.Item('EduTerm_ENABLED').Value then Params.Item('EDUTERM_EDUTERMNAME').Value := '';
+  if not Params.Item('NumGroup_ENABLED').Value then Params.Item('NumGroup').Value := '';
+  Band.Stop := (not Params.Item('EduTerm_ENABLED').Value)
+                and (not Params.Item('NumGroup_ENABLED').Value);
+end;
+
+begin
+end.</Script><Events OnEndReport="OnEndReport"/></Report>

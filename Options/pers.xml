@@ -1,0 +1,100 @@
+<?xml version="1.0"?>
+<Pers>
+  <Sections>
+    <Section ID="Photo" Label="Фото">
+      <Field Name="Photo" Label=" " Height="143"/>
+    </Section>
+    <Section ID="Personal" Label="Личные сведения">
+      <Field Name="FIO" Label="Фамилия, имя, отчество" Required="True"/>
+      <Field Name="SEX1" Label="Пол"/>
+      <Field Name="BIRTHDATE" Label="Дата рождения"/>
+      <Field Name="COUNTRYNAME" Label="Гражданство"/>
+      <Field Name="IDCODE" Label="Идентификационный код"/>
+      <Field Name="SOCIALORIGIN" Label="Социальное происхождение"/>
+      <Field Name="FAMILYSTATUSNAME" Label="Семейное положение"/>
+      <Field Name="FAMILY" Label="Состав семьи" Height="42"/>
+      <Field Name="REGIONNAME" Label="Область проживания"/>
+      <Field Name="ORPHAN" Label="Сирота"/>
+      <Field Name="HOSTEL" Label="Общежитие"/>
+      <Field Name="NFIO" Label="Фамилия, имя, отчество (англ.)"/>
+    </Section>
+    <Section ID="Education" Label="Сведения об обучении">
+      <Field Name="SPECIALITY" Label="Специальность" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="DEPARTMENT" Label="Подразделение" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="EDUFORM" Label="Форма обучения" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="EDUBASIS" Label="Форма финансирования" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="EDUTERMNAME" Label="Срок обучения" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="SEMESTER" Label="Семестр" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="GROUPNUM" Label="№ группы" ReadOnly="True"/>
+      <Field Name="STREAM" Label="Поток" ReadOnly="True"/>
+      <Field Name="STATUSNAME" Label="Статус" ReadOnly="True" HistoryReadOnly="True"/>
+      <Field Name="MEDICALARMTRAINING" Label="Военно-медицинская подготовка"/>
+    </Section>
+    <Section ID="EnterInfo" Label="Сведения при поступлении">
+      <Field Name="ENTERDATE" Label="Дата зачисления"/>
+      <Field Name="ZNOMARK" Label="Балл ВНО"/>
+      <Field Name="ENTERCLAUSE" Label="Условия зачисления" Height="42"/>
+	  <Field Name="PROTOCOLNUM" Label="№ протокола заседания приемной комиссии"/>
+	  <Field Name="PROTOCOLDATE" Label="Дата протокола заседания приемной комиссии"/>
+      <Field Name="JURIDICALPERSON" Label="Юридическое лицо, заключившее контракт" Height="42"/>
+      <Field Name="PREVIOUSEDUCATION" Label="Образование"/>
+      <Field Name="PREVIOUSDOCUMENT" Label="Документ при поступлении"/>
+      <Field Name="PREVIOUSDOCUMENTNUM" Label="№ документа"/>
+      <Field Name="EDUCATIONALINSTITUTION" Label="Название и дата окончания уч. зав." Height="42"/>
+      <Field Name="DIRECTIONPLACE" Label="Область целевого направления"/>
+      <Field Name="DIRECTIONPLACETYPE" Label="Тип целевого направления"/>
+      <Field Name="PRIVILEGE" Label="Льготы при поступлении"/>
+    </Section>
+    <Section ID="Docs" Label="Документы">
+      <Field Name="PRIVATEAFFAIRNUM" Label="№ личного дела"/>
+      <Field Name="RECORDBOOKNUM" Label="№ зачетной книжки"/>
+      <Field Name="PASSPORTNUM" Label="№ паспорта"/>
+      <Field Name="PASSPORTGIVEDATE" Label="Дата выдачи паспорта"/>
+      <Field Name="PASSPORTGIVEPLACE" Label="Место выдачи паспорта" Height="42"/>
+      <Field Name="PASSPORTREGISTRATION" Label="№ и место регистрации паспорта" Height="42"/>
+      <Field Name="WORKBOOKNUM" Label="№ трудовой книжки"/>
+      <Field Name="WORKBOOKGIVEDATE" Label="Дата выдачи трудовой книжки"/>
+      <Field Name="WORKPERIOD" Label="Стаж"/>
+      <Field Name="CERTIFICATENUM" Label="№ аттестата"/>
+      <Field Name="CERTIFICATEREGNUM" Label="Рег. № аттестата"/>
+      <Field Name="DIPLOMANUM" Label="№ диплома выпускника"/>
+      <Field Name="DIPLOMAREGNUM" Label="Рег. № диплома выпускника"/>
+    </Section>
+    <Section ID="Add" Label="Дополнительные сведения">
+      <Field Name="BIRTHADDRESS" Label="Место рождения" Height="42"/>
+      <Field Name="ADDRESSBEFORE" Label="Место жительства до поступления" Height="42"/>
+      <Field Name="ADDRESSNOW" Label="Место жительства в настоящее время" Height="42"/>
+      <Field Name="ADDRESSOFPARENTS" Label="Адрес родителей" Height="42"/>
+      <Field Name="EMAIL" Label="E-Mail" />
+			<Field Name="NOTE" Label="Примечание" Height="42"/>
+      <Field Name="KROKID" Label="Крок id"/>
+      <Field Name="RATING" Label="Рейтинг"/>
+      <Field Name="TEMPORARY_LISTENER" Label="Временный слушатель"/>
+      <Field Name="REFUGEE_STATUS" Label="Имеет статус беженца"/>
+      <Field Name="OWNER" Label="Ответственный"/>
+    </Section>
+    <Section ID="Raspred" Label="Распределение">
+      <Field Name="MINISTRY" Label="Министерство"/>
+      <Field Name="PLANRASP" Label="Место распределения"/>
+      <Field Name="HOSPITAL" ReadOnly="False" Label="Учреждение" Height="42"/>
+      <Field Name="HOSPITALTYPE" Label="Тип учреждения"/>
+      <Field Name="HOSPITALSTATUS" Label="Статус учреждения"/>
+      <Field Name="POST" Label="Должность"/>
+      <Field Name="HABITATION" Label="Сведения о жилье"/>
+      <Field Name="RANK_AKADEM" Label="Оцінка академічної успішності (max 5.0)"/>
+      <Field Name="RANK_SCIENCE" Label="Оцінка наукової работи (max 5.0)"/>
+      <Field Name="RANK_CIVIL" Label="Оцінка громадської роботи (max 5.0)"/>
+      <Field Name="CONSENT" Label="Согласен"/>
+    </Section>
+    <Section ID="EDBO" Label="EDBO, заказ документов">
+      <Field Name="EDBO_IDPERSON" Label="IdPerson" />
+      <Field Name="EDBO_KOATUUADDRESS" Label="КОАТУУ адрес" Height="42"/>
+      <Field Name="EDBO_KOATUUCODE" Label="КОАТУУ код"/>
+      <Field Name="EDBO_CITY" Label="Город" />
+      <Field Name="EDBO_STREET" Label="Улица"/>
+      <Field Name="EDBO_HOUSE" Label="Дом"/>
+      <Field Name="EDBO_BUILDING" Label="Корпус"/>
+      <Field Name="EDBO_FLAT" Label="Квартира"/>
+    </Section>
+  </Sections>
+</Pers>

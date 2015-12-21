@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Сведения о контингенте" ProgressMax="100" EncodeText="False" ID="{4C9289B3-3D6F-4CF0-B945-07AAB4AA5350}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Faculty" DisplayLabel="Факультет" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, 0, DEPARTMENT
+from GUIDE_DEPARTMENT
+where USE = 1" CommonValue="False"/><Parameter Name="EduForm" DisplayLabel="Форма навчання" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUFORMID, EDUFORM
+FROM GUIDE_EDUFORM
+where USE = 1" CommonValue="False"/><Parameter Name="EduBases" DisplayLabel="форми фінансування" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUBASISID, 0, EDUBASIS
+from GUIDE_EDUBASIS
+where USE = 1" CommonValue="False"/><Parameter Name="FromDate" DisplayLabel="Початок періода" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="Кінець періода" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUYEAR, EDUYEARSTR
+FROM GUIDE_EDUYEAR
+where USE = 1" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False"><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL><Bands/></Band><Band Name="dsSpeciality" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStat" Master="dsSpeciality" AutoOpen="True" UniDirectional="False" Suppress="False"><SQL>select *
+from SP_RP_CONTINGENT(
+  :EduYear_EDUYEAR,
+  :MAS_SPECIALITYID,
+  :EduForm_EDUFORMID,
+  :FromDate,
+  :ToDate,
+  :Faculty_KEYS,
+  :EduBases_KEYS)
+</SQL><Events OnGetFieldData="dsStat_OnGetFieldData"/></Band></Bands><SQL>select distinct HMF.SPECIALITYID, (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY
+from HS_MOVEMENT_FULL HMF
+inner join GUIDE_SPECIALITY GS
+  on (GS.SPECIALITYID = HMF.SPECIALITYID)
+where
+  HMF.DEPARTMENTID in (@@Faculty_KEYS@)
+  and HMF.EDUBASISID in (@@EduBases_KEYS@)
+  and HMF.EDUFORMID = :EduForm_EDUFORMID
+  and HMF.BEGINDATE &lt; :ToDate
+  and HMF.ENDDATE &gt; :ToDate
+  and HMF.STATUS in ('С', 'А', 'П')
+order by GS.SPECIALITY
+</SQL></Band></Bands><Script>procedure OnStartReport;
+var
+  i: Integer;
+begin
+  for i := 3 to 22 do
+  begin
+    Params.Item('C'+IntToStr(i)).Value := 0;
+  end;
+end;
+
+procedure dsStat_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if ValidInt(Field.Value) then
+    Params.Item(Field.FieldName).Value :=
+      Params.Item(Field.FieldName).Value + Field.Value;
+end;
+
+procedure OnEndReport;
+begin
+  Report.ShowType := 7;
+end;
+
+begin
+end.</Script><Events OnStartReport="OnStartReport" OnEndReport="OnEndReport"/></Report>

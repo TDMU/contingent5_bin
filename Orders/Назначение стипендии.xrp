@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Назначение стипендии" ProgressMax="100" EncodeText="False" ID="{90244AA4-827D-4D4E-84FC-2D9350B2E833}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="" OnBeforeQueryParams="OnBeforeQueryParams"/><Parameter Name="ProtocolNum" DisplayLabel="На основании протокола" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svDontSave" CommonValue="True" ShowCheck="False" SaveCheck="False" Visible="True" SQL="select A.ACCOUNTINGID,
+case
+  when A.PROTOCOLNUM is null then ('ID ' || A.ACCOUNTINGID)
+  else  ('№ '|| A.PROTOCOLNUM ||'  вiд  ' || A.PROTOCOLDATE  )
+end as TITLE,
+GE.EDUYEARSTR, coalesce(A.PROTOCOLDATE, '________') as PROTOCOLDATE,
+coalesce(A.PROTOCOLNUM, '_______') as PROTOCOLNUM
+from ACCOUNTING A
+left join GUIDE_EDUYEAR GE
+on GE.EDUYEAR = A.EDUYEAR
+
+
+where --not(A.CONFIRMUSERID is null)
+--and
+ (
+  (current_user = 'SYSDBA')
+  or (exists(
+     select 1
+     from SEC_USERS_HISTORY SUH
+     inner join SEC_USERSGROUPS  SU
+     on (SU.UGNAME=SUH.USERNAME)
+     inner join VW_USERACCESS  VU
+     on (VU.UGNAME = SUH.USERNAME)
+     where (SUH.USERID = A.CREATEUSERID)
+  )
+)
+)
+--and (A.CONFIRMUSERID = ?Order_DEPARTMENTID)
+order by 1"/><Parameter Name="IncludeInOrder" DisplayLabel="Включити в наказ" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select GRANTID, 0, TITLE
+from GUIDE_GRANT
+order by TITLE" CommonValue="False"/></UserParameters><Bands><Band Name="dsCourse" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsGroups" AutoOpen="True" UniDirectional="False" Master="dsCourse" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsGrants" AutoOpen="True" UniDirectional="False" Master="dsGroups" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL> select distinct S.FIO, G.STUDENTID, G.ACCOUNTINGID,
+ SG.AVG_MARK,
+ (select sum(G.SUMMA)
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        S.STUDENTID = G.STUDENTID and
+        GG.TYPEGRANTS = 'О'
+        and (G.GRANTID in (@@INCLUDEINORDER_KEYS@))
+  ) as SUMMA1,
+  (select sum(g.summa)
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        S.STUDENTID = G.STUDENTID and
+        GG.TYPEGRANTS = 'С'
+        and (G.GRANTID in (@@INCLUDEINORDER_KEYS@))
+  ) as SUMMA2
+
+
+
+
+from GRANTS G
+inner join STUDENTS S
+on   S.STUDENTID = G.STUDENTID
+inner join STUDENT_GRANT SG
+on   (SG.STUDENTID = G.STUDENTID) and
+      (SG.ACCOUNTINGID = G.ACCOUNTINGID)
+where (G.ACCOUNTINGID = ?MAS_ACCOUNTINGID)
+  and (S.GROUPNUM = :MAS_GROUPNUM)
+  and exists(select 1
+  from GRANTS G
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        S.STUDENTID = G.STUDENTID and (G.GRANTID in (@@INCLUDEINORDER_KEYS@)))
+  and (G.GRANTID in (@@INCLUDEINORDER_KEYS@))
+
+--order by GROUPNUM
+</SQL><Bands><Band Name="dsNamedGrants" Master="dsGrants" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select   GG.SHORTTITLE, GG.SUMMA, GG.TYPEGRANTS
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        G.STUDENTID = ?MAS_STUDENTID and
+        ((GG.TYPEGRANTS = 'С') or (GG.TYPEGRANTS = 'И'))
+        and (G.GRANTID in (@@INCLUDEINORDER_KEYS@))
+</SQL></Band></Bands><Events OnGetFieldData="dsGrants_OnGetFieldData"/></Band></Bands><SQL>select distinct  GN.GROUPNUM, G.ACCOUNTINGID
+from GRANTS G
+left join HS_GROUPNUM GN
+on   (GN.STUDENTID = G.STUDENTID
+     and  (GN.BEGINDATE = (select first 1 GN1.BEGINDATE
+                                 from HS_GROUPNUM GN1
+                                 where GN1.STUDENTID = G.STUDENTID
+                                 order by GN1.BEGINDATE desc)))
+inner join ACCOUNTING A
+on  (A.ACCOUNTINGID = G.ACCOUNTINGID)
+inner join STUDENT_GRANT SG
+on (SG.STUDENTID = G.STUDENTID )and
+   (SG.ACCOUNTINGID = G.ACCOUNTINGID)
+where (G.ACCOUNTINGID = ?MAS_ACCOUNTINGID)
+and (exists(select 1
+  from GRANTS G1
+  where G1.ACCOUNTINGID = G.ACCOUNTINGID and
+        G1.STUDENTID = GN.STUDENTID
+        and (G1.GRANTID  in (@@INCLUDEINORDER_KEYS@))))
+and (SG.SEMESTER = :MAS_SEMESTER)
+and (G.GRANTID in (@@INCLUDEINORDER_KEYS@))
+
+
+--order by GROUPNUM
+</SQL></Band></Bands><SQL>select distinct cast((((SG.SEMESTER + 1)+1)/2 - 0.5) as smallint) as COURSE , SG.SEMESTER , G.ACCOUNTINGID
+from GRANTS G
+inner join STUDENT_GRANT SG
+on   (SG.STUDENTID = G.STUDENTID)and
+     (SG.ACCOUNTINGID = G.ACCOUNTINGID)
+inner join ACCOUNTING A
+on A.ACCOUNTINGID = ?PROTOCOLNUM_ACCOUNTINGID
+where (G.ACCOUNTINGID = ?PROTOCOLNUM_ACCOUNTINGID)
+and exists(select 1
+  from GRANTS G1
+  where G1.ACCOUNTINGID = G.ACCOUNTINGID and
+        G1.STUDENTID = SG.STUDENTID
+        and G1.GRANTID in (@@INCLUDEINORDER_KEYS@) )
+and (G.GRANTID in (@@INCLUDEINORDER_KEYS@))
+</SQL><Events OnGetFieldData=""/></Band></Bands><Script>procedure OnBeforeQueryParams;
+begin
+  Params.Item('Order_DEPARTMENTID').Value := OrderParams.Item('Department_DEPARTMENTID').Value;
+  Params.Item('Order_DEPARTMENT').Value := OrderParams.Item('Department_DEPARTMENT_CASE2').Value;
+
+  Params.Item('StudentsID').Value :=
+    HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+
+procedure dsGrants_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  Params.Item('SHORTTITLE').Value := '';
+  if Field.FieldName = 'SUMMA2'
+  then
+  begin
+  while not (dsNamedGrants.eof) do
+  begin
+     if  Params.Item('SHORTTITLE').Value &lt;&gt; '' then Params.Item('SHORTTITLE').Value := Params.Item('SHORTTITLE').Value +', ';
+//     begin
+       if dsNamedGrants.FieldByName('TYPEGRANTS').Value = 'И' then
+//       begin
+//         Params.Item('SHORTTITLE').Value := Params.Item('SHORTTITLE').Value +', ';
+         Params.Item('SHORTTITLE').Value := Params.Item('SHORTTITLE').Value + inttostr(dsNamedGrants.FieldByName('SUMMA').Value) + '(' + dsNamedGrants.FieldByName('SHORTTITLE').Value + ')'
+//       end
+       else
+   //    begin
+
+         Params.Item('SHORTTITLE').Value := Params.Item('SHORTTITLE').Value + dsNamedGrants.FieldByName('SHORTTITLE').Value ;
+   //    end;
+//     end;
+
+     dsNamedGrants.next;
+  end ;
+  end;
+end;
+
+
+
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport=""/></Report>

@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Направление на работу" ProgressMax="100" EncodeText="False" ID="{69B271FA-95CD-4242-846E-EBA42C29159B}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Pay" DisplayLabel="місячний оклад (літерами)" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ArrivalDate" DisplayLabel="Дата прибуття :" ParamType="Date" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="DocumentDate" DisplayLabel="Дата документа:" ParamType="Date" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToPost" DisplayLabel="Призначений на посаду" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="лікаря-інтерна
+провізора-інтерна" KeyItems="0
+1" CommonValue="False"/><Parameter Name="Post1" DisplayLabel="Посада 1" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Name1" DisplayLabel="Призвище 1" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Post2" DisplayLabel="Посада 2" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Name2" DisplayLabel="Призвище 2" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>select S.FIO, PR.PLANYEAR, (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY,
+       GM.MINISTRY, S.HOSPITAL, GP.POST, S.HABITATION, GA.APPOINTMENT, GA.SUBORDINATION
+from STUDENTS S
+     left join PLANRASP PR on (PR.PLANRASPID = S.PLANRASPID)
+     left join GUIDE_SPECIALITY GS on (GS.SPECIALITYID = S.SPECIALITYID)
+     left join GUIDE_APPOINTMENT GA on (GA.APPOINTMENTID = PR.APPOINTMENTID)
+     left join GUIDE_MINISTRY GM on (GM.MINISTRYID = S.MINISTRYID)
+     left join GUIDE_POST GP on (GP.POSTID = S.POSTID)
+where S.STUDENTID in (@@StudentsID%0@)
+order by 1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+   If (Field.FieldName = 'NewPage')
+      and (Field.Dataset.RecNo &gt; 1)
+   Then Field.Value := '&amp;page&amp;';
+end;
+
+Begin
+End.</Script></Report>

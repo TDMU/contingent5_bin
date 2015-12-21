@@ -1,0 +1,195 @@
+const
+  cPackVersion = 3;
+
+var
+  InfoXML: Variant;
+  PackageInfoNode: Variant;
+  OptionsNode: Variant;
+  TablesNode: Variant;
+
+const
+  cSelJoin1 = 'where exists ( ' +
+              'select 1 from B_EDUPLAN_ITEMS S ' +
+              'inner join SELECTEDIDS SS ' +
+              'on (SS.SELID = S.EDUPLANID) ' +
+              'and (SS.TRANID = current_transaction) ' +
+              'where (S.VARIANTID in (SI.VARIANTID, SI.PARENTVARIANTID)))';
+
+  cSelJoin2 = 'where exists ( ' +
+              'select 1 from B_EDUPLAN_ITEMS S ' +
+              'inner join SELECTEDIDS SS ' +
+              'on (SS.SELID = S.EDUPLANID) ' +
+              'and (SS.TRANID = current_transaction) ' +
+              'where (S.VARIANTID = SI.VARIANTID))';
+
+  cSelJoin3 = 'where exists ( ' +
+              'select 1 from B_EDUPLAN_ITEMS S ' +
+              'inner join SELECTEDIDS SS ' +
+              'on (SS.SELID = S.EDUPLANID) ' +
+              'and (SS.TRANID = current_transaction) ' +
+              'where (S.VARIANTID = SI.PARENTVARIANTID))';
+
+  cSelJoin4 = 'inner join SELECTEDIDS SS ' +
+              'on (SS.SELID = S.EDUPLANID) ' +
+              'and (SS.TRANID = current_transaction)';
+
+
+function GetParameter(ParameterName: string): string;
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = ''' + ParameterName + '''';
+      ExecQuery;
+      Result := Fields[0].AsString;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure ExecuteSQL(ASQL: string);
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := ASQL;
+      ExecQuery;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure SetPackageInfo(ParameterName: string; ParameterValue: variant);
+var
+  Node: Variant;
+begin
+  Node := InfoXML.CreateElement(ParameterName);
+  PackageInfoNode.AppendChild(Node);
+  Node.Text := ParameterValue;
+end;
+
+
+function GetOptions: Variant;
+
+  procedure AddOption(Name: string; Caption: string; Checked: Boolean);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement(Name);
+    OptionsNode.AppendChild(Node);
+    Node.SetAttribute('Caption', Caption);
+    Node.SetAttribute('Checked', Checked);
+  end;
+  
+begin
+  AddOption('OnlySelected', _('Только выделенные планы'), True);
+
+  Result := OptionsNode;
+end;
+
+function GetOptionAttrValue(NodeName, AttrName: string): Variant;
+var
+  Node, Attr: Variant;
+begin
+  Result := '';
+  Node := OptionsNode.SelectSingleNode(NodeName);
+//  if VarIsEmpty(Node) then Exit;
+  Attr := Node.attributes.getNamedItem(AttrName);
+//  if Attr = nil then Exit;
+  Result := Attr.nodeValue;
+end;
+
+procedure StartExport;
+
+  procedure AddTableInfo(TableName, TableTitle: string; RecordCount: integer);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement('Table');
+    TablesNode.AppendChild(Node);
+    Node.SetAttribute('Name', TableName);
+    Node.SetAttribute('Title', TableTitle);
+    Node.SetAttribute('RecordCount', RecordCount);
+  end;
+
+  procedure ProcessTable(TableName, TableTitle, SQL: string; ExcludeFields: string = ''; SelClause: String = '');
+  var
+    RecCount: integer;
+  begin
+    OutMessage(#13#10 + _('Таблица') + ' "' + TableTitle + '"');
+
+    if not GetOptionAttrValue('OnlySelected', 'Checked') then  {not Selected}
+      SelClause := '';
+      
+//    Log(Format(SQL, [SelClause]));
+    RecCount := SQL2XML(Format(SQL, [SelClause]), TableName + '.xml', ExcludeFields);
+
+
+    AddTableInfo(TableName, TableTitle, RecCount);
+  end;
+
+
+begin
+
+  if GetOptionAttrValue('OnlySelected', 'Checked') then
+  begin
+    Params.Item('Action').Value := 'SelectedIDs';
+    Params.Item('TransactionHandle').Value := TransactionHandle;
+    HostAppl.Plugins.Item('EduPlan_B').Execute(Params); // Заполнение выделенных уч. планов
+  end;
+
+  SetPackageInfo('PackageType', 'Plans_ECTS');
+  SetPackageInfo('Version', cPackVersion);
+  SetPackageInfo('OrgCode', GetParameter('OrgCode'));
+  SetPackageInfo('DBCode', GetParameter('DBCode'));
+  SetPackageInfo('CreateDate', FormatDateTime('dd.mm.yyyy hh:mm:ss', Now));
+  SetPackageInfo('OrgName', GetParameter('OrgName'));
+  SetPackageInfo('ARMName', GetRegValue(rgContKey, rgARMName));
+
+  ProcessTable('SEC_USERS_HISTORY', _('Пользователи'), 'select SUH.* from SEC_USERS_HISTORY SUH %s');
+  ProcessTable('B_VARIANT_ITEMS', _('Справочник вариантов'), 'select SI.* from B_VARIANT_ITEMS SI %s order by SI.VARIANTID', '', cSelJoin1);
+  ProcessTable('B_VARIANT_DISCIPLINE', _('Информация о дисциплинах'), 'select SI.* from B_VARIANT_DISCIPLINE SI %s', '', cSelJoin2);
+  ProcessTable('B_VARIANT_MODULE', _('Информация о модулях'), 'select VM.* from B_VARIANT_MODULE VM inner join B_VARIANT_ITEMS SI on (SI.VARIANTID = VM.VARIANTID) %s', 'HOURS_ALL,HOURS_AUD', cSelJoin3);
+  ProcessTable('B_VARIANT_PRACTICE', _('Информация о практиках'), 'select VM.* from B_VARIANT_PRACTICE VM inner join B_VARIANT_ITEMS SI on (SI.VARIANTID = VM.VARIANTID) %s', '', cSelJoin3);
+  ProcessTable('B_EDUPLAN_TITLE', _('Заголовки планов'), 'select S.* from B_EDUPLAN_TITLE S %s', 'DBCODE', cSelJoin4);
+  ProcessTable('B_EDUPLAN_ITEMS', _('Учебные планы'), 'select S.* from B_EDUPLAN_ITEMS S %s', '', cSelJoin4);
+  if GetOptionAttrValue('OnlySelected', 'Checked') then
+  begin
+{    ProcessTable('SEC_USERS_HISTORY', 'Пользователи',
+      'select SUH.* from SEC_USERS_HISTORY SUH ' +
+      'where ' +
+      'Exists( ' +
+      '  select * from EPTITLE S ' +
+      '  inner join ORDERS O' +
+      '  on (O.ORDERID = S.ORDERID) ' + SelJoin +
+      '  where (O.USERID = SUH.USERID) ' +
+      ')', '', False);}
+  end
+  else
+  begin
+  end;
+
+  InfoXML.Save(TempDir + '\info.xml');
+
+  OutMessage(#13#10#13#10 + _('Архивирование'));
+  Compress(ArchFileName, TempDir + '\*.*');
+end;
+
+
+begin
+  try
+    InfoXML := CreateOleObject('Msxml2.DOMDocument.3.0');
+  except
+    RaiseException(_('В системе не установлена библиотека msxml3'));
+  end;
+  InfoXML.LoadXML('<?xml version="1.0" encoding="windows-1251"?><Info><PackageInfo/><Options/><Tables/></Info>');
+  PackageInfoNode := InfoXML.DocumentElement.SelectSingleNode('PackageInfo');
+  OptionsNode := InfoXML.DocumentElement.SelectSingleNode('Options');
+  TablesNode := InfoXML.DocumentElement.SelectSingleNode('Tables');
+end.

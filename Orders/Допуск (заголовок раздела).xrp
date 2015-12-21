@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Допуск (заголовок раздела)" ProgressMax="100" ID="{9109516E-C6B5-402F-85F8-37B4F814DB78}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="AccessReason" DisplayLabel="Заголовок розділу" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="False" Visible="True" Items="у зв'язку з закінченням академвідпустки
+у зв'язку з повторним навчанням
+у зв'язку з переведенням з іншого ВНЗ
+у зв'язку з отриманням дозволу МОЗ України
+у зв'язку з поновленням на навчання" KeyItems="10005
+10006
+3
+10007
+10013" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands/><Script>procedure OnAfterQueryParams;
+begin
+  OrderParams.Item('AccessReason_KEY').Value :=
+    Params.Item('AccessReason_KEY').Value;
+
+  OrderParams.Item('AccessReason').Value :=
+    Params.Item('AccessReason').Value;
+end;
+
+
+procedure OnStartReport;
+var
+  AccessType_KEY: string;
+begin
+  AccessType_KEY := OrderParams.Item('AccessType_KEY').Value;
+
+// Если в шапке не допуск к занятиям
+  if (AccessType_KEY &lt;&gt; '0') then
+    RaiseException('Необхідно спочатку додати відповідну шапку наказу.');
+
+end;
+
+
+begin
+end.</Script><Events OnStartReport="OnStartReport"/></Report>

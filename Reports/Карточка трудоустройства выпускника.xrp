@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Карточка трудоустройства выпускника" ID="{D2817CF6-0ACD-4C74-A693-26857AE36355}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title=""/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>select S.FIO, extract (year from S.BIRTHDATE) as BIRTHYEAR,
+       GD.DEPARTMENT, GD.DEPARTMENT_CASE2, GE.EMP_POST, GE.EMP_FIO,
+       (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY,
+       GFS.FAMILYSTATUSNAME, S.HOSPITAL, GP.POST,
+       S.HABITATION, GM.MINISTRY, S.ADDRESSOFPARENTS, S.ADDRESSNOW, GA.SUBORDINATION
+from STUDENTS S
+     left join PLANRASP PR on (PR.PLANRASPID = S.PLANRASPID)
+     left join GUIDE_SPECIALITY GS on (GS.SPECIALITYID = S.SPECIALITYID)
+     left join GUIDE_DEPARTMENT GD on(GD.DEPARTMENTID = S.DEPARTMENTID)
+     left join GUIDE_EMPLOYER GE on (GE.EMP_ID = GD.BOSSID)
+     left join GUIDE_FAMILYSTATUS GFS on (GFS.FAMILYSTATUS = S.FAMILYSTATUS)
+     left join GUIDE_MINISTRY GM on (GM.MINISTRYID = S.MINISTRYID)
+     left join GUIDE_POST GP on (GP.POSTID = S.POSTID)
+     left join GUIDE_APPOINTMENT GA on (GA.APPOINTMENTID = PR.APPOINTMENTID)
+where S.STUDENTID in (@@StudentsID%0@)
+order by 1
+</SQL></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+    if (SL.Count &lt;= 3) then
+    begin
+      if SL.Count &gt;= Num then Result := SL[Num - 1]
+      else Result := '';
+    end
+    else if Num = 1 then Result := s
+    else Result := '';
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+   If (Field.FieldName = 'NewPage')
+      and (Field.Dataset.RecNo &gt; 1)
+   Then Field.Value := '&amp;page&amp;'
+   else if (Field.FieldName = 'Surname')
+   then
+     Field.Value := GetWord(1,Field.DataSet.FieldByName('FIO').asString)
+   else if (Field.FieldName = 'NAME')
+   then
+     Field.Value := GetWord(2,Field.DataSet.FieldByName('FIO').asString)
+   else if (Field.FieldName = 'PATRONYMIC')
+   then
+     Field.Value := GetWord(3,Field.DataSet.FieldByName('FIO').asString);
+end;
+
+Begin
+End.</Script></Report>

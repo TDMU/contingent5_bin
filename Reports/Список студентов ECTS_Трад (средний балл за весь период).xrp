@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов ECTS_Трад (средний балл за весь период)" ProgressMax="100" EncodeText="False" ID="{2E17D5EA-E613-47ED-A7E5-EFC052927106}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Precision" DisplayLabel="Точність" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="0
+1
+2
+3
+4
+5
+" KeyItems="0
+0.0
+0.00
+0.000
+#.0000
+#.00000" CommonValue="False"/><Parameter Name="Semesters" DisplayLabel="Семестри" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SEMESTER, 0, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 3" CommonValue="False"/><Parameter Name="Ordering" DisplayLabel="Cортувати по средньому балу" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select SQ.FIO, SQ.GROUPNUM, SQ.AVGMARK1, SQ.AVGMARK2, SQ.AVGMARK1 + SQ.AVGMARK2 as ORDERING
+from
+ (select S.FIO, S.GROUPNUM,
+  (select  avg(cast(S2P.TRADITIONALMARK as numeric(4, 2)))
+   from STUDENT2PROTOCOL S2P
+   left join RANKING_PROTOCOLS RP
+     on (RP.PROTOCOLID = S2P.PROTOCOLID)
+   inner join V_LASTPROTOCOL VLP
+     on (S2P.PROTOCOLID = VLP.PROTOCOLID
+        and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+   where (S2P.STUDENTID = S.STUDENTID)
+     and (RP.SEMESTER in ( @@SEMESTERS_KEYS%0@ ))
+     and (S2P.TRADITIONALMARK in (2,3,4,5))
+  ) as AVGMARK1,
+
+  (select avg(cast(G_MT.MARKNUM as Numeric(4, 2))) from V_LASTSESSIONMARKS V_LSM
+   inner join V_GUIDE_MARKTYPE G_MT
+     on (G_MT.MARKID = V_LSM.MARKID)
+   where (V_LSM.STUDENTID = S.STUDENTID)
+     and (not G_MT.MARKNUM is null)
+     and (V_LSM.SEMESTER in ( @@Semesters_KEYS%0@ ) )
+  ) as AVGMARK2
+
+  from STUDENTS S
+  where S.STUDENTID in (@@STUDENTSID%0@)
+ ) SQ
+
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData" OnBeforeOpenDataSet="dsStudents_OnBeforeOpenDataSet"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'AvgMark' then
+  begin
+    Field.Value := '';
+    if ((not dsStudents.FieldByName('AVGMARK1').IsNull) and (dsStudents.FieldByName('AVGMARK1').AsVariant &gt; 0))
+     and
+       ((not dsStudents.FieldByName('AVGMARK2').IsNull) and (dsStudents.FieldByName('AVGMARK2').AsVariant &gt; 0))
+    then
+      Field.Value :=
+        FormatFloat(
+          Params.Item('Precision_KEY').Value,
+          (dsStudents.FieldByName('AVGMARK1').AsFloat + dsStudents.FieldByName('AVGMARK2').AsFloat)/2
+        )
+    else
+    if ((not dsStudents.FieldByName('AVGMARK1').IsNull) and (dsStudents.FieldByName('AVGMARK1').Value &gt; 0)) then
+      Field.Value := FormatFloat(Params.Item('Precision_KEY').Value, dsStudents.FieldByName('AVGMARK1').AsVariant)
+    else
+    if ((not dsStudents.FieldByName('AVGMARK2').IsNull) and (dsStudents.FieldByName('AVGMARK2').Value &gt; 0)) then
+      Field.Value := FormatFloat(Params.Item('Precision_KEY').Value, dsStudents.FieldByName('AVGMARK2').AsVariant)
+  end;
+end;
+
+
+procedure dsStudents_OnBeforeOpenDataSet(ds: TpFibDataSet);
+begin
+  if (Params.Item('Ordering').Value) then
+    ds.SelectSQL.Text := ds.SelectSQL.Text + ' order by 5 desc'
+  else
+    ds.SelectSQL.Text := ds.SelectSQL.Text + ' order by SQ.GROUPNUM, SQ.FIO';
+end;
+
+begin
+end.</Script></Report>

@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Отработка занятий" ProgressMax="100" EncodeText="False" ID="{493F0800-94DC-4C6E-ACAA-53D8B78EA298}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="" OnBeforeQueryParams=""/><Parameter Name="Reason" DisplayLabel="Отработка занятий" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select REASONID, REASON
+from V_GUIDE_REASON
+where REASONID in (10011, 10012)" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="С какой даты" ParamType="Date" Required="True" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ShowTitle" DisplayLabel="Добавить заголовок приказа" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudentList" Master="" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 STUDENTID, FIO
+from STUDENTS
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet" OnGetFieldData="grStudentList_OnGetFieldData"/><Bands><Band Name="dsDisciplines" Master="dsStudentList" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GD.DISCIPLINE
+from V_LASTRETAKEMARKS VLRM
+inner join STUDENTPLAN SP
+on (SP.STUDENTID = VLRM.STUDENTID)
+and (SP.PLANID = VLRM.PLANID)
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLRM.DISCIPLINEID)
+where VLRM.STUDENTID = ?MAS_STUDENTID
+and SP.SEMESTER = ?MAS_SEMESTER
+and SP.EDUYEAR = ?MAS_EDUYEAR
+and VLRM.FORMREPORT &lt;&gt; '-'
+and VLRM.MARKID in (0,20,10010,10030,10040)
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band></Bands></Band></Bands><Script>procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,' +
+    'GROUPNUM,CODE,SPECIALITY,EDUBASIS_RUS_CASE9') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+//  Params.Item('StudentID').Value := HostAppl.Data.GetData('STUDENTID');
+end;
+
+
+procedure grStudentList_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.DataSet.FieldByName('FIO').AsString, 0, 3)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').AsInteger + 1) / 2);
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+begin
+  if Field.FieldName = 'Disciplines' then
+  begin
+    s := '';
+    while not (Field.DataSet.Eof) do
+    begin
+      if s &lt;&gt; '' then
+        s := s + ', ' + Field.DataSet.FieldByName('DISCIPLINE').AsString
+      else
+        s := Field.DataSet.FieldByName('DISCIPLINE').AsString;
+
+      Field.DataSet.Next;
+    end;
+
+    Field.Value := s;
+  end;
+end;
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport=""/></Report>

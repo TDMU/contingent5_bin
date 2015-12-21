@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<Periods>
+  <Period D1="01" M1="10" D2="Last" M2="09" FirstIsPrevYear="True"/>
+  <Period D1="01" M1="10" D2="Last" M2="02" FirstIsPrevYear="True"/>
+  <Period D1="01" M1="03" D2="09" M2="07" FirstIsPrevYear="False"/>
+  <Period D1="10" M1="07" D2="Last" M2="09" FirstIsPrevYear="False"/>
+</Periods>

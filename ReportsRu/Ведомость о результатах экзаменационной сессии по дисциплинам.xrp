@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Ведомость о результатах экзаменационной сессии по дисциплинам" ProgressMax="100" EncodeText="False" ID="{7828AB06-7423-43C3-96CA-14EE09B501EE}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Faculty" DisplayLabel="Факультет" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, 0, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE = 1
+order by 3" CommonValue="False"/><Parameter Name="Speciality" DisplayLabel="Специальности" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT SPECIALITYID, 0, (CODE || ' - ' || SPECIALITY) as SPECIALITY
+FROM V_GUIDE_SPECIALITY
+where USE = 1" CommonValue="False"/><Parameter Name="CountryTypes" DisplayLabel="Гражданство" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT distinct COUNTRYTYPE, 0, COUNTRYTYPE
+FROM V_GUIDE_COUNTRY
+where USE = 1
+order by 3" CommonValue="False"/><Parameter Name="EduBase" DisplayLabel="Форма финансирования" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUBASISID, 0, EDUBASIS
+FROM V_GUIDE_EDUBASIS
+where USE = 1
+order by 3" CommonValue="False"/><Parameter Name="EduForm" DisplayLabel="Форма обучения" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUFORMID, 0, EDUFORM
+FROM V_GUIDE_EDUFORM
+where USE = 1
+order by 3" CommonValue="False"/><Parameter Name="Semester" DisplayLabel="За семестры" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SEMESTER, 0, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1" CommonValue="False"/><Parameter Name="EduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT EDUYEAR, EDUYEARSTR
+FROM GUIDE_EDUYEAR
+where USE = 1
+order by 1" CommonValue="False"/><Parameter Name="SessionBeginDate" DisplayLabel="Дата начала сессии" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="SessionEndDate" DisplayLabel="Дата подведения итогов сессии" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="FormReport" DisplayLabel="Форма контроля" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select FORMREPORT, 0, FORMREPORTNAME
+from V_GUIDE_FORMREPORT
+where USE = 1
+order by 3" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL><Bands/></Band><Band Name="dsSemesters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>SELECT SEMESTER
+FROM GUIDE_SEMESTER
+where SEMESTER in (@@Semester_KEYS@)
+</SQL><Bands><Band Name="dsSemesterStat" Master="dsSemesters" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select *
+from SP_RP_DISCIPLINESESSIONRESULT1(
+  :Faculty_KEYS,
+  :CountryTypes_KEYS,
+  :Speciality_KEYS,
+  :EduBase_KEYS,
+  :EduForm_KEYS,
+  :EduYear_EDUYEAR,
+  :MAS_SEMESTER,
+  :SessionBeginDate,
+  :SessionEndDate,
+  :FormReport_KEYS)
+</SQL></Band><Band Name="dsDiscipline" Master="dsSemesters" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select *
+from SP_RP_DISCIPLINESESSIONRESULT2(
+  :Faculty_KEYS,
+  :CountryTypes_KEYS,
+  :Speciality_KEYS,
+  :EduBase_KEYS,
+  :EduForm_KEYS,
+  :FormReport_KEYS,
+  :EduYear_EDUYEAR,
+  :MAS_SEMESTER,
+  :SessionBeginDate)
+</SQL></Band></Bands></Band></Bands><Script/></Report>

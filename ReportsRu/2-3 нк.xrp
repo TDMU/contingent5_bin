@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="2-3 нк" ID="{FA10E6DE-A867-4F40-BC05-48E552CED91D}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="ToDate" DisplayLabel="На дату" ParamType="Date" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Parameter Name="Eduform" DisplayLabel="форма навчання" ParamType="Lookup" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" SQL="select EDUFORMID, EDUFORM
+from GUIDE_EDUFORM
+where USE=1
+order by EDUFORM" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="CountryTypes" DisplayLabel="Громадяни" ParamType="Grid" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" SQL="SELECT distinct COUNTRYTYPE, 0, COUNTRYTYPE
+FROM GUIDE_COUNTRY" CommonValue="False"/></UserParameters><Bands><Band Name="dsNK1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select * from SP_RP_23NK1(?ToDate, ?EduForm_EDUFORMID, ?CountryTypes_KEYS);
+</SQL><Events OnBeforePrintRec="dsNK1_1_OnBeforePrintRec"/></Band><Band Name="dsNK2" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select * from SP_RP_23NK2(?ToDate, ?EduForm_EDUFORMID, ?CountryTypes_KEYS);
+</SQL><Bands/></Band><Band Name="dsNK3" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select * from SP_RP_23NK3(?ToDate, ?EduForm_EDUFORMID, ?CountryTypes_KEYS);
+</SQL></Band></Bands><Script>
+procedure OnAfterQueryParams;
+Var
+  M,D : Word;
+  CurYear : Word;
+begin
+  DecodeDate(StrToDate(Params.Item('ToDate').Value), CurYear, M, D);
+  Params.Item('CurYear').Value := CurYear;
+end;
+
+
+procedure dsNK1_1_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+{  Band.Visible :=
+    (Band.DataSet.FieldByName('C4').AsInteger +
+    Band.DataSet.FieldByName('C9').AsInteger +
+    Band.DataSet.FieldByName('C10').AsInteger) &gt; 0;}
+end;
+
+
+procedure OnEndReport;
+begin
+  Report.ShowType := 7; //ShowReport + ShowMessage + UpdateFields
+end;
+
+
+Begin
+End.</Script><Events OnEndReport="OnEndReport"/></Report>

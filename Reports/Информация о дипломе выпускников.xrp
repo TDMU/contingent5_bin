@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Информация о дипломе выпускников" ProgressMax="100" EncodeText="False" ID="{7786EDF6-7586-47E3-AA87-2C5363084998}"><UserParameters/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>select S.FIO, S.DIPLOMANUM , S.DIPLOMAREGNUM
+from STUDENTS S
+where (S.STUDENTID in (@@STUDENTSID%0@))
+order by S.FIO
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+begin
+end.</Script></Report>

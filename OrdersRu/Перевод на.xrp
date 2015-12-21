@@ -1,0 +1,199 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перевод на" ProgressMax="100" EncodeText="False" ID="{2DE3306F-6500-442A-861C-82E7D4DCE45F}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="С какой даты" ParamType="Date" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="NewDepartment" DisplayLabel="Подразделение" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE = 1
+order by DEPARTMENT" CommonValue="False"/><Parameter Name="NewSpeciality" DisplayLabel="Специальность" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SPECIALITYID,
+(CODE || ' - ' || SPECIALITY) as SPECIALITY
+from V_GUIDE_SPECIALITY
+where USE = 1
+order by SPECIALITY" CommonValue="False"/><Parameter Name="NewEduForm" DisplayLabel="Форма обучения" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUFORMID, EDUFORM, EDUFORM_CASE4
+from V_GUIDE_EDUFORM
+where USE = 1
+order by EDUFORM" CommonValue="False"/><Parameter Name="NewEduBasis" DisplayLabel="Форма финансирования" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUBASISID, EDUBASIS, EDUBASIS_RUS_CASE9
+from V_GUIDE_EDUBASIS
+where USE = 1
+order by EDUBASIS" CommonValue="False"/><Parameter Name="NewEduTerm" DisplayLabel="Срок обучения" ParamType="Lookup" Required="False" AutoSize="False" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUTERM, EDUTERMNAME
+from V_GUIDE_EDUTERM
+order by 1" CommonValue="False"/><Parameter Name="NewSemester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="NewEduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="False" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="NewGroupNum" DisplayLabel="№ группы" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Stip" DisplayLabel="Стипендия" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EduPlanDiff" DisplayLabel="Ликвидировать различие в планах до" ParamType="Date" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams" OnBeforeQueryParams="OnBeforeQueryParams"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Bands/><Events OnGetFieldData="dsStudents_OnGetFieldData" OnBeforeOpenDataSet="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL></Band></Bands><Script>function Equal(v1, v2: Variant): Boolean;
+begin
+  try
+    Result := v1 = v2;
+  except
+    Result := True;
+  end;
+//  (VarIsNull(v1) and VarIsNull(v2)) or (VarToStr(v1) = VarToStr(v2));
+//  Result := VarToStr(v1) = VarToStr(v2);
+end;
+
+
+function StipIndex(Field: TDBFieldInfo): integer;
+begin
+  if Params.Item('NewEduBasis_EDUBASISID').Value = 'К' then
+    Result := 1
+  else
+    if Params.Item('Stip').Value then Result := 2
+    else Result := 3;
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,CODE,SPECIALITYID,SPECIALITY,' +
+    'SEMESTER,EDUYEAR,EDUYEARSTR,EDUBASISID,EDUBASIS_RUS_CASE9,DEPARTMENTID,DEPARTMENT_RUS_CASE6,' +
+    'EDUFORMID,EDUFORM_CASE6,EDUTERM,EDUTERMNAME,GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 4)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').AsInteger + 1) / 2)
+  else if Field.FieldName = 'EDUFORM' then
+    Field.Visible := HostAppl.UserOptions.Item('ShowEduForm').Value;
+end;
+
+
+procedure grOldEduForm_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := FindDataSet('dsStudents').FieldByName('EDUFORM').Value =
+                 Params.Item('NewEduForm_EDUFORM').Value;
+end;
+
+
+procedure OnBeforeQueryParams;
+var
+  ds: TpFibDataSet;
+begin
+  ds := FindDataSet('dsStudents');
+  ds.Active := True;
+
+  Report.UserParams.Item('NewSemester').Value := ds.FieldByName('SEMESTER').AsString;
+  Report.UserParams.Item('NewEduYear').Value := ds.FieldByName('EDUYEAR').AsString;
+  Report.UserParams.Item('NewSpeciality').Value := ds.FieldByName('SPECIALITYID').AsString;
+  Report.UserParams.Item('NewDepartment').Value := ds.FieldByName('DEPARTMENTID').AsString;
+  Report.UserParams.Item('NewEduForm').Value := ds.FieldByName('EDUFORMID').AsString;
+  Report.UserParams.Item('NewEduBasis').Value := ds.FieldByName('EDUBASISID').AsString;
+  Report.UserParams.Item('NewEduTerm').Value := ds.FieldByName('EDUTERM').AsString;
+end;
+
+
+procedure OnStartReport;
+var
+  ReasonID: string;
+begin
+  ReasonID := OrderParams.Item('Reason_REASONID').Value;
+  
+  if (ReasonID = '') then
+    RaiseException('Необходимо сначала добавить соответствующий заголовок раздела.');
+
+  Params.Item('Reason_REASONID').Value := ReasonID;
+
+  Params.Item('Reason_REASON').Value :=
+    OrderParams.Item('Reason_REASON').Value;
+
+  Params.Item('Reason_REASONFULL').Value :=
+    OrderParams.Item('Reason_REASONFULL').Value;
+end;
+
+
+procedure OnAfterQueryParams;
+var
+  ds: TpFibDataSet;
+begin
+  ds := FindDataSet('dsStudents');
+
+  Params.Item('Department_Changed').Value :=
+    not Equal(Params.Item('NewDepartment_DEPARTMENTID').Value, ds.FieldByName('DEPARTMENTID').Value);
+
+  Params.Item('Speciality_Changed').Value :=
+    not Equal(Params.Item('NewSpeciality_SPECIALITYID').Value, ds.FieldByName('SPECIALITYID').Value);
+
+  Params.Item('EduForm_Changed').Value :=
+    not Equal(Params.Item('NewEduForm_EDUFORMID').Value, ds.FieldByName('EDUFORMID').Value);
+
+  Params.Item('EduBasis_Changed').Value :=
+    not Equal(Params.Item('NewEduBasis_EDUBASISID').Value, ds.FieldByName('EDUBASISID').Value);
+
+  Params.Item('Semester_Changed').Value :=
+    not Equal(Params.Item('NewSemester_SEMESTER').Value, ds.FieldByName('SEMESTER').Value);
+
+  Params.Item('EduTerm_Changed').Value :=
+    not Equal(Params.Item('NewEduTerm_EDUTERM').Value, ds.FieldByName('EDUTERM').Value);
+
+
+  Params.Item('ShowEduForm').Value :=
+    HostAppl.UserOptions.Item('ShowEduForm').Value
+    and Params.Item('EduForm_Changed').Value;
+
+  Params.Item('ShowEduTerm').Value :=
+    HostAppl.UserOptions.Item('ShowEduTerm').Value;
+// 12.04.2012    and Params.Item('EduTerm_Changed').Value;
+
+  Params.Item('Show1').Value :=
+    Params.Item('ShowEduForm').Value;
+
+  Params.Item('Show2').Value :=
+    Params.Item('ShowEduTerm').Value
+    and not Params.Item('Show1').Value;
+    
+  Params.Item('Show3').Value :=
+    Params.Item('EduBasis_Changed').Value
+    and not Params.Item('Show1').Value
+    and not Params.Item('Show2').Value;
+
+end;
+
+
+begin
+end.</Script><Events OnStartReport="OnStartReport"/></Report>

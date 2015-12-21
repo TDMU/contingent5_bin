@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов которые должны приступить к обучению" ProgressMax="100" EncodeText="False" ID="{2DC65A37-FA8B-4B8E-B8FF-E66FED59678C}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="Начало периода" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="Окончание периода" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.FIO, S.STATUS, S.SEMESTER,
+  (GS.CODE || ' ' || GS.SPECIALITY) as SPECIALITY,
+  GET.EDUTERMNAME, GEF.EDUFORM, GEB.EDUBASIS,
+  M.BEGINDATE, M.TODATE,
+  S.NOTE,
+  S.EDUNOTE,
+  O.ORDERNUM, O.ORDERDATE
+from HS_MOVEMENT M
+inner join STUDENTS S
+  on (S.STUDENTID = M.STUDENTID)
+inner join ORDERS O
+  on (O.ORDERID = M.ORDERID)
+inner join GUIDE_SPECIALITY GS
+  on (GS.SPECIALITYID = S.SPECIALITYID)
+inner join V_GUIDE_EDUTERM GET
+  on (GET.EDUTERM = S.EDUTERM)
+inner join V_GUIDE_EDUFORM GEF
+  on (GEF.EDUFORMID = S.EDUFORMID)
+inner join V_GUIDE_EDUBASIS GEB
+  on (GEB.EDUBASISID = S.EDUBASISID)
+where M.TODATE between :FROMDATE and :TODATE
+order by TODATE
+</SQL><Events OnAfterCreateDataSet=""/></Band></Bands><Script>begin
+end.</Script></Report>

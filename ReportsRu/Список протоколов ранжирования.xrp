@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список протоколов ранжирования" ProgressMax="100" EncodeText="False" ID="{67B85E9D-D399-418D-BF7D-DAE4797B60AA}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="CreateDate" DisplayLabel="Дата ранжирования" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsProtocols" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select RP.REAL_CREATEDATE, RP.PROTOCOLNUM, RP.PROTOCOLDATE, RP.SEMESTER,
+   GD.DISCIPLINE, GDP.DEPARTMENT
+
+from RANKING_PROTOCOLS RP
+inner join V_GUIDE_DISCIPLINE GD
+on GD.DISCIPLINEID = RP.DISCIPLINEID
+inner join V_GUIDE_DEPARTMENT GDP
+on GDP.DEPARTMENTID = RP.DEPARTMENTID
+where RP.REAL_CREATEDATE = :CreateDate
+order by PROTOCOLNUM
+</SQL></Band></Bands><Script/></Report>

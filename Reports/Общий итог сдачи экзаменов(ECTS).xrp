@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Общий итог сдачи экзаменов(ECTS)" ProgressMax="100" EncodeText="False" ID="{248DA006-604A-4455-B3AC-0E0142F78128}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><Bands><Band Name="dsInfo" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>SELECT MARKALL, MARK5, MARK4, MARK3, MARKZ, ORDERNUM, ORDERDATE
+FROM SP_RP_ITOGMARKS_B(:MAS_STUDENTID)
+</SQL></Band><Band Name="dsStateExams" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GD.DISCIPLINE,
+   case VLP.ECTS
+     when 'S' then 'склав'
+     when 'NS' then 'не склав'
+     else GTM.MARKSTR
+   end as MARKNAME,
+   VLP.PROTOCOLNUM,
+   VLP.PROTOCOLDATE
+from V_STUDENT_DISCIPLINES_LAST LP
+inner join GUIDE_DISCIPLINE GD
+on GD.DISCIPLINEID = LP.DISCIPLINEID
+inner join B_VARIANT_DISCIPLINE BVD
+on BVD.VARIANTID = LP.VARIANTID
+inner join GUIDE_FORMREPORT_B FR
+on FR.FORMREPORT = BVD.FORMREPORT
+left join V_LASTPROTOCOL VLP
+on VLP.STUDENTID = LP.STUDENTID
+   and VLP.DISCIPLINEID = LP.DISCIPLINEID
+left join GUIDE_TRADITIONAL_MARK GTM
+on GTM.TRADITIONAL_MARKID = VLP.TRADITIONALMARK
+where LP.STUDENTID = :STUDENTID
+  and LP.DISCIPLINETYPE &lt;&gt; 'П'
+  and (FR.FORMREPORT = 'да' or FR.FORMREPORT = 'де')
+</SQL><Events OnGetFieldData="dsStateExams_OnGetFieldData"/></Band></Bands><SQL>1
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+  HostAppl.Data.GetSQL('STUDENTID, FIO, DEPARTMENT') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'NewPage') then
+    if (dsStudents.RecNo &gt; 1) then Field.Value := '&amp;page&amp;';
+end;
+
+procedure dsStateExams_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'TESTDATE') then
+  begin
+    if (
+      not dsStateExams.FieldByName('PROTOCOLNUM').IsNull
+      and
+      not dsStateExams.FieldByName('PROTOCOLDATE').IsNull
+    ) then
+      Field.Value :=
+        dsStateExams.FieldByName('PROTOCOLNUM').asString +
+        ' від ' +
+       FormatDateTime('dd.MM.yyyy', dsStateExams.FieldByName('PROTOCOLDATE').asDateTime)
+      else
+       Field.Value := ''
+      ;
+  end
+
+end;
+
+begin
+end.</Script></Report>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Движение контингента (МОЗ)" ProgressMax="100" EncodeText="False" ID="{19CDB447-C95D-4D67-AD30-9CFC6A44EAF5}"><UserParameters/><Bands><Band Name="dsStat" AutoOpen="True" UniDirectional="False" Master="" Suppress="False"><Events OnBeforePrintRec="dsStudents_OnBeforePrintRec" OnAfterPrintRec="dsStudents_OnAfterPrintRec" OnGetFieldData="dsStudents_OnGetFieldData" OnFirstPrintBand="dsStudents_OnFirstPrintBand"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False"><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>var
+  Xml: TfsXMLDocument;
+  RowData: TfsXMLItem;
+  RowNum: integer;
+  Row: TfsXMLItem;
+  
+procedure dsStudents_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Xml := TfsXMLDocument.Create;
+  Xml.LoadFromFile(Params.Item('DataFile').Value);
+  RowData := Xml.Root.FindItem('ROWDATA');
+  Band.Stop := (RowData = nil) or (RowData.Count = 0);
+  RowNum := 0;
+end;
+
+procedure dsStudents_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  Band.Stop := RowNum &gt; RowData.Count - 1;
+  if Band.Stop then Exit;
+  Row := RowData.Items[RowNum];
+end;
+
+procedure dsStudents_OnAfterPrintRec(Band: TDBBandInfo);
+begin
+  RowNum := RowNum + 1;
+  Band.Stop := False;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  Field.Value := Row.Prop(Field.FieldName);
+end;
+
+procedure OnEndReport;
+begin
+  Report.ShowType := 7; //ShowReport + ShowMessage + UpdateFields
+end;
+
+begin
+end.</Script><Events OnEndReport="OnEndReport"/></Report>

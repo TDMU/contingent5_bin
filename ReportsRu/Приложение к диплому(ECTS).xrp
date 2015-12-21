@@ -1,0 +1,196 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Приложение к диплому(ECTS)" ProgressMax="100" EncodeText="False" ID="{E32FEDAA-1C3A-4FE0-9188-276355300BD8}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Exclude_1k" DisplayLabel="Виключити 1-ий курс" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Exclude_PZSO" DisplayLabel="Исключить дисциплины уровня ПЗСО" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="SortOrder" DisplayLabel="Сортування" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="За алфавітом
+За семестром початку вивчення дисципліни
+За семестром закінчення вивчення дисципліни" KeyItems="DISCIPLINE collate WIN1251_UA
+SEMESTER, DISCIPLINE collate WIN1251_UA
+END_SEMESTER, DISCIPLINE collate WIN1251_UA" CommonValue="False"/><Parameter Name="ReleaseDate" DisplayLabel="Дата випуску" ParamType="Date" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="DecisionOfSEC" DisplayLabel="Дата рішення ДЕК" ParamType="Date" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="RegistrationsDate" DisplayLabel="Дата реєстрації" ParamType="Date" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsPractica" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select *
+from SP_RP_DIPLOM_PRACTIC_B(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+order by @@SortOrder_KEY@
+</SQL><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/></Band><Band Name="dsDisciplines" AutoOpen="True" UniDirectional="False" Master="dsStudents" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select *
+from SP_RP_DIPLOM_B(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+order by @@SortOrder_KEY@
+</SQL><Events OnBeforePrintRec="" OnBeforePrintBand="" OnAfterOpenDataSet="" OnAfterCreateDataSet="" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/><Bands/></Band><Band Name="dsState" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select *
+from SP_RP_DIPLOM_STATE_B(?MAS_STUDENTID, ?Exclude_1k, ?Exclude_PZSO)
+order by @@SortOrder_KEY@
+</SQL><Events OnAfterCreateDataSet="" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/></Band></Bands><SQL>1
+</SQL><Events OnBeforePrintRec="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>var
+  MA: array [1..12] of string;
+  
+function GetDatePart(D: TDateTime; Part: Integer): string;
+var
+  DD, DM, DY: Word;
+  err: Boolean;
+begin
+  err := False;
+  DecodeDate(D, DY, DM, DD);
+  if (Part = 1) then
+  begin
+    Result := IntToStr(DD);
+    if (Length(Result) = 1) then Result := '0' + Result;
+  end
+  else
+  if (Part = 2) then
+  begin
+    if (DM&gt;=1) and (DM &lt;=12) then
+      Result := MA[DM]
+    else
+      err := True;
+  end
+  else
+  if (Part = 3) then
+  begin
+    Result := IntToStr(DY);
+  end;
+  
+  if err then
+    Result := '';
+end;
+
+// Используется в Тернополе.
+function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+  i: Integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+    if Num &lt;= SL.Count then
+    begin
+      Result := SL[Num - 1];
+      if (SL.Count &gt; 3) and (Num = 3) then
+      begin
+        for i := Num + 1 to SL.Count do
+          Result := Result + ' ' + SL[i - 1];
+      end
+    end
+    else Result := '';
+  finally
+    SL.Free;
+  end;
+end;
+
+function datetostrukr(dt: TDateTime): string;
+var
+  Y, M, D: Word;
+begin
+  DecodeDate(dt, Y, M, D);
+  if (D &lt;= 9 ) then
+    result := '0' + IntToStr(D) + ' ' + MA[M] + ' ' + IntToStr(Y)
+  else
+    result := IntToStr(D) + ' ' + MA[M] + ' ' + IntToStr(Y);
+end;
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, EDUTERMNAME, EDUFORM, BIRTHDATE, PREVIOUSDOCUMENT, PREVIOUSDOCUMENTNUM, PREVIOUSEDUCATION, ENTERCLAUSE, ENTERDATE, DIPLOMANUM, DIPLOMAREGNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsDisciplines_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+end;
+
+procedure dsDisciplines_OnBeforeOpenDataSet(ds: TpFibDataSet);
+begin
+//  ShowMessage(Params.Item('alfa_order').Value);
+//  if (Params.Item('alfa_order').Value) then
+//    ds.SelectSQL.Text := ds.SelectSQL.Text + ' order by DISCIPLINE collate WIN1251_UA';
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+  i: Integer;
+begin
+  if (Field.FieldName = 'D1') then
+    Field.Value := GetDatePart(StrToDate(Params.Item('DecisionOfSEC').Value), 1)
+  else
+  if (Field.FieldName = 'D2') then
+    Field.Value := GetDatePart(StrToDate(Params.Item('DecisionOfSEC').Value), 2)
+  else
+  if (Field.FieldName = 'D3') then
+    Field.Value := GetDatePart(StrToDate(Params.Item('DecisionOfSEC').Value), 3)
+  else
+  if (Field.FieldName = 'R1') then
+    Field.Value := GetDatePart(StrToDate(Params.Item('RegistrationsDate').Value), 1)
+  else
+  if (Field.FieldName = 'R2') then
+    Field.Value := GetDatePart(StrToDate(Params.Item('RegistrationsDate').Value), 2)
+  else
+  if (Field.FieldName = 'R3') then
+    Field.Value := GetDatePart(StrToDate(Params.Item('RegistrationsDate').Value), 3)
+  else
+  if (Field.FieldName = 'RELEASEDATE') then
+    Field.Value := datetostrukr(StrToDate(Params.Item('RELEASEDATE').Value))
+  else
+  if (Field.FieldName = 'FAMILY') then // Используется в Тернополе.
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('FIO').AsString)
+  else
+  if (Field.FieldName = 'NAME') then // Используется в Тернополе.
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('FIO').AsString)
+  else
+  if (Field.FieldName = 'MIDDLENAME') then // Используется в Тернополе.
+    Field.Value := GetWord(3, Field.DataSet.FieldByName('FIO').AsString)
+  else
+  if (Field.FieldName = 'BIRTHDATE') then
+    Field.Value := datetostrukr(dsStudents.FieldByName('BIRTHDATE').asDateTime)
+  else
+  if (Field.FieldName = 'ENTERDATE') then
+    Field.Value := datetostrukr(dsStudents.FieldByName('ENTERDATE').asDateTime)
+  else
+  if Field.FieldName = 'DIPSER' then
+  begin
+    s := Field.DataSet.FieldByName('DIPLOMANUM').AsString;
+    i := Length(s);
+    while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+    if i = 1 then Field.Value := ''
+    else
+    begin
+      if Pos('№', s) &gt; 0 then
+      begin
+        while s[i] &lt;&gt; '№' do Dec(i);
+        Dec(i);
+      end;
+      Field.Value := Trim(Copy(s, 1, i));
+    end;
+  end
+  else
+  if Field.FieldName = 'DIPNUM' then
+  begin
+    s := Field.DataSet.FieldByName('DIPLOMANUM').AsString;
+    if Length(s) &gt; 0 then
+    begin
+      i := Length(s);
+      while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+      if i = 1 then Field.Value := s
+      else
+      begin
+        Inc(i);
+        Field.Value := Trim(Copy(s, i, Length(s) - i + 1));
+      end;
+    end;
+  end;
+end;
+
+begin
+  MA[1] := 'січня';
+  MA[2] := 'лютого';
+  MA[3] := 'березня';
+  MA[4] := 'квітня';
+  MA[5] := 'травня';
+  MA[6] := 'червня';
+  MA[7] := 'липня';
+  MA[8] := 'серпня';
+  MA[9] := 'вересня';
+  MA[10] := 'жовтня';
+  MA[11] := 'листопада';
+  MA[12] := 'грудня';
+end.</Script><Events OnStartReport="OnStartReport"/></Report>

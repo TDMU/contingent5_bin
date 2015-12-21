@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Академическая справка" ProgressMax="100" EncodeText="False" ID="{1EB995E5-831C-4F60-9D9E-86906F6D1C59}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsDisciplines" Master="dsStudents" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select VL.SEMESTER,
+   coalesce(G_D.DISCIPLINE, 'id: ' || VL.DISCIPLINEID) as DISCIPLINE,
+   coalesce(
+     (case VL.DISCIPLINETYPE
+       when '?' then (
+         select SPI.PRACTHOURS
+         from STUDENTPRACTICEINFO SPI
+         where (SPI.STUDENTID = VL.STUDENTID)
+         and (SPI.PLANID = VL.PLANID)
+         and (SPI.NUMORDER = VL.NUMORDER)
+       )
+       else VL.ALLHOURS
+     end),
+     0
+     ) as ALLHOURS,
+   coalesce(G_MT.MARKSTR, '') as MARKSTR,
+   coalesce(VL.FORMREPORT, '') as FORMREPORT
+from V_LASTSESSIONMARKS VL
+     inner join V_GUIDE_DISCIPLINE G_D on (VL.DISCIPLINEID = G_D.DISCIPLINEID)
+     inner join V_GUIDE_MARKTYPE G_MT on (VL.MARKID = G_MT.MARKID)
+where VL.STUDENTID = ?MAS_STUDENTID
+  and VL.FORMREPORT &lt;&gt; 'кр'
+  and not VL.MARKID in (20,10010,10030,10040,10050)
+--  and VL.DISCIPLINETYPE &lt;&gt; 'П'
+  --('ек','де','пд','зл','дз')
+order by VL.SEMESTER, VL.NUMORDER
+  
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band><Band Name="dsEnter" Master="dsStudents" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join V_GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 2
+order by V_STO.ORDERDATE
+</SQL></Band><Band Name="dsOut" Master="dsStudents" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 V_STO.ORDERDATE, V_STO.ORDERNUM
+from V_STUDENTORDERS V_STO
+     inner join V_GUIDE_REASON G_RN on (V_STO.REASONID = G_RN.REASONID)
+     inner join REASONTOCATEGORY RTC on (G_RN.REASONID = RTC.REASONID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 3
+order by V_STO.ORDERDATE desc
+</SQL></Band></Bands><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnAfterOpenDataSet="" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>1
+</SQL></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+   ds.SelectSQL.Text :=
+   HostAppl.Data.GetSQL('STUDENTID, FIO, SEX, DEPARTMENT, SPECIALITY') +
+   ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+   
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+begin
+   if (Field.FieldName = 'EMARKSTR') Then Begin
+     if (Field.DataSet.FieldByName('FORMREPORT').Value in ['ек','де','пд']) then
+        Field.Value := Field.DataSet.FieldByName('MARKSTR').Value;
+   End
+   Else
+   Begin
+     if (Field.FieldName = 'ZMARKSTR') then Begin
+        if (Field.DataSet.FieldByName('FORMREPORT').Value in ['зл','дз']) then
+        Field.Value := Field.DataSet.FieldByName('MARKSTR').Value;
+     End;
+   End;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+   if Field.FieldName = 'NewPage' then
+     if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+        Field.Value := '&amp;page&amp;';
+end;
+
+Begin
+End.</Script></Report>

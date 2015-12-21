@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<Tree>
+  <Level0 KeyField="ORDERYEAR" DisplayField="ORDERYEAR">
+    select distinct Extract(Year from O.ORDERDATE) as ORDERYEAR
+    from ORDERS O
+    order by 1
+  </Level0>
+  <Level1 KeyField="DEPARTMENTID" DisplayField="DEPARTMENT">
+    select distinct Extract(Year from O.ORDERDATE) as ORDERYEAR, O.DEPARTMENTID, GD.DEPARTMENT
+    from ORDERS O
+    inner join GUIDE_DEPARTMENT GD
+    on (GD.DEPARTMENTID = O.DEPARTMENTID)
+    where Extract(Year from O.ORDERDATE) = ?ORDERYEAR
+    order by 1
+  </Level1>
+  <Level2 KeyField="ORDERID" DisplayField="ORDERNUM,ORDERDATE">
+    select distinct O.ORDERID, O.ORDERNUM, O.ORDERDATE, ('¹ ' || O.ORDERNUM || '  ' || O.ORDERDATE) as ORDERINFO
+    from ORDERS O
+    where Extract(Year from O.ORDERDATE) = ?ORDERYEAR
+    and O.DEPARTMENTID = ?DEPARTMENTID
+    order by 3, 2
+  </Level2>
+</Tree>

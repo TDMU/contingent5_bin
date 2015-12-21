@@ -1,0 +1,48 @@
+function GetAppMutexName: string;
+begin
+  Result := 'Contingent5_mutex';
+end;
+
+function GetAppCaption: string;
+begin
+  Result := 'Контингент 5';
+end;
+
+function GetAppURL: string;
+begin
+  Result := 'http://contingent.euro.ru';
+end;
+
+function GetAppExeName: string;
+begin
+  Result := AddSlash2(GetRegValue(rgContKey, rgBinPath)) + 'contingent.exe';
+end;
+
+function GetServerName: string;
+begin
+  Result := GetRegValue(rgContKey, rgServerName);
+end;
+
+function GetDBName: string;
+begin
+  Result := GetRegValue(rgContKey, rgDBName);
+end;
+
+function GetLang: string;
+begin
+  Result := GetRegValue(rgContKey, rgLang);  // ru, ua
+end;
+
+function GetAppVersion: string;
+begin
+  Result := GetRegValue(rgContKey, rgVersion);  // 1.0.0.0
+end;
+
+function GetLibraryName: string;
+begin
+  Result := 'fbclient.dll';
+end;
+
+begin
+//  ShowMessage('OK');
+end.

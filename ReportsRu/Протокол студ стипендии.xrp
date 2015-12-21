@@ -1,0 +1,271 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Протокол студ стипендии" ProgressMax="100" EncodeText="False" ID="{F58F00F9-7781-4329-9025-3AFF78ADA616}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="ShowGrant" DisplayLabel="Показать" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" Items="сумму стипендии
+название стипендии" KeyItems="1
+2"/><Parameter Name="PredsedatelKomissi" DisplayLabel="Председатель комиссии" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member1" DisplayLabel="Член комиссии 1" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member2" DisplayLabel="Член комиссии 2" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member3" DisplayLabel="Член комиссии 3" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member4" DisplayLabel="Член комиссии 4" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member5" DisplayLabel="Член комиссии 5" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member6" DisplayLabel="Член комиссии 6" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member7" DisplayLabel="Член комиссии 7" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Member8" DisplayLabel="Член комиссии 8" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsGrantTitle" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsCourse" AutoOpen="True" UniDirectional="False" Master="dsGrantTitle" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select distinct cast((((HMF.SEMESTER + 1)+1)/2 - 0.5) as smallint) as COURSE , HMF.SEMESTER, G.ACCOUNTINGID, SG.SEMESTER
+from GRANTS G
+inner join STUDENT_GRANT SG
+on   (SG.STUDENTID = G.STUDENTID) and
+     (SG.ACCOUNTINGID = G.ACCOUNTINGID)
+left join accounting a
+on a.accountingid = G.ACCOUNTINGID
+left join HS_MOVEMENT_FULL HMF
+on   (HMF.STUDENTID = G.STUDENTID
+     and  (HMF.BEGINDATE = (select first 1 HMF1.BEGINDATE
+                                 from HS_MOVEMENT_FULL HMF1
+                                 where HMF1.STUDENTID = G.STUDENTID
+                                 order by HMF1.BEGINDATE desc)))
+--inner join HS_MOVEMENT_FULL HMF
+-- on  (hmf.begindate&lt;= a.protocoldate and hmf.enddate &gt; a.protocoldate )
+where (G.ACCOUNTINGID = ?MAS_ACCOUNTINGID)
+and exists(select 1
+  from GRANTS G1
+  where G1.ACCOUNTINGID = G.ACCOUNTINGID and
+        G1.STUDENTID = SG.STUDENTID)
+</SQL><Bands><Band Name="dsGroups" Master="dsCourse" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>   select distinct  GN.GROUPNUM, A.ACCOUNTINGID
+from GRANTS G
+left join HS_GROUPNUM GN
+on   (GN.STUDENTID = G.STUDENTID
+     and  (GN.BEGINDATE = (select first 1 GN1.BEGINDATE
+                                 from HS_GROUPNUM GN1
+                                 where GN1.STUDENTID = G.STUDENTID
+                                 order by GN1.BEGINDATE desc)))
+inner join ACCOUNTING A
+on  (A.ACCOUNTINGID = G.ACCOUNTINGID)
+inner join STUDENT_GRANT SG
+on (SG.STUDENTID = G.STUDENTID )and
+   (SG.ACCOUNTINGID = G.ACCOUNTINGID)
+where (G.ACCOUNTINGID = ?MAS_ACCOUNTINGID)
+and (exists(select 1
+  from GRANTS G1
+  where G1.ACCOUNTINGID = G.ACCOUNTINGID and
+        G1.STUDENTID = GN.STUDENTID))
+and (SG.SEMESTER = :MAS_SEMESTER1)
+
+
+--order by GROUPNUM
+</SQL><Bands><Band Name="dsGrants" Master="dsGroups" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL> select distinct S.FIO, G.STUDENTID,
+ S.GROUPNUM ,SG.AVG_MARK, G.ACCOUNTINGID,
+ (select sum(G.SUMMA)
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        S.STUDENTID = G.STUDENTID and
+        GG.TYPEGRANTS = 'О'
+  ) as SUMMA1,
+  (select sum(g.summa)
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        S.STUDENTID = G.STUDENTID and
+        GG.TYPEGRANTS = 'С'
+  ) as SUMMA2
+
+from GRANTS G
+inner join STUDENTS S
+on   S.STUDENTID = G.STUDENTID
+inner join STUDENT_GRANT SG
+on   (SG.STUDENTID = G.STUDENTID) and
+      (SG.ACCOUNTINGID = G.ACCOUNTINGID)
+where (G.ACCOUNTINGID = ?MAS_ACCOUNTINGID)
+  and (S.GROUPNUM = :MAS_GROUPNUM)
+  and exists(select 1
+  from GRANTS G
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        G.STUDENTID = S.STUDENTID)
+
+--order by GROUPNUM
+</SQL><Bands><Band Name="dsNamedGrants" Master="dsGrants" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GG.SHORTTITLE, G.SUMMA
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        G.STUDENTID = ?MAS_STUDENTID and
+        ( GG.TYPEGRANTS = 'И')
+
+</SQL></Band><Band Name="dsAcademGrants" Master="dsGrants" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GG.SHORTTITLE
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        G.STUDENTID = ?MAS_STUDENTID and
+        ( GG.TYPEGRANTS = 'О')
+
+</SQL></Band><Band Name="dsSocialGrants" Master="dsGrants" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GG.SHORTTITLE
+  from GRANTS G
+  inner join GUIDE_GRANT GG
+  on G.GRANTID = GG.GRANTID
+  where G.ACCOUNTINGID = ?MAS_ACCOUNTINGID and
+        G.STUDENTID = ?MAS_STUDENTID and
+        ( GG.TYPEGRANTS = 'С')
+
+</SQL></Band></Bands><Events OnGetFieldData="dsGrants_OnGetFieldData"/></Band></Bands></Band></Bands><Events OnGetFieldData=""/></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master="dsGrantTitle" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='OrgName') as ORGNAME,
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='OrgCity') as ORGCITY,
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='Ministry') as MINISTRY,
+ (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME='Address') as ADDRESS
+from RDB$DATABASE
+</SQL></Band><Band Name="Vis1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis1_OnFirstPrintBand"/></Band><Band Name="Vis2" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis2_OnFirstPrintBand"/></Band><Band Name="Vis3" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis3_OnFirstPrintBand"/><Bands/></Band><Band Name="Vis4" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis4_OnFirstPrintBand"/><Bands/></Band><Band Name="Vis5" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis5_OnFirstPrintBand"/><Bands/></Band><Band Name="Vis6" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis6_OnFirstPrintBand"/><Bands/></Band><Band Name="Vis7" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis7_OnFirstPrintBand"/><Bands/></Band><Band Name="Vis8" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis8_OnFirstPrintBand"/><Bands/></Band><Band Name="Vis9" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis9_OnFirstPrintBand"/><Bands/></Band></Bands><SQL>SELECT A.ACCOUNTINGID, GD.DEPARTMENT_CASE2, GE.EDUFORM, A.ACCOUNTINGDATE, SUH.FIO, A.PROTOCOLDATE, A.PROTOCOLNUM, GED.EDUYEARSTR,
+(select first 1 cast(((SG.SEMESTER + 1)/2 - SG.SEMESTER/2 +1) as smallint)
+ from STUDENT_GRANT SG
+ where SG.ACCOUNTINGID = A.ACCOUNTINGID) as HALFYEAR
+FROM ACCOUNTING A
+left join V_GUIDE_DEPARTMENT GD
+on GD.DEPARTMENTID = A.DEPARTMENTID
+left join V_GUIDE_EDUFORM GE
+on GE.EDUFORMID = A.EDUFORMID
+left join SEC_USERS_HISTORY SUH
+on SUH.USERID = A.CONFIRMUSERID
+left join GUIDE_EDUYEAR GED
+on GED.EDUYEAR = A.EDUYEAR
+where A.ACCOUNTINGID in ( @@ACCOUNTINGID@ )
+</SQL><Events OnGetFieldData="dsGrantTitle_OnGetFieldData"/></Band></Bands><Script>procedure dsGrantTitle_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'NewPage' then
+  begin
+    if (Field.DataSet.RecNo &lt; Field.DataSet.RecordCount) then
+      Field.Value := '&amp;page&amp;';
+  end;
+end;
+
+procedure Vis1_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('PredsedatelKomissi_Enabled').Value;
+end;
+
+procedure Vis2_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member1_Enabled').Value;
+end;
+
+procedure dsGrants_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: String;
+begin
+  if Field.FieldName = 'SHORTTITLE'then
+  begin
+    s := '';
+    while not (dsNamedGrants.eof) do
+    begin
+       if s &lt;&gt; '' then s := s + ', ';
+       s := s + dsNamedGrants.FieldByName('SUMMA').AsString + '(' + dsNamedGrants.FieldByName('SHORTTITLE').AsString + ')';
+
+       dsNamedGrants.Next;
+    end;
+    Field.Value := s;
+  end;
+  
+  if Field.FieldName = 'ST1'then
+  begin
+    if Params.Item('ShowGrant_KEY').Value = 1 then Field.Value := dsGrants.FieldByName('SUMMA1').AsString
+    else
+    begin
+      s := '';
+      while not (dsAcademGrants.eof) do
+      begin
+        if s &lt;&gt; '' then s := s + ', ';
+        s := s + dsAcademGrants.FieldByName('SHORTTITLE').AsString;
+
+        dsAcademGrants.Next;
+      end;
+    
+      Field.Value := s;
+    end;
+  end;
+  
+  if Field.FieldName = 'ST2'then
+  begin
+    if Params.Item('ShowGrant_KEY').Value = 1 then Field.Value := dsGrants.FieldByName('SUMMA2').AsString
+    else
+    begin
+      s := '';
+      while not (dsSocialGrants.eof) do
+      begin
+        if s &lt;&gt; '' then s := s + ', ';
+        s := s + dsSocialGrants.FieldByName('SHORTTITLE').AsString;
+
+        dsSocialGrants.Next;
+      end;
+
+      Field.Value := s;
+    end;
+  end;
+end;
+
+
+procedure Vis3_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member2_Enabled').Value;
+end;
+
+procedure Vis4_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member3_Enabled').Value;
+end;
+
+procedure Vis5_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member4_Enabled').Value;
+end;
+
+procedure Vis6_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member5_Enabled').Value;
+end;
+
+procedure Vis7_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member6_Enabled').Value;
+end;
+
+procedure Vis8_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member7_Enabled').Value;
+end;
+
+procedure Vis9_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Member8_Enabled').Value;
+end;
+
+procedure OnAfterQueryParams;
+var
+  i: integer;
+  MemberNum: string;
+  s1: string;
+  MemberEnabled: string;
+begin
+  s1 := '';
+  for i := 1 to 8 do
+  begin
+    MemberNum := 'Member' + inttostr(i) + '_EMP_FIO';
+    MemberEnabled := 'Member' + inttostr(i) + '_Enabled';
+    if Params.Item(MemberEnabled).Value then
+    begin
+      if s1 = '' then s1 := s1 + Params.Item(MemberNum).Value
+      else s1 := s1 + ', ' + Params.Item(MemberNum).Value;
+    end;
+  end;
+  Params.Item('Members').Value := s1;
+end;
+
+begin
+end.</Script></Report>

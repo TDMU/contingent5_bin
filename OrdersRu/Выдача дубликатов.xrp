@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Выдача дубликатов" ProgressMax="100" EncodeText="False" ID="{8E50A871-FBC5-4090-BC31-CE98E6333DB5}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/><Parameter Name="DuplicateType" DisplayLabel="Дубликат" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="студенческого билета
+зачетной книжки" KeyItems="студенческого билета
+зачетной книжки" CommonValue="False"/><Parameter Name="ShowTitle" DisplayLabel="Добавить заголовок приказа" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="grStudentList" Master="" AutoOpen="True" UniDirectional="True"><SQL>1
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet" OnGetFieldData="grStudentList_OnGetFieldData"/></Band></Bands><Script>procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,COUNTRYNAME,SEMESTER,GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) ';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure grStudentList_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport=""/></Report>

@@ -1,0 +1,85 @@
+<?xml version="1.0"?>
+<Orders>
+  <Order Caption="Бланк" Template="Бланк.xrp" ImageIndex="48"/>
+  <Order Caption="Зачисление" ImageIndex="45">
+    <Order Caption="Зачисление на курс" ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Зачисление на курс (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Зачисление на курс" Template="Зачисление на курс.xrp" ImageIndex="1"/>
+    </Order>
+    <Order Caption="Перевод/восстановление" ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Зачисление (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Заголовок раздела" Template="Зачисление (заголовок раздела).xrp" ImageIndex="49"/>
+      <Order Caption="Перевод из другого вуза" Template="Перевод из другого вуза.xrp" ImageIndex="32"/>
+      <Order Caption="Восстановление" Template="Восстановление.xrp" ImageIndex="37"/>
+      <Order Caption="Зачисление и допуск к аттестации" Template="Восстановление и допуск к госаттестации.xrp" ImageIndex="7"/>
+    </Order>
+  </Order>
+  <Order Caption="Отчисление" ImageIndex="45">
+    <Order Caption="Отчисление" ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Отчисление (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Отчисление из вуза" Template="Отчисление.xrp" ImageIndex="8"/>
+    </Order>
+    <Order Caption="Отчисление в связи с окончанием" ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Отчисление в связи с окончанием (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Отчисление из вуза в связи с окончанием" Template="Отчисление в связи с окончанием.xrp" ImageIndex="9"/>
+      <Order Caption="Отчисление в связи с несдачей гос. экзаменов" Template="Отчисление в связи с несдачей гос экзаменов.xrp" ImageIndex="43"/>
+    </Order>
+  </Order>
+  <Order Caption="Перерыв в обучении" ImageIndex="45">
+    <Order Caption="Заголовок приказа" Template="Перерыв (шапка).xrp" ImageIndex="15"/>
+    <Order Caption="Перерыв в обучении" Template="Перерыв в обучении.xrp" ImageIndex="16"/>
+    <Order Caption="Продление академического отпуска" ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Продление академического отпуска (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Продление академического отпуска" Template="Продление академического отпуска.xrp" ImageIndex="18"/>
+    </Order>
+  </Order>
+  <Order Caption="Допуск" ImageIndex="45">
+    <Order Caption="Заголовок приказа" Template="Допуск (шапка).xrp" ImageIndex="15"/>
+    <Order Caption="Допуск к обучению" ImageIndex="45">
+      <Order Caption="Заголовок раздела" Template="Допуск (заголовок раздела).xrp" ImageIndex="49"/>
+      <Order Caption="Допуск к обучению" Template="Допуск к обучению.xrp" ImageIndex="17"/>
+    </Order>
+    <Order Caption="Допуск к ..." ImageIndex="45">
+      <Order Caption="Допуск" Template="Допуск.xrp" ImageIndex="0"/>
+      <Order Caption="Недопуск" Template="Недопуск.xrp" ImageIndex="28"/>
+    </Order>
+  </Order>
+  <Order Caption="Переводы" ImageIndex="45">
+    <Order Caption="На другой семестр" ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Перевод на другой семестр (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Перевод на другой семестр" Template="Перевод на другой семестр.xrp" ImageIndex="25"/>
+      <Order Caption="Неперевод на другой семестр" Template="Неперевод на другой семестр.xrp" ImageIndex="27"/>
+    </Order>
+    <Order Caption="На другой факультет, специальность ..." ImageIndex="45">
+      <Order Caption="Заголовок приказа" Template="Перевод (шапка).xrp" ImageIndex="15"/>
+      <Order Caption="Заголовок раздела" Template="Перевод (заголовок раздела).xrp" ImageIndex="49"/>
+      <Order Caption="Перевод на ..." Template="Перевод на.xrp" ImageIndex="3"/>
+    </Order>
+  </Order>
+  <Order Caption="Разное" ImageIndex="45">
+    <Order Caption="Выдача дубликатов" Template="Выдача дубликатов.xrp" ImageIndex="12"/>
+    <Order Caption="Изменение фамилии" Template="Изменение фамилии.xrp" ImageIndex="39"/>
+    <Order Caption="Изменение гражданства" Template="Изменение гражданства.xrp" ImageIndex="33"/>
+    <Order Caption="Назначение старост групп и курсов" Template="Назначение старост групп и курсов.xrp" ImageIndex="4"/>
+    <Order Caption="Назначение стипендии" Template="Назначение стипендии.xrp" ImageIndex="26"/>
+    <Order Caption="Назначение именных стипендий" Template="Назначение именных стипендий.xrp" ImageIndex="26"/>
+    <Order Caption="Предоставление целевых льготных кредитов" Template="Предоставление целевых льготных кредитов.xrp" ImageIndex="26"/>
+    <Order Caption="Присвоение квалификации и выдача дипломов" Template="Присвоение квалификации и выдача дипломов.xrp" ImageIndex="10"/>
+    <Order Caption="Объявление выговора, благодарности" Template="Объявление выговора, благодарности.xrp" ImageIndex="2"/>
+    <Order Caption="Утверждение состава групп" Template="Утверждение состава групп.xrp" ImageIndex="14"/>
+    <Order Caption="Разрешение на индивидуальный график ..." Template="Разрешение на обучение по индивидуальному графику.xrp" ImageIndex="50"/>
+
+    <Order Caption="Отработка занятий" Template="Отработка занятий.xrp" ImageIndex="11"/>
+	<Order Caption="Отработка расхождений" Template="Отработка расхождений в учебных планах.xrp" ImageIndex="11"/>
+<!--
+    <Order Caption="Сдача экзаменов на контрактной основе" Template="Сдача экзаменов на контрактной основе.xrp" ImageIndex="11"/>
+-->
+    <Order Caption="Снижение оплаты за обучение" Template="Снижение оплаты за обучение.xrp" ImageIndex="7"/>
+
+  </Order>
+  <Order Caption="Технологические" ImageIndex="45">
+    <Order Caption="Перевод на другой факультет, специальность" Template="Перевод на другой факультет (технологический).xrp" ImageIndex="44"/>
+  </Order>
+  <Order Caption="Подпись" Template="Подпись.xrp" ImageIndex="13"/>
+  <Order Caption="Реестр рассылки" Template="Реестр рассылки.xrp" ImageIndex="20"/>
+</Orders>

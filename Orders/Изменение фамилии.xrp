@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Изменение фамилии" ProgressMax="100" EncodeText="False" ID="{3CB94A76-EFC6-4EB0-A465-FB9B4D2A6FD4}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="NewFio" DisplayLabel="Нове ПІБ" ParamType="Edit" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Reason" DisplayLabel="Підстава" ParamType="Lookup" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" Items="у зв'язку з одруженням
+у зв'язку з корекцією при перекладі паспортних даних" KeyItems="у зв'язку з одруженням
+у зв'язку з помилкою в документації" CommonValue="False" SQL="select REASONID, REASON
+from V_REASONANDCATEGORY
+where REASONCATEGORYID = 7 /* Изменение фамилии */
+and DEPRECATED = 0"/><Parameter Name="BeginDate" DisplayLabel="З якої дати" ParamType="Date" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams" OnBeforeQueryParams="OnBeforeQueryParams"/><Parameter Name="ShowTitle" DisplayLabel="Додати заголовок наказу" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudent" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudent_OnAfterCreateDataSet" OnGetFieldData="dsStudent_OnGetFieldData" OnAfterOpenDataSet=""/></Band><Band Name="V11020" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="V_OnFirstPrintBand"/></Band><Band Name="V11021" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="V_OnFirstPrintBand"/></Band><Band Name="V11019" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="V_OnFirstPrintBand"/></Band><Band Name="V11023" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="V_OnFirstPrintBand"/></Band></Bands><Script>procedure dsStudent_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,COUNTRYNAME,SEMESTER,EDUYEARSTR,GROUPNUM,CODE,SPECIALITY') +
+                         ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudent_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO_CASE3' then
+    Field.Value := Utils.GetFIOPadeg(Field.DataSet.FieldByName('FIO').Value, 0, 3)
+  else if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+procedure V_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := Band.Name &lt;&gt; ('V' + IntToStr(Params.Item('Reason_REASONID').Value));
+end;
+
+
+procedure OnBeforeQueryParams;
+begin
+  dsStudent.Active := True;
+  Report.UserParams.Item('NewFio').Value := dsStudent.FieldByName('FIO').Value;
+end;
+
+begin
+end.</Script></Report>

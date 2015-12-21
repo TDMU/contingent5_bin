@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Зачетно-экзаменационная ведомость" ProgressMax="100" EncodeText="False" ID="{4DBEB949-174F-4CBC-9645-D3769C132BD7}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/></UserParameters><Bands><Band Name="grTestList" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="grStudents" AutoOpen="True" UniDirectional="False" Master="grTestList" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>SELECT
+    S.FIO,
+    S.RECORDBOOKNUM,
+    S.GROUPNUM
+from STUDENTS S
+inner join STUDENTMARK SM
+on (SM.STUDENTID = S.STUDENTID)
+/*left join HS_FIO HSF
+          on (HSF.STUDENTID = S.STUDENTID)
+          and (HSF.BEGINDATE =
+            (
+              select first 1 HSF1.BEGINDATE
+              from HS_FIO HSF1
+              where HSF1.STUDENTID = S.STUDENTID
+              and HSF1.BEGINDATE &lt;= ?MAS_TESTDATE
+              order by HSF1.BEGINDATE desc)
+            )
+*/
+where SM.TESTLISTID = ?MAS_TESTLISTID
+order by S.FIO
+</SQL></Band></Bands><SQL>SELECT
+    STT.TESTLISTID,
+    STT.TESTDATE,
+    STT.TESTLISTNUM,
+    GD.DISCIPLINE,
+    GDT.DISCIPLINETYPENAME,
+    GDP.DEPARTMENT,
+    GEY.EDUYEARSTR,
+    STT.SEMESTER,
+    cast(((STT.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+    STT.FORMREPORT,
+    GFR.FORMREPORTNAME,
+    STT.GROUPNUM,
+    STT.ISRETAKE,
+    GE.EMP_POSTFULL,
+    GE.EMP_FIO,
+    (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry,
+    (select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName
+FROM
+    STUDENTTESTLIST STT
+left join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = STT.DISCIPLINEID)
+left join GUIDE_DEPARTMENT GDP
+on (GDP.DEPARTMENTID = STT.DEPARTMENTID)
+left join GUIDE_EMPLOYER GE
+on (GE.EMP_ID = GDP.BOSSID)
+left join GUIDE_EDUYEAR GEY
+on (GEY.EDUYEAR = STT.EDUYEAR)
+left join GUIDE_DISCIPLINETYPE GDT
+on (GDT.DISCIPLINETYPE = STT.DISCIPLINETYPE)
+left join GUIDE_FORMREPORT GFR
+on (GFR.FORMREPORT = STT.FORMREPORT)
+where STT.TESTLISTID in (@@TESTLISTS%0@)
+--between 7010000008330 and 7010000008441
+</SQL><Events OnGetFieldData="grTestList_OnGetFieldData" OnAfterOpenDataSet="grTestList_OnAfterOpenDataSet"/></Band></Bands><Script>procedure grTestList_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'NewPage' then
+  begin
+    if Field.DataSet.RecNo &lt; Field.DataSet.RecordCount then
+      Field.Value := '&amp;page&amp;';
+  end;
+end;
+
+
+procedure grTestList_OnAfterOpenDataSet(ds: TpFibDataSet);
+begin
+//  ShowMessage(Report.TemplateDoc);
+  if ds.FieldByName('ISRETAKE').Value then
+    Report.TemplateDoc := ExtractFilePath(Report.TemplateDoc) + '\Зачетно-экзаменационная ведомость (пересдача).rtf';
+//  ShowMessage(Report.TemplateDoc);
+end;
+
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

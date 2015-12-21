@@ -1,0 +1,279 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Экспорт данных в программу Education в XML формате" ProgressMax="100" EncodeText="False" ID="{8351F1CC-0BFD-4289-8089-27C53DF353F6}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="Дата видачі" ParamType="Date" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams" OnBeforeQueryParams=""/><Parameter Name="Honours" DisplayLabel="Диплом з відзнакою" ParamType="CheckBox" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Parameter Name="Foreigner" DisplayLabel="Диплом паперового зразка, або іноземця" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="FileName" DisplayLabel="Експорт в файл" ParamType="FileName" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" DefaulDir="" FileTypes="Текстовий файл(*.xml)|*.xml"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><Bands><Band Name="dsDisciplines" AutoOpen="True" UniDirectional="False" Master="dsStudents" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select *
+from SP_RP_DIPLOM_B(?MAS_STUDENTID, 'False', 'True')
+
+
+</SQL><Events OnBeforePrintRec="" OnBeforePrintBand="" OnAfterOpenDataSet="" OnAfterCreateDataSet="" OnBeforeOpenDataSet="" OnGetFieldData="dsDisciplines_OnGetFieldData"/><Bands/></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+   ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,HONOURS,FIO,NFIO,SEX,BIRTHDATE,PASSPORTNUM,' +
+       'PASSPORTGIVEPLACE,PASSPORTGIVEDATE,DIPLOMANUM,PREVIOUSDOCUMENTNUM,' +
+       'PREVIOUSEDUCATION,ENTERDATE,DISCIPLINE,EDUBASISID,IDCODE,EDUFORMID,' +
+       'DEPARTMENT,CODE,SPECIALITY,QUALIFICATION,EDBO_KOATUUCODE,EDBO_CITY,' +
+       'EDBO_STREET,EDBO_HOUSE,EDBO_BUILDING,EDBO_FLAT'
+    ) + ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+
+  Params.Item('StudentsID').Value :=  HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+{function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+    if (SL.Count &gt; 3) then RaiseException('Не можливо експортувати заявку тому що ПІБ містить більше 3 слів.'#13#10 + s);
+    if (SL.Count &lt;= 3) then
+    begin
+      if SL.Count &gt;= Num then Result := SL[Num - 1]
+      else Result := '';
+    end
+    else if Num = 1 then Result := s
+    else Result := '';
+  finally
+    SL.Free;
+  end;
+end;}
+
+
+function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+  i: integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+//    if (SL.Count &gt; 3) then RaiseException('Не можливо експортувати заявку тому що ПІБ містить більше 3 слів.'#13#10 + s);
+    Result := '';
+    if (SL.Count &gt; 3) and (Num = 3) then
+    begin
+      for i := 2 to SL.Count - 1 do
+        Result := Result + SL[i] + ' ';
+    end
+    else
+    if (Num &lt;= SL.Count) then
+      Result := SL[Num - 1]
+    else
+      Result := '.';
+
+
+  {  if (SL.Count &lt;= 3) then
+    begin
+      if SL.Count &gt;= Num then Result := SL[Num - 1]
+      else Result := '';
+    end
+    else if Num = 1 then Result := s
+    else Result := '';  }
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+  i: integer;
+  KOATUU: string;
+begin
+  KOATUU := Field.DataSet.FieldByName('EDBO_KOATUUCODE').AsString;
+
+  if Field.FieldName = 'PASSPORTSER' then
+  begin
+    s := Field.DataSet.FieldByName('PASSPORTNUM').AsString;
+    s := Trim(s);
+    Field.Value := '';
+    if (Length(s)&gt;0) then
+    begin
+      i := 1;
+      repeat
+        if (s[i] in ['A'..'Я']) then
+          Field.Value := Field.Value + s[i];
+        Inc(i);
+      until ((i &gt;= Length(s)) or (s[i] = ' ') or (s[i] = '№'));
+    end;
+  end
+  
+  else
+  if Field.FieldName = 'PASSPORTNUM' then
+  begin
+    s := Field.DataSet.FieldByName('PASSPORTNUM').AsString;
+    if Length(s) &gt; 0 then
+    begin
+      i := Length(s);
+      while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+      if i = 1 then Field.Value := s
+      else
+      begin
+        Inc(i);
+        Field.Value := Trim(Copy(s, i, Length(s) - i + 1));
+      end;
+    end;
+  end
+  
+  
+  else
+  if Field.FieldName = 'DIPLOMASER' then
+  begin
+    s := Field.DataSet.FieldByName('DIPLOMANUM').AsString;
+    s := Trim(s);
+    Field.Value := '';
+    if (Length(s)&gt;0) then
+    begin
+      i := 1;
+      repeat
+        if (s[i] in ['A'..'Я']) then
+          Field.Value := Field.Value + s[i];
+        Inc(i);
+      until ((i &gt;= Length(s)) or (s[i] = ' ') or (s[i] = '№'));
+    end;
+    {
+    i := Length(s);
+    while (i &gt; 1 ) and (s[i] in ['A'..'Я']) do Dec(i);
+    if i = 1 then Field.Value := ''
+    else
+    begin
+      if Pos('№', s) &gt; 0 then
+      begin
+        while s[i] &lt;&gt; '№' do Dec(i);
+        Dec(i);
+      end;
+      Field.Value := Trim(Copy(s, 1, i));
+    end;}
+  end
+  else
+  if Field.FieldName = 'DIPLOMANUM' then
+  begin
+    s := Field.DataSet.FieldByName('DIPLOMANUM').AsString;
+    if Length(s) &gt; 0 then
+    begin
+      i := Length(s);
+      while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+      if i = 1 then Field.Value := s
+      else
+      begin
+        Inc(i);
+        Field.Value := Trim(Copy(s, i, Length(s) - i + 1));
+      end;
+    end;
+  end
+
+
+  else
+  if Field.FieldName = 'PREVIOUSDOCUMENTSER' then
+  begin
+    s := Field.DataSet.FieldByName('PREVIOUSDOCUMENTNUM').AsString;
+    s := Trim(s);
+    Field.Value := '';
+    if (Length(s)&gt;0) then
+    begin
+      i := 1;
+      repeat
+        if (s[i] in ['A'..'Я']) then
+          Field.Value := Field.Value + s[i];
+        Inc(i);
+      until ((i &gt;= Length(s)) or (s[i] = ' ') or (s[i] = '№'));
+    end;
+  end
+  else
+  if Field.FieldName = 'PREVIOUSDOCUMENTNUM' then
+  begin
+    s := Field.DataSet.FieldByName('PREVIOUSDOCUMENTNUM').AsString;
+    if Length(s) &gt; 0 then
+    begin
+      i := Length(s);
+      while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+      if i = 1 then Field.Value := s
+      else
+      begin
+        Inc(i);
+        Field.Value := Trim(Copy(s, i, Length(s) - i + 1));
+      end;
+    end;
+  end
+  
+  else
+  if Field.FieldName = 'SURNAME' then
+  begin
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('FIO').AsString);
+  end
+  else
+  if Field.FieldName = 'NAME' then
+  begin
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('FIO').AsString);
+  end
+  else
+  if Field.FieldName = 'PATRONYMIC' then
+  begin
+    Field.Value := GetWord(3, Field.DataSet.FieldByName('FIO').AsString);
+  end
+  
+  else
+  if Field.FieldName = 'NSURNAME' then
+  begin
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('NFIO').AsString);
+  end
+  else
+  if Field.FieldName = 'NNAME' then
+  begin
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('NFIO').AsString);
+  end
+  else
+  if Field.FieldName = 'NPATRONYMIC' then
+  begin
+    Field.Value := GetWord(3, Field.DataSet.FieldByName('NFIO').AsString);
+  end
+  else
+  if Field.FieldName = 'EDBO_KOATUUCODE_REGION' then
+  begin
+    Field.Value := copy(KOATUU, 1, 2);
+  end
+  else
+  if Field.FieldName = 'EDBO_KOATUUCODE_DISTRICT' then
+  begin
+    Field.Value := copy(KOATUU, 3, 8);
+  end;
+  
+  // ASCII -&gt; UTF8
+  Field.Value := AnsiToUtf8(Field.Value);
+  
+end;
+
+
+procedure OnAfterQueryParams;
+begin
+  Report.ShowType := 0;
+  Report.DestinationDoc := Params.Item('FileName').Value;
+end;
+
+
+procedure OnEndReport;
+begin
+  ShowMessage('Экспорт здійснено успішно.');
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'CREDITS_AVG') then
+  begin
+    if (not Field.DataSet.FieldByName('CREDITS_AVG').IsNull)  then
+      Field.Value := Format('%d', [round(Field.DataSet.FieldByName('CREDITS_AVG').Value)])
+  end
+  else
+  if Field.FieldName ='DISCIPLINE' then
+  begin
+    if not Field.DataSet.FieldByName('DISCIPLINE_ENG').IsNull then
+      Field.Value := Field.Value + ' - ' + Field.DataSet.FieldByName('DISCIPLINE_ENG').AsString;
+  end;
+  
+  // ASCII -&gt; UTF8
+  Field.Value := AnsiToUtf8(Field.Value);
+end;
+
+begin
+end.</Script><Events OnEndReport="OnEndReport"/></Report>

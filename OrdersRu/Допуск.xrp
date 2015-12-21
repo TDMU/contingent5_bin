@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Допуск" ProgressMax="100" EncodeText="False" ID="{3E2BF48E-2A9B-4E7F-B7C3-7837CFB85D2D}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/></UserParameters><Bands><Band Name="dsStudent" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudent_OnAfterCreateDataSet" OnGetFieldData="dsStudent_OnGetFieldData"/><SQL>1
+</SQL></Band><Band Name="grGroupNum" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="grStudentList" Master="grGroupNum" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet"/></Band></Bands><SQL>1
+</SQL><Events OnAfterCreateDataSet="grGroupNum_OnAfterCreateDataSet"/></Band></Bands><Script>procedure grGroupNum_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  s: string;
+begin
+  Params.Item('StudentsID').Value :=
+    HostAppl.Data.GetSelectedList('STUDENTID');
+  
+  s := HostAppl.Data.GetSQL('GROUPNUM') +
+     ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  ds.SelectSQL.Text := StringReplace(s, 'select', 'select distinct', 0);
+end;
+
+
+procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,COUNTRYNAME,GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) ' +
+    ' and ' + HostAppl.Data.GetAliasForField('GROUPNUM') +
+    '.GROUPNUM = ?MAS_GROUPNUM order by 1';
+end;
+
+
+procedure dsStudent_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('EDULEVEL,SEMESTER,EDUYEARSTR,SPECIALITY,COURSE,DEPARTMENT_CASE2') +
+    ' where S.STUDENTID = ?STUDENTID ';
+     
+  Params.Item('STUDENTID').Value := HostAppl.Data.GetData('STUDENTID');
+end;
+
+
+procedure OnStartReport;
+var
+  AccessType_KEY: string;
+begin
+  AccessType_KEY := OrderParams.Item('AccessType_KEY').Value;
+  
+  if (AccessType_KEY &lt;&gt; '12000')
+     and (AccessType_KEY &lt;&gt; '12002')
+     and (AccessType_KEY &lt;&gt; '12004')
+     and (AccessType_KEY &lt;&gt; '12006')
+     and (AccessType_KEY &lt;&gt; '12008')
+     and (AccessType_KEY &lt;&gt; '12010')
+     and (AccessType_KEY &lt;&gt; '12012')  then
+        RaiseException('Необходимо сначала добавить соответствующую шапку приказа.');
+  
+  Params.Item('AccessType_KEY').Value := AccessType_KEY;
+
+  Params.Item('AccessType').Value :=
+    OrderParams.Item('AccessType').Value;
+end;
+
+
+procedure dsStudent_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+  Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+begin
+end.</Script><Events OnStartReport="OnStartReport" OnEndReport=""/></Report>

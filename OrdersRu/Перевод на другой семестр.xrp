@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перевод на другой семестр" ProgressMax="100" EncodeText="False" ID="{B47C6598-7507-4879-B07E-D9DE8DC6398F}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams=""/><Parameter Name="AfterRetake" DisplayLabel="После пересдачи" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="grVis1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsGroupNum" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="dsStudentsGroup" Master="dsGroupNum" AutoOpen="True" UniDirectional="True" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet"/></Band></Bands><SQL>1
+</SQL><Events OnAfterCreateDataSet="grGroupNum_OnAfterCreateDataSet"/></Band></Bands><Events OnFirstPrintBand="grVis1_OnFirstPrintBand" OnGetFieldData="grVis1_OnGetFieldData"/></Band><Band Name="grVis2" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="grVis2_OnFirstPrintBand" OnGetFieldData=""/><Bands><Band Name="dsStudents" Master="" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/></Band></Bands></Band></Bands><Script>var
+  No: Integer;
+
+procedure grGroupNum_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  s: string;
+begin
+  s := HostAppl.Data.GetSQL('GROUPNUM') +
+       ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  ds.SelectSQL.Text := StringReplace(s, 'select', 'select distinct', 0);
+end;
+
+
+procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,COUNTRYNAME,GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) ' +
+    ' and ' + HostAppl.Data.GetAliasForField('GROUPNUM') +
+    '.GROUPNUM = ?MAS_GROUPNUM ' +
+    'order by ' + HostAppl.Data.GetAliasForField('FIO') + '.FIO';
+end;
+
+
+procedure OnStartReport;
+var
+  NewSemester: string;
+  NewEduYear: string;
+  NewEduYearStr: string;
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+
+  NewSemester := OrderParams.Item('NewSemester_SEMESTER').Value;
+  NewEduYear := OrderParams.Item('NewEduYear_EDUYEAR').Value;
+  NewEduYearStr := OrderParams.Item('NewEduYear_EDUYEARSTR').Value;
+
+  if (NewSemester = '') or (NewEduYear = '') then
+    RaiseException('Необходимо сначала добавить соответствующую шапку приказа.');
+  
+  Params.Item('NewSemester_SEMESTER').Value := NewSemester;
+  Params.Item('NewEduYear_EDUYEAR').Value := NewEduYear;
+  Params.Item('NewEduYear_EDUYEARSTR').Value := NewEduYearStr;
+  Params.Item('DEPARTMENT_CASE2').Value := OrderParams.Item('DEPARTMENT_CASE2').Value;
+  Params.Item('EDUFORM_RUS_CASE2').Value := OrderParams.Item('EDUFORM_RUS_CASE2').Value;
+  Params.Item('EDULEVEL').Value := OrderParams.Item('EDULEVEL').Value;
+  Params.Item('SPECIALITY').Value := OrderParams.Item('SPECIALITY').Value;
+  Params.Item('CODE').Value := OrderParams.Item('CODE').Value;
+  Params.Item('EDUDIRECTION').Value := OrderParams.Item('EDUDIRECTION').Value;
+  Params.Item('EDUDIRECTION_CODE').Value := OrderParams.Item('EDUDIRECTION_CODE').Value;
+  Params.Item('EDUBASIS_RUS_CASE9').Value := OrderParams.Item('EDUBASIS_RUS_CASE9').Value;
+  Params.Item('EDUTERMNAME').Value := OrderParams.Item('EDUTERMNAME').Value;
+  Params.Item('COURSE').Value := ((OrderParams.Item('SEMESTER').Value + 1) div 2);
+  Params.Item('SEMESTER').Value := OrderParams.Item('SEMESTER').Value;
+  Params.Item('EDUYEARSTR').Value := OrderParams.Item('EDUYEARSTR').Value;
+  Params.Item('EDU_TYPE').Value := OrderParams.Item('EDU_TYPE').Value;
+end;
+
+
+procedure grVis1_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  No := 0;
+  Band.Stop := Params.Item('AfterRetake').Value;
+end;
+
+
+procedure grVis2_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('AfterRetake').Value
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,COUNTRYNAME,GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+end;
+
+
+procedure grVis1_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'No')then
+  begin
+    Inc(No);
+    Field.Value := IntToStr(No);
+  end;
+end;
+
+begin
+end.</Script><Events OnStartReport="OnStartReport" OnEndReport=""/></Report>

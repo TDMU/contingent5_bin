@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов с суммой баллов за семестр  ECTS" ProgressMax="100" EncodeText="False" ID="{2E17D5EA-E613-47ED-A7E5-EFC052927106}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 2" CommonValue="False"/><Parameter Name="EduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.FIO, S.GROUPNUM,
+(select  sum(S2P.CREDITS_AVG + S2P.STIMULATIONMARKS)
+ from STUDENT2PROTOCOL S2P
+ left join RANKING_PROTOCOLS RP
+   on (RP.PROTOCOLID = S2P.PROTOCOLID)
+ inner join V_LASTPROTOCOL VLP
+   on (S2P.PROTOCOLID = VLP.PROTOCOLID
+      and VLP.STUDENTID = S2P.STUDENTID
+       and VLP.EDUYEAR = RP.EDUYEAR
+       and VLP.SEMESTER = RP.SEMESTER
+       and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+ where (S2P.STUDENTID = S.STUDENTID)
+   and (RP.SEMESTER =  ?Semester_SEMESTER)
+   and (RP.EDUYEAR = ?EduYear_EDUYEAR)
+   and (S2P.TRADITIONALMARK &gt; 0)
+) as SUMMARK,
+
+(select  sum(S2P.CREDITS_AVG + S2P.STIMULATIONMARKS)
+ from STUDENT2PROTOCOL S2P
+ left join RANKING_PROTOCOLS RP
+   on (RP.PROTOCOLID = S2P.PROTOCOLID)
+ inner join V_LASTPROTOCOL VLP
+   on (S2P.PROTOCOLID = VLP.PROTOCOLID
+      and VLP.STUDENTID = S2P.STUDENTID
+       and VLP.EDUYEAR = RP.EDUYEAR
+       and VLP.SEMESTER = RP.SEMESTER
+       and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+ where (S2P.STUDENTID = S.STUDENTID)
+--   and (RP.SEMESTER =  ?Semester_SEMESTER)
+   and (RP.EDUYEAR = ?EduYear_EDUYEAR)
+   and (S2P.TRADITIONALMARK &gt; 0)
+) as SUMMARKYEAR
+
+from STUDENTS S
+where S.STUDENTID in (@@STUDENTSID%0@)
+order by S.GROUPNUM, S.FIO
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'AvgMark' then
+  begin
+    if Field.Value &lt;&gt; '' then
+      Field.Value := FormatFloat(Params.Item('Precision_KEY').Value, Field.Value);
+  end;
+end;
+
+
+begin
+end.</Script></Report>

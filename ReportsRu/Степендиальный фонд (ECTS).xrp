@@ -1,0 +1,491 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Степендиальный фонд (ECTS)" ProgressMax="100" EncodeText="False" ID="{8DE9F890-C410-4207-9009-7FB5C2F5C546}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 2"/><Parameter Name="EduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams" OnAfterCreateParams="" OnBeforeQueryParams=""/></UserParameters><Bands><Band Name="dsStudents_5" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT
+
+from STUDENTS S
+where S.STUDENTID in (@@STUDENTSID%0@)
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 5
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK between 2 and 4
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforeOpenDataSet="" OnAfterOpenDataSet="" OnGetFieldData=""/></Band><Band Name="dsStudents_45" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT
+
+from STUDENTS S
+where S.STUDENTID in (@@STUDENTSID%0@)
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 4
+    )
+  )
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 5
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK between 2 and 3
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL></Band><Band Name="dsStudents_4" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT
+
+from STUDENTS S
+where S.STUDENTID in (@@STUDENTSID%0@)
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 4
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and ((S2P.TRADITIONALMARK between 2 and 3) or (S2P.TRADITIONALMARK = 5))
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL></Band><Band Name="dsStudentsPrivilege_5" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT,
+GP.PRIVILEGE,
+S.ORPHAN
+from STUDENTS S
+left join GUIDE_PRIVILEGE GP
+  on GP.PRIVILEGEID = S.PRIVILEGEID
+where S.STUDENTID in (@@STUDENTSID%0@)
+and ((S.ORPHAN = 1)                                                             -- сирота
+   or (GP.PRIVILEGEID in (1, 19, 10)) -- інвалід І або ІІ групи,  інвалід дитинства,  (10 сирота  (это при поступлении) ???)
+   )
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 5
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK between 2 and 4
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL></Band><Band Name="dsStudentsPrivilege_45" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT,
+GP.PRIVILEGE,
+S.ORPHAN
+from STUDENTS S
+left join GUIDE_PRIVILEGE GP
+  on GP.PRIVILEGEID = S.PRIVILEGEID
+where S.STUDENTID in (@@STUDENTSID%0@)
+and ((S.ORPHAN = 1)                                                             -- сирота
+   or (GP.PRIVILEGEID in (1, 19, 10)) -- інвалід І або ІІ групи,  інвалід дитинства,  (10 сирота  (это при поступлении) ???)
+   )
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 4
+    )
+  )
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 5
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK between 2 and 3
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL></Band><Band Name="dsStudentsPrivilege_4" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT,
+GP.PRIVILEGE,
+S.ORPHAN
+from STUDENTS S
+left join GUIDE_PRIVILEGE GP
+  on GP.PRIVILEGEID = S.PRIVILEGEID
+where S.STUDENTID in (@@STUDENTSID%0@)
+and ((S.ORPHAN = 1)                                                             -- сирота
+   or (GP.PRIVILEGEID in (1, 19, 10)) -- інвалід І або ІІ групи,  інвалід дитинства,  (10 сирота  (это при поступлении) ???)
+   )
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 4
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and ((S2P.TRADITIONALMARK between 2 and 3) or (S2P.TRADITIONALMARK = 5))
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL></Band><Band Name="dsStudentsPrivilege_3" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.STUDENTID, S.FIO, S.GROUPNUM,
+(
+  select count(*)
+  from STUDENT2TESTLIST S2T
+  inner join B_TESTLIST BTL
+  on (BTL.TESTLISTID = S2T.TESTLISTID)
+  where (S2T.STUDENTID = S.STUDENTID)
+  and (BTL.SEMESTER = ?Semester_SEMESTER)
+  and (BTL.EDUYEAR = ?EduYear_EDUYEAR)
+  and (BTL.ISRETAKE = 1)
+) as RETAKECOUNT,
+GP.PRIVILEGE,
+S.ORPHAN
+from STUDENTS S
+left join GUIDE_PRIVILEGE GP
+  on GP.PRIVILEGEID = S.PRIVILEGEID
+where S.STUDENTID in (@@STUDENTSID%0@)
+and ((S.ORPHAN = 1)                                                             -- сирота
+   or (GP.PRIVILEGEID in (1, 19, 10)) -- інвалід І або ІІ групи,  інвалід дитинства,  (10 сирота  (это при поступлении) ???)
+   )
+and
+  (exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 3
+    )
+  )
+and
+  (not exists(
+     select *
+     from STUDENT2PROTOCOL S2P
+     inner join RANKING_PROTOCOLS RP
+       on (RP.PROTOCOLID = S2P.PROTOCOLID)
+     inner join GUIDE_ECTS GE
+       on (GE.ECTS = S2P.ECTS)
+     inner join V_LASTPROTOCOL VLP
+       on S2P.PROTOCOLID = VLP.PROTOCOLID
+         and VLP.STUDENTID = S2P.STUDENTID
+         and VLP.EDUYEAR = RP.EDUYEAR
+         and VLP.SEMESTER = RP.SEMESTER
+         and VLP.DISCIPLINEID = RP.DISCIPLINEID
+     where S2P.STUDENTID = S.STUDENTID
+      and RP.SEMESTER = ?Semester_SEMESTER
+      and RP.EDUYEAR = ?EduYear_EDUYEAR
+      and S2P.TRADITIONALMARK = 2
+    )
+  )
+
+order by S.GROUPNUM, S.FIO
+</SQL></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+begin
+end.</Script></Report>

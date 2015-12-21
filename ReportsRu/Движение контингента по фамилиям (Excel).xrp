@@ -1,0 +1,462 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Движение контингента по фамилиям (Excel)" ProgressMax="100" EncodeText="False" ID="{9421E8F3-E0DC-4725-B1CE-5CD1554285CF}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="C какой даты:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="По какую дату:" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Department" DisplayLabel="Факультет" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select DEPARTMENTID, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE=1
+order by DEPARTMENT" CommonValue="False"/><Parameter Name="Reason1" DisplayLabel="Зачисление на курс" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="pCountryType" DisplayLabel="Тип гражданства" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="Все
+Граждане Российской Федерации
+Иностранные граждане" KeyItems="All
+РУС
+foreigners" CommonValue="False"/></UserParameters><Bands><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band><Band Name="grInOuter" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="grInOuterReason" Master="grInOuter" AutoOpen="True" UniDirectional="False"><SQL>select
+  (select first 1 HSF.FIO
+  from HS_FIO HSF
+  where HSF.STUDENTID = V_SO.STUDENTID
+  and HSF.BEGINDATE &lt;= VHMF.BEGINDATE
+  order by HSF.BEGINDATE desc) as FIO,
+
+  V_SO.ORDERNUM,
+  V_SO.ORDERDATE,
+  cast(((VHMF.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+  (G_SP.CODE || ' - ' || G_SP.SPECIALITY) as SPECIALITY,
+  G_EB.EDUBASIS as EDUBASIS,
+  G_ET.EDUTERMNAME as EDUTERM,
+  G_EF.EDUFORM as EDUFORM,
+
+  (select first 1 HS_GN.GROUPNUM
+  from HS_GROUPNUM HS_GN
+  where HS_GN.STUDENTID = V_SO.STUDENTID
+    and HS_GN.BEGINDATE &lt;= VHMF.BEGINDATE
+  order by HS_GN.BEGINDATE desc
+  ) as GROUPNUM,
+  
+  (select S.NOTE from STUDENTS S where S.STUDENTID = V_SO.STUDENTID) as NOTE
+
+from V_STUDENTORDERS V_SO
+  inner join V_MOVEMENT_FULL VHMF on (VHMF.STUDENTID = V_SO.STUDENTID and VHMF.ORDERID = V_SO.ORDERID)
+  inner join V_GUIDE_SPECIALITY G_SP on (G_SP.SPECIALITYID = VHMF.SPECIALITYID) -- Нов Специальность
+  inner join V_GUIDE_EDUBASIS G_EB on (G_EB.EDUBASISID = VHMF.EDUBASISID) -- Нов форма финансирования
+  inner join V_GUIDE_EDUFORM G_EF on (G_EF.EDUFORMID = VHMF.EDUFORMID) -- Нов Форма обучения
+  left join V_GUIDE_EDUTERM G_ET on (G_ET.EDUTERM = VHMF.EDUTERM)
+where
+  V_SO.REASONID = ?MAS_REASONID
+  and VHMF.BEGINDATE &gt;= ?FromDate
+  and VHMF.BEGINDATE &lt;= ?ToDate
+  and VHMF.DEPARTMENTID = ?Department_DEPARTMENTID
+  @@COUNTRYTYPE@
+
+order by V_SO.ORDERDATE
+</SQL><Events OnBeforeOpenDataSet="grInOuterReason_OnBeforeOpenDataSet"/></Band></Bands><SQL>select distinct GR.REASONID, GR.REASON, 0 as RECORDCOUNT
+from V_GUIDE_REASON GR
+  inner join REASONTOCATEGORY RTC on (GR.REASONID = RTC.REASONID)
+WHERE ((RTC.REASONCATEGORYID = 2) ---Зарахування
+  and (not GR.REASONID in (1,5))) or ((GR.REASONID in (1,5)) and (@@Reason1%#1@ = 'True'))
+order by 2
+</SQL><Events OnGetFieldData="grInOuter_OnGetFieldData"/></Band><Band Name="grInInner" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="grInInnerReason" Master="grInInner" AutoOpen="True" UniDirectional="False"><SQL>select
+  (select first 1 HSF.FIO
+  from HS_FIO HSF
+  where HSF.STUDENTID = V_SO.STUDENTID
+  and HSF.BEGINDATE &lt;= VHMF.BEGINDATE
+  order by HSF.BEGINDATE desc) as FIO,
+
+  V_SO.ORDERNUM, V_SO.ORDERDATE,
+  cast(((VHMF.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+-- Новое состояние
+  (G_SP.CODE || ' - ' || G_SP.SPECIALITY) as SPECIALITY,
+  G_EB.EDUBASIS as EDUBASIS,
+  G_ET.EDUTERMNAME as EDUTERM,
+  G_EF.EDUFORM as EDUFORM, G_D.DEPARTMENT,
+
+  (select first 1 HS_GN.GROUPNUM
+  from HS_GROUPNUM HS_GN
+  where HS_GN.STUDENTID = V_SO.STUDENTID
+    and HS_GN.BEGINDATE &lt;= VHMF.BEGINDATE
+  order by HS_GN.BEGINDATE desc
+  ) as GROUPNUM,
+
+-- предыдущее состояние
+  (G_SP1.CODE || ' - ' || G_SP1.SPECIALITY) as SPECIALITY1,
+  G_EB1.EDUBASIS as EDUBASIS1,
+  G_ET1.EDUTERMNAME as EDUTERM1,
+  G_D1.DEPARTMENT as DEPARTMENT1,
+  G_EF1.EDUFORM as EDUFORM1,
+  '' as CHANGES,
+  
+  (select S.NOTE from STUDENTS S where S.STUDENTID = V_SO.STUDENTID) as NOTE
+  
+from V_STUDENTORDERS V_SO
+  inner join V_MOVEMENT_FULL VHMF
+  on (VHMF.STUDENTID = V_SO.STUDENTID
+    and VHMF.ORDERID = V_SO.ORDERID)   -- Новое состояние
+  inner join V_STATEBEFOREORDER V_SBO
+  on V_SBO.ORDERID = V_SO.ORDERID
+    and V_SBO.STUDENTID = V_SO.STUDENTID
+    and V_SBO.REASONID = ?MAS_REASONID --Предыдушее состояние
+-- из справочников
+  inner join GUIDE_SPECIALITY G_SP on (G_SP.SPECIALITYID = VHMF.SPECIALITYID) -- Нов Специальность
+  inner join V_GUIDE_EDUBASIS G_EB on (G_EB.EDUBASISID = VHMF.EDUBASISID) -- Нов форма финансирования
+  inner join V_GUIDE_EDUFORM G_EF on (G_EF.EDUFORMID = VHMF.EDUFORMID) -- Нов Фориа обучения
+  inner join V_GUIDE_DEPARTMENT G_D on (G_D.DEPARTMENTID = VHMF.DEPARTMENTID) -- Нов факультет
+  left join V_GUIDE_EDUTERM G_ET on (G_ET.EDUTERM = VHMF.EDUTERM) -- Новый срок обучения
+-- предыдущее состояние
+  inner join GUIDE_SPECIALITY G_SP1 on (V_SBO.SPECIALITYID = G_SP1.SPECIALITYID) -- Предыдуш Специальность
+  inner join V_GUIDE_EDUBASIS G_EB1 on (V_SBO.EDUBASISID = G_EB1.EDUBASISID) -- Предыдуш форма финансирования
+  inner join V_GUIDE_EDUFORM G_EF1 on (V_SBO.EDUFORMID = G_EF1.EDUFORMID) -- Предыдуш Форма обучения
+  inner join V_GUIDE_DEPARTMENT G_D1 on (V_SBO.DEPARTMENTID = G_D1.DEPARTMENTID) -- Предыдуш факультет
+  left join V_GUIDE_EDUTERM G_ET1 on (G_ET1.EDUTERM = V_SBO.EDUTERM) -- Предыдущий срок обучения
+--     inner join GUIDE_EDUTERM G_ET on (HS_M.EDU
+where V_SO.REASONID = ?MAS_REASONID
+  and VHMF.BEGINDATE &gt;= ?FromDate
+  and VHMF.BEGINDATE &lt;= ?ToDate
+  and VHMF.DEPARTMENTID = ?Department_DEPARTMENTID
+  @@COUNTRYTYPE@
+
+order by V_SO.ORDERDATE
+</SQL><Events OnGetFieldData="grInInnerReason_OnGetFieldData" OnBeforeOpenDataSet="grInOuterReason_OnBeforeOpenDataSet"/></Band></Bands><SQL>select G_R.REASONID, G_R.REASONFULL1 as REASON, 0 as RECORDCOUNT
+from V_GUIDE_REASON G_R
+  inner join REASONTOCATEGORY RTC on (G_R.REASONID = RTC.REASONID)
+WHERE RTC.REASONCATEGORYID = 8 ---Переведення
+order by 1
+</SQL><Events OnGetFieldData="grInInner_OnGetFieldData"/></Band><Band Name="grOutOuter" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="grOutOuterReason" Master="grOutOuter" AutoOpen="True" UniDirectional="False"><SQL>select
+  (select first 1 HSF.FIO
+   from HS_FIO HSF
+   where HSF.STUDENTID = V_SO.STUDENTID
+   and HSF.BEGINDATE &lt;= VHMF.BEGINDATE
+   order by HSF.BEGINDATE desc) as FIO,
+
+   V_SO.ORDERNUM, V_SO.ORDERDATE,
+   cast(((VHMF.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+   (G_SP.CODE || ' - ' || G_SP.SPECIALITY) as SPECIALITY,
+   G_EB.EDUBASIS as EDUBASIS,
+   G_ET.EDUTERMNAME as EDUTERM, G_EF.EDUFORM as EDUFORM,
+
+   (select first 1 HS_GN.GROUPNUM
+    from HS_GROUPNUM HS_GN
+    where HS_GN.STUDENTID = V_SO.STUDENTID
+    and HS_GN.BEGINDATE &lt;= VHMF.ORDERDATE
+    order by HS_GN.BEGINDATE desc
+   ) as GROUPNUM,
+   (V_SBO.STATUS || ' - &gt; ' || gs.STATUS) as CHANGESTATUS,
+   (select S.NOTE from STUDENTS S where S.STUDENTID = V_SO.STUDENTID) as NOTE
+
+from V_STUDENTORDERS V_SO
+
+inner join V_MOVEMENT_FULL VHMF
+on (VHMF.STUDENTID = V_SO.STUDENTID
+and VHMF.ORDERID = V_SO.ORDERID)    -- Новое состояние
+
+  inner join V_STATEBEFOREORDER V_SBO
+  on (V_SBO.ORDERID = V_SO.ORDERID
+    and V_SBO.STUDENTID = V_SO.STUDENTID
+--    and V_SBO.REASONID = ?MAS_REASONID
+     )  --Предыдушее состояние
+
+inner join GUIDE_SPECIALITY G_SP
+on (G_SP.SPECIALITYID = VHMF.SPECIALITYID) -- Нов Специальность
+
+inner join V_GUIDE_EDUBASIS G_EB
+on (G_EB.EDUBASISID = VHMF.EDUBASISID) -- Нов форма финансирования
+
+inner join V_GUIDE_EDUFORM G_EF
+on (G_EF.EDUFORMID = VHMF.EDUFORMID) -- Нов Форма обучения
+
+left join V_GUIDE_EDUTERM G_ET
+on (G_ET.EDUTERM = VHMF.EDUTERM)  -- Нов срок обучения
+
+inner join V_GUIDE_STATUS gs    -- Нов статус
+on gs.STATUS = vhmf.STATUS
+
+
+
+where VHMF.BEGINDATE &gt;= ?FromDate
+  and VHMF.BEGINDATE &lt;= ?ToDate
+  and V_SO.REASONID = ?MAS_REASONID
+  and VHMF.DEPARTMENTID = ?Department_DEPARTMENTID
+  @@COUNTRYTYPE@
+
+order by V_SO.ORDERDATE
+</SQL><Events OnBeforeOpenDataSet="grInOuterReason_OnBeforeOpenDataSet"/></Band></Bands><SQL>select G_R.REASONID, G_R.REASON, 0 as RECORDCOUNT
+from V_GUIDE_REASON G_R
+     inner join REASONTOCATEGORY RTC on (G_R.REASONID = RTC.REASONID)
+     ---inner join GUIDE_REASONCATEGORY G_RC on (RTC.REASONCATEGORYID = G_RC.REASONCATEGORYID)
+WHERE RTC.REASONCATEGORYID = 3 ---Відрахування
+order by 1
+</SQL><Events OnGetFieldData="grOutOuter_OnGetFieldData"/></Band><Band Name="grOutInner" AutoOpen="True" UniDirectional="False" Master=""><Bands><Band Name="grOutInnerReason" Master="grOutInner" AutoOpen="True" UniDirectional="False"><SQL>select
+  (select first 1 HSF.FIO
+   from HS_FIO HSF
+   where HSF.STUDENTID = V_SO.STUDENTID
+   and HSF.BEGINDATE &lt;= VHMF.BEGINDATE
+   order by HSF.BEGINDATE desc) as FIO,
+
+  V_SO.ORDERNUM,
+  V_SO.ORDERDATE,
+  cast(((V_SBO.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+-- Новое состояние
+  (G_SP.CODE || ' - ' || G_SP.SPECIALITY) as SPECIALITY,
+  G_EB.EDUBASIS as EDUBASIS,
+  G_ET.EDUTERMNAME as EDUTERM,
+  G_EF.EDUFORM as EDUFORM,
+  G_D.DEPARTMENT,
+-- предыдущее состояние
+  (G_SP1.CODE || ' - ' || G_SP1.SPECIALITY) as SPECIALITY1,
+  G_EB1.EDUBASIS as EDUBASIS1,
+  G_ET1.EDUTERMNAME as EDUTERM1,
+  G_D1.DEPARTMENT as DEPARTMENT1,
+  G_EF1.EDUFORM as EDUFORM1,
+
+  (select first 1 HS_GN.GROUPNUM
+  from HS_GROUPNUM HS_GN
+  where HS_GN.STUDENTID = V_SO.STUDENTID
+    and HS_GN.BEGINDATE &lt; VHMF.BEGINDATE
+  order by HS_GN.BEGINDATE desc
+  ) as GROUPNUM,
+  '' as CHANGES,
+
+  (select S.NOTE from STUDENTS S where S.STUDENTID = V_SO.STUDENTID) as NOTE
+
+from V_STUDENTORDERS V_SO
+  inner join V_MOVEMENT_FULL VHMF
+  on (VHMF.STUDENTID=V_SO.STUDENTID
+    and VHMF.ORDERID = V_SO.ORDERID) -- Новое состояние
+  inner join V_STATEBEFOREORDER V_SBO
+  on (V_SBO.ORDERID = V_SO.ORDERID
+    and V_SBO.STUDENTID = V_SO.STUDENTID
+    and V_SBO.REASONID = ?MAS_REASONID) --Предыдушее состояние
+-- из справочников
+  inner join GUIDE_SPECIALITY G_SP on (G_SP.SPECIALITYID = VHMF.SPECIALITYID) -- Нов Специальность
+  inner join V_GUIDE_EDUBASIS G_EB on (G_EB.EDUBASISID = VHMF.EDUBASISID) -- Нов форма финансирования
+  inner join V_GUIDE_EDUFORM G_EF on (G_EF.EDUFORMID = VHMF.EDUFORMID) -- Нов Фориа обучения
+  inner join V_GUIDE_DEPARTMENT G_D on (G_D.DEPARTMENTID = VHMF.DEPARTMENTID) -- Нов факультет
+  left join V_GUIDE_EDUTERM G_ET on (G_ET.EDUTERM = VHMF.EDUTERM) -- Нов срок обучения
+-- предыдущее состояние
+  inner join GUIDE_SPECIALITY G_SP1 on (V_SBO.SPECIALITYID = G_SP1.SPECIALITYID) -- Предыдуш Специальность
+  inner join V_GUIDE_EDUBASIS G_EB1 on (V_SBO.EDUBASISID = G_EB1.EDUBASISID) -- Предыдуш форма финансирования
+  inner join V_GUIDE_EDUFORM G_EF1 on (V_SBO.EDUFORMID = G_EF1.EDUFORMID) -- Предыдуш Форма обучения
+  inner join V_GUIDE_DEPARTMENT G_D1 on (V_SBO.DEPARTMENTID = G_D1.DEPARTMENTID) -- Предыдуш факультет
+  left join V_GUIDE_EDUTERM G_ET1 on (G_ET1.EDUTERM = V_SBO.EDUTERM) -- Нов срок обучения
+--     inner join GUIDE_EDUTERM G_ET on (HS_M.EDU
+
+where V_SO.REASONID = ?MAS_REASONID
+  and VHMF.BEGINDATE &gt;= ?FromDate
+  and VHMF.BEGINDATE &lt;= ?ToDate
+  and G_D1.DEPARTMENTID = ?Department_DEPARTMENTID
+  @@COUNTRYTYPE@
+  
+order by V_SO.ORDERDATE
+</SQL><Events OnGetFieldData="grInInnerReason_OnGetFieldData" OnBeforeOpenDataSet="grInOuterReason_OnBeforeOpenDataSet"/></Band></Bands><SQL>select G_R.REASONID, G_R.REASONFULL as REASON, 0 as RECORDCOUNT
+from V_GUIDE_REASON G_R
+     inner join REASONTOCATEGORY RTC on (G_R.REASONID = RTC.REASONID)
+     ---inner join GUIDE_REASONCATEGORY G_RC on (RTC.REASONCATEGORYID = G_RC.REASONCATEGORYID)
+WHERE RTC.REASONCATEGORYID = 8 ---Переведення
+order by 1
+</SQL><Events OnGetFieldData="grOutInner_OnGetFieldData"/></Band><Band Name="grCountryChange" AutoOpen="True" UniDirectional="False" Master=""><SQL>select HC.STUDENTID, HC.BEGINDATE, HC.COUNTRYID, HC.ORDERID, HC.PACKAGEID,
+  HCB.COUNTRYID as B_COUNTRYID,
+
+  (select first 1 HSF.FIO
+  from HS_FIO HSF
+  where HSF.STUDENTID = HC.STUDENTID
+  and HSF.BEGINDATE &lt; HC.BEGINDATE
+  order by HSF.BEGINDATE desc) as FIO,
+
+  O.ORDERNUM,
+  O.ORDERDATE,
+
+  cast(((HMF.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE,
+
+  (select first 1 HS_GN.GROUPNUM
+  from HS_GROUPNUM HS_GN
+  where HS_GN.STUDENTID = HC.STUDENTID
+    and HS_GN.BEGINDATE &lt; HC.BEGINDATE
+  order by HS_GN.BEGINDATE desc) as GROUPNUM,
+
+  (coalesce(GCB.COUNTRYNAME, 'нет') || ' -&gt; ' || GC.COUNTRYNAME ||
+    ' (' || coalesce(GCB.COUNTRYTYPE, 'нет') || ' -&gt; ' || GC.COUNTRYTYPE || ')') as CHANGES,
+
+  (G_SP.CODE || ' - ' || G_SP.SPECIALITY) as SPECIALITY,
+  G_EB.EDUBASIS as EDUBASIS,
+  G_ET.EDUTERMNAME as EDUTERM,
+  G_EF.EDUFORM as EDUFORM,
+
+  (select S.NOTE from STUDENTS S where S.STUDENTID = HC.STUDENTID) as NOTE
+
+from HS_COUNTRY HC
+inner join V_GUIDE_COUNTRY GC
+  on (GC.COUNTRYID = HC.COUNTRYID)
+left join ORDERS O
+  on (O.ORDERID = HC.ORDERID)
+
+-- state before
+left join HS_COUNTRY HCB
+  on (HCB.STUDENTID = HC.STUDENTID)
+    and (HCB.BEGINDATE &lt; HC.BEGINDATE)
+left join V_GUIDE_COUNTRY GCB
+  on (GCB.COUNTRYID = HCB.COUNTRYID)
+
+left join HS_MOVEMENT_FULL HMF
+  on (HMF.STUDENTID = HC.STUDENTID)
+    and (HMF.BEGINDATE &lt;= HC.BEGINDATE - 1) -- день раньше. т.к. на день
+    and (HMF.ENDDATE &gt; HC.BEGINDATE - 1)    -- смены гр. студ. может быть уже на другой спец и т.п.
+
+left join GUIDE_SPECIALITY G_SP
+  on (G_SP.SPECIALITYID = HMF.SPECIALITYID)
+left join V_GUIDE_EDUBASIS G_EB on (G_EB.EDUBASISID = HMF.EDUBASISID) -- Нов форма финансирования
+left join V_GUIDE_EDUFORM G_EF on (G_EF.EDUFORMID = HMF.EDUFORMID) -- Нов Форма обучения
+left join V_GUIDE_EDUTERM G_ET on (G_ET.EDUTERM = HMF.EDUTERM)
+
+where HC.BEGINDATE &gt;= ?FromDate
+  and HC.BEGINDATE &lt;= ?ToDate
+  and HMF.DEPARTMENTID = ?Department_DEPARTMENTID
+  -- state before
+  and (HCB.BEGINDATE is null or
+       HCB.BEGINDATE =
+      (
+       select first 1 HSC_B.BEGINDATE
+       from HS_COUNTRY HSC_B
+       where HSC_B.STUDENTID = HC.STUDENTID
+           and HSC_B.BEGINDATE &lt; HC.BEGINDATE
+       order by HSC_B.BEGINDATE desc
+      )
+    )
+</SQL><Events OnGetFieldData=""/></Band><Band Name="grProblems1" AutoOpen="True" UniDirectional="False" Master=""><SQL>select HS_MF.STUDENTID, S.FIO, S.SEMESTER, S.GROUPNUM,
+  (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY,
+   S.OWNER, S.ARCHIVE,
+  (GD.DEPARTMENT) as DEPARTMENT,
+  S.NOTE
+from HS_MOVEMENT_FULL HS_MF
+inner join STUDENTS S
+  on (S.STUDENTID = HS_MF.STUDENTID)
+inner join GUIDE_SPECIALITY GS
+  on (GS.SPECIALITYID = S.SPECIALITYID)
+inner join V_GUIDE_DEPARTMENT GD
+  on (GD.DEPARTMENTID = S.DEPARTMENTID)
+where HS_MF.BEGINDATE &gt;= ?FromDate
+  and HS_MF.BEGINDATE &lt;= ?ToDate
+  and ((
+    select count(distinct O.ORDERNUM)
+    from HS_MOVEMENT HS_M
+    inner join ORDERS O
+      on (O.ORDERID = HS_M.ORDERID)
+    inner join STUDENTTOORDER STO
+      on (STO.STUDENTID = HS_M.STUDENTID)
+        and (STO.ORDERID = HS_M.ORDERID)
+    inner join REASONTOCATEGORY RTC
+      on (RTC.REASONID = STO.REASONID)
+    where HS_M.BEGINDATE = HS_MF.BEGINDATE
+      and HS_M.STUDENTID = HS_MF.STUDENTID
+      and RTC.REASONCATEGORYID = 1 -- Рух контингенту
+      ) &gt; 1)
+</SQL><Events OnGetFieldData=""/><Bands/></Band></Bands><Script>procedure grInInnerReason_OnGetFieldData(Field: TDBFieldInfo);
+Var
+   S : String;
+   ds: TpFibDataSet;
+begin
+   If Field.FieldName = 'CHANGES' Then Begin
+     ds := Field.DataSet;
+     S := '';
+     
+     If (ds.FieldByName('SPECIALITY').asString &lt;&gt;
+         ds.FieldByName('SPECIALITY1').asString)
+        Then S := S + ds.FieldByName('SPECIALITY1').asString + ' -&gt; '
+                    + ds.FieldByName('SPECIALITY').asString + '; ';
+     If (ds.FieldByName('EDUBASIS').asString &lt;&gt;
+         ds.FieldByName('EDUBASIS1').asString)
+        Then S := S + ds.FieldByName('EDUBASIS1').asString + ' -&gt; '
+                    + ds.FieldByName('EDUBASIS').asString + '; ';
+     If (ds.FieldByName('EDUTERM').asString &lt;&gt;
+         ds.FieldByName('EDUTERM1').asString)
+        Then S := S + ds.FieldByName('EDUTERM1').asString + ' -&gt; '
+                    + ds.FieldByName('EDUTERM').asString + '; ';
+     If (ds.FieldByName('EDUFORM').asString &lt;&gt;
+         ds.FieldByName('EDUFORM1').asString)
+        Then S := S + ds.FieldByName('EDUFORM1').asString + ' -&gt; '
+                    + ds.FieldByName('EDUFORM').asString + '; ';
+     If (ds.FieldByName('DEPARTMENT').asString &lt;&gt;
+         ds.FieldByName('DEPARTMENT1').asString)
+        Then S := S + ds.FieldByName('DEPARTMENT1').asString + ' -&gt; '
+                    + ds.FieldByName('DEPARTMENT').asString + '; ';
+                    
+     if Length(S) &gt; 2 then S := Copy(S, 1, Length(S)-2);
+     Field.Value := S;
+   End;
+end;
+
+procedure grInOuter_OnGetFieldData(Field: TDBFieldInfo);
+begin
+    If Field.FieldName = 'RECORDCOUNT' Then Begin
+       Field.Value := findDataset('grInOuterReason').RecordCount;
+    End;
+end;
+
+procedure grInInner_OnGetFieldData(Field: TDBFieldInfo);
+begin
+    If Field.FieldName = 'RECORDCOUNT' Then Begin
+       Field.Value := findDataset('grInInnerReason').RecordCount;
+    End;
+end;
+
+procedure grOutInner_OnGetFieldData(Field: TDBFieldInfo);
+begin
+    If Field.FieldName = 'RECORDCOUNT' Then Begin
+       Field.Value := findDataset('grOutInnerReason').RecordCount;
+    End;
+end;
+
+procedure grOutOuter_OnGetFieldData(Field: TDBFieldInfo);
+begin
+    If Field.FieldName = 'RECORDCOUNT' Then Begin
+       Field.Value := findDataset('grOutOuterReason').RecordCount;
+    End;
+end;
+
+procedure grInOuterReason_OnBeforeOpenDataSet(ds: TpFibDataSet);
+var
+  sql: string;
+  function Condition: string;
+  begin
+    Result := '';
+    if (Params.Item('pCountryType_KEY').Value = 'РУС') then
+      Result := '      and GC.COUNTRYTYPE = ''РУС'' '
+    else
+    if (Params.Item('pCountryType_KEY').Value &lt;&gt; 'РУС') then
+      Result := '      and GC.COUNTRYTYPE &lt;&gt; ''РУС'' ';
+  end;
+begin
+  if (Params.Item('pCountryType_KEY').Value &lt;&gt; 'All') then
+  begin
+    sql :=
+     ' and exists ( ' +
+     '    select * ' +
+     '    from HS_COUNTRY HS_C ' +
+     '      inner join GUIDE_COUNTRY GC ' +
+     '        on (GC.COUNTRYID = HS_C.COUNTRYID) ' +
+     '    where HS_C.STUDENTID = V_SO.STUDENTID ' +
+     '      and HS_C.BEGINDATE = ' +
+     '        (select first 1 HS_C1.BEGINDATE ' +
+     '         from HS_COUNTRY HS_C1 ' +
+     '         where HS_C1.STUDENTID = V_SO.STUDENTID ' +
+     '           and HS_C1.BEGINDATE &lt;= V_SO.ORDERDATE ' +
+     '         order by HS_C1.BEGINDATE desc ' +
+     '        ) ' +
+      Condition +
+     '  ) ';
+
+    ds.ParamByName('COUNTRYTYPE').AsString := sql;
+  end;
+end;
+
+
+
+procedure grItem_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  If (Field.FieldName = 'ARCHIVE') then
+  begin
+    if (Field.Value = 1) then
+       Field.Value := 'A'
+    else
+       Field.Value := '';
+  end;
+end;
+
+Begin
+End.</Script></Report>

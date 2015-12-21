@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Отчисление" ProgressMax="100" EncodeText="False" ID="{FC80101C-BC61-4825-9F81-0FD64F96CA42}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="OutDate" DisplayLabel="Дата отчисления" ParamType="Date" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Reason" DisplayLabel="Основание" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select REASONID, REASON from V_GUIDE_REASON
+where REASONID between 1000 and 1499
+and DEPRECATED = 0
+order by REASON" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="True" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforeOpenDataSet="" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL> 1
+</SQL><Bands><Band Name="dsDisciplines" Master="dsStudents" AutoOpen="False" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select GD.DISCIPLINE
+from V_LASTRETAKEMARKS VLRM
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLRM.DISCIPLINEID)
+where VLRM.STUDENTID = ?MAS_STUDENTID
+and VLRM.FORMREPORT &lt;&gt; '-'
+and VLRM.MARKID in (20,10010,10030,10040,10050)
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID,FIO,SEX,STATUS,COUNTRYNAME,SEMESTER,EDUYEARSTR,GROUPNUM,CODE,SPECIALITY,EDUBASIS_RUS_CASE9, EDUTERMNAME') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'FIO' then
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 4)
+  else
+  if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s, s1: string;
+begin
+  if Field.FieldName = 'DisciplinesText' then
+  begin
+    Field.Visible := Params.Item('Reason_REASONID').Value = 1002; //за невиконання навчального плану
+    if Field.Visible then
+    begin
+      Field.DataSet.Active := True;
+      Field.Visible := Field.DataSet.RecordCount &gt; 0;
+    end;
+  end
+  else
+  if Field.FieldName = 'Disciplines' then
+  begin
+    s := '';
+    while not Field.DataSet.Eof do
+    begin
+      s1 := Field.DataSet.FieldByName('DISCIPLINE').Value;
+      if Length(s1) &gt; 0 then s1[1] := LowerCase(s1[1]);
+      if s &lt;&gt; '' then
+        s := s + ', ' + s1
+      else
+        s := s1;
+
+      Field.DataSet.Next;
+    end;
+
+    Field.Value := s;
+//    ShowMessage(s);
+  end;
+end;
+
+
+begin
+end.</Script></Report>

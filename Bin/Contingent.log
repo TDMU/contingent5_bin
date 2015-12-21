@@ -1,0 +1,483 @@
+18.05.2015 15:46:22 [INFO] [4792] Start application initializing
+18.05.2015 15:46:22 [INFO] [4792] Start datamodule initializing
+18.05.2015 15:46:22 [INFO] [4792] End datamodule initializing
+18.05.2015 15:46:22 [INFO] [4792] End application initializing
+18.05.2015 15:46:22 [INFO] [4792] Login
+18.05.2015 15:46:26 [INFO] [4792] AllRights: actStudentListDeleteSelected,actPCardView,actPCardInsert,actJournalView,actGuideView,GuideEdit,actTestListView,actECardShowTestList,actECardAddTestList,TestListEdit,actNCOrdersView,NCOrdersEdit,actJournalDelete,actOptionsView,actStudentListFieldsVisibility,actPCardPost,actPCardCancel,PCardEdit,actNCOrdersConfirmOrder,OptionsEdit,actStudentListArch,actStudentListToArch,actStudentListFromArch,actECardView,ECardEdit,actECardAddRetake,actECardDeleteDiscipline,actECardAddPlan,actECardEditPlan,actECardDeletePlan,actCOrdersDelete,actEduPlansView,actEduPlansView_B,actEduPlansNewPlan,actEduPlansEditPlan,actEduPlansCopyPlan,EduPlanEdit,actVariantsEditorView,actEduPlansDeletePlan,actEduPlansConfirmPlan,actEduPlansDeliverPlan,actEduPlanDeliver,actTestListDelete,actPlanRaspView,PlanRaspEdit,actEduPlansExport,actCreatePackage,actGetPackage,actProtocolsView,actECardProtocolCreate,actProtocolsCreateRelative,actProtocolsDelete,actProtocolsConfirm,actGrantView,actNewAccount,actEditGrant,actDeleteGrant,actAddGrant,actSaveGrant,actCancelGrant,actDeleteAccount,actConfirmAccount,actCancelConfirmAccount,actEnterPlanView,EnterPlanEdit,actLibraryView,actAddBook,actCancelBook,actSaveBook,actDeleteBook,actOrdersViewAll,TestListControl
+18.05.2015 15:46:26 [INFO] [4792] AllowedRights: actAddBook,actAddGrant,actCancelBook,actCancelConfirmAccount,actCancelGrant,actConfirmAccount,actCOrdersDelete,actCreatePackage,actDeleteAccount,actDeleteBook,actDeleteGrant,actECardAddPlan,actECardAddRetake,actECardAddTestList,actECardDeleteDiscipline,actECardDeletePlan,actECardEditPlan,actECardProtocolCreate,actECardShowTestList,actECardView,actEditGrant,actEduPlanDeliver,actEduPlansConfirmPlan,actEduPlansCopyPlan,actEduPlansDeletePlan,actEduPlansDeliverPlan,actEduPlansEditPlan,actEduPlansExport,actEduPlansNewPlan,actEduPlansView,actEduPlansView_B,actEnterPlanView,actGetPackage,actGrantView,actGuideView,actJournalDelete,actJournalView,actLibraryView,actNCOrdersConfirmOrder,actNCOrdersView,actNewAccount,actOptionsView,actPCardCancel,actPCardInsert,actPCardPost,actPCardView,actPlanRaspView,actProtocolsConfirm,actProtocolsCreateRelative,actProtocolsDelete,actProtocolsView,actSaveBook,actSaveGrant,actStudentListArch,actStudentListDeleteSelected,actStudentListFieldsVisibility,actStudentListFromArch,actStudentListToArch,actTestListDelete,actTestListView,actVariantsEditorView,ECardEdit,EduPlanEdit,EnterPlanEdit,GuideEdit,NCOrdersEdit,PCardEdit,PlanRaspEdit,TestListEdit
+18.05.2015 15:46:26 [INFO] [4792] Start application preparing
+18.05.2015 15:46:26 [INFO] [4792] Start plugins creation
+18.05.2015 15:46:26 [INFO] [4792] End plugins creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: B_EduPlan.ContPlugin.5; GUID = {BEFC6BFF-D726-4594-915C-8FE832F7FCD3}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: ContJournal.ContPlugin.5; GUID = {D6450F07-1911-4FCC-B6F1-DFF311048DFE}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: ECard.ContPlugin.5; GUID = {3CCA2978-4876-49A7-A82C-E96F838889C8}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: EduPlan.ContPlugin.5; GUID = {4022ECF6-9D67-4ACE-BEA5-11D71ECAAEDD}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: Grant.ContPlugin.5; GUID = {539196E5-5F7A-4B3A-981B-DF8FDE20282D}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: Guide.ContPlugin.5; GUID = {3480BFB7-796F-4062-B5A4-9B2A77C5B3AE}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: Import.ContPlugin.5; GUID = {5572EEF0-B5BA-44A3-A55F-A4C9B9B67A6B}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: MOZStat.ContPlugin.5; GUID = {48E1AD10-20E1-48AC-8616-96A7604C725C}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: Options.ContPlugin.5; GUID = {551F524E-1EB1-45F3-80C9-F2411C35F489}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: Orders.ContPlugin.5; GUID = {DEF5671F-E66A-43C3-B14A-479CC0E6F2FA}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: PCard.ContPlugin.5; GUID = {455294DC-4CC2-4E5D-B481-66E8BFB5548A}
+18.05.2015 15:46:26 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:26 [INFO] [4792] Found plugin: PlanRasp.ContPlugin.5; GUID = {2E7B31B8-4DD6-40DA-A70A-07992F862099}
+18.05.2015 15:46:27 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] Found plugin: Protocols.ContPlugin.5; GUID = {110C6FA9-B7B0-4778-B0F1-EF912117DC5F}
+18.05.2015 15:46:27 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] Found plugin: Replicator.ContPlugin.5; GUID = {E955F3C1-200D-420F-A39C-A9877F3D1DCA}
+18.05.2015 15:46:27 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] Start PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] Found plugin: Reports.ContPlugin.5; GUID = {8593B1E3-10FE-4FC1-B153-4F2BB7B8AF68}
+18.05.2015 15:46:27 [INFO] [4792] End PluginItem creation
+18.05.2015 15:46:27 [INFO] [4792] PSCFltBld1ModifyPickList SEMESTER
+18.05.2015 15:46:27 [INFO] [4792] PSCFltBld1ModifyPickList DEPARTMENT
+18.05.2015 15:46:27 [INFO] [4792] PSCFltBld1ModifyPickList OWNER
+18.05.2015 15:46:27 [INFO] [4792] PSCFltBld1ModifyPickList DEPARTMENT
+18.05.2015 15:46:27 [INFO] [4792] select
+S.STUDENTID,
+S.FIO,
+S.NFIO,
+S.SEX,
+S.BIRTHDATE,
+GC.COUNTRYNAME,
+GC.COUNTRYTYPE,
+S.SEMESTER,
+GEY.EDUYEARSTR,
+GSP.SPECIALITY,
+GSPC.SPECIALITY_CODE,
+GST.STATUSNAME,
+GEF.EDUFORM,
+GEB.EDUBASIS,
+GET.EDUTERMNAME,
+GED.DEPARTMENT,
+S.GROUPNUM,
+S.OWNER,
+S.STREAM,
+S.ENTERDATE
+from
+STUDENTS S
+left join V_GUIDE_COUNTRY GC on (GC.COUNTRYID = S.COUNTRYID)
+left join V_GUIDE_SPECIALITY GSP on (GSP.SPECIALITYID = S.SPECIALITYID)
+left join V_SPECIALITYCODE GSPC on (GSPC.SPECIALITYID = S.SPECIALITYID)
+left join V_GUIDE_STATUS GST
+          on (GST.STATUS = S.STATUS)
+left join GUIDE_EDUYEAR GEY
+          on (GEY.EDUYEAR = S.EDUYEAR)
+left join V_GUIDE_EDUFORM GEF
+          on (GEF.EDUFORMID = S.EDUFORMID)
+left join V_GUIDE_EDUBASIS GEB
+          on (GEB.EDUBASISID = S.EDUBASISID)
+left join V_GUIDE_EDUTERM GET
+          on (GET.EDUTERM = S.EDUTERM)
+left join V_GUIDE_DEPARTMENT GED
+          on (GED.DEPARTMENTID = S.DEPARTMENTID)
+
+  WHERE (S.ARCHIVE = 0) and (1=1)
+ORDER BY 6
+
+18.05.2015 15:46:29 [INFO] [4792] End application preparing
+18.05.2015 15:46:35 [INFO] [4792] Begin TfmNCOrders.CreateOrder
+18.05.2015 15:46:35 [INFO] [4792] Begin TTAKReport.Initialize
+18.05.2015 15:46:35 [INFO] [4792] End TTAKReport.Initialize
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 1
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:35 [INFO] [4792] Begin TTAKReport.Open(FileName = C:\Program Files (x86)\CSMU\Contingent5\Orders\Бланк.xrp). RefCount = 1
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 3
+18.05.2015 15:46:35 [INFO] [4792] TAKReportWrapper.Create(FileName = C:\Program Files (x86)\CSMU\Contingent5\Orders\Бланк.xrp)
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 4
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 5
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] Start TAKReportBase.Create
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] End TAKReportBase.Create
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:35 [INFO] [4792] Start TAKReportBase.ParseReportEvents
+18.05.2015 15:46:35 [INFO] [4792] Events: OnBeforeQueryParams=OnBeforeQueryParams
+OnAfterQueryParams=OnAfterQueryParams
+root_OnGetFieldData=root_OnGetFieldData
+OnEndReport=OnEndReport
+
+18.05.2015 15:46:35 [INFO] [4792] End TAKReportBase.ParseReportEvents
+18.05.2015 15:46:35 [INFO] [4792] Start TAKReportBase.PrepareScript
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] End TAKReportBase.PrepareScript
+18.05.2015 15:46:35 [INFO] [4792] Begin TAKReportBase.FillUserParams
+18.05.2015 15:46:35 [INFO] [4792] End TAKReportBase.FillUserParams
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 4
+18.05.2015 15:46:35 [INFO] [4792] End TTAKReport.Open. RefCount = 4
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 5
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:35 [INFO] [4792] Begin TAKRtfReportWrapper.Execute
+18.05.2015 15:46:35 [INFO] [4792] Begin TAKDBReportBase.ParseReportDataSets
+18.05.2015 15:46:35 [INFO] [4792] End TAKDBReportBase.ParseReportDataSets
+18.05.2015 15:46:35 [INFO] [4792] Begin TAKReportBase.QueryParams
+18.05.2015 15:46:35 [INFO] [4792] Begin ExecProc(ProcName = OnBeforeQueryParams)
+18.05.2015 15:46:35 [INFO] [4792] End ExecProc(ProcName = OnBeforeQueryParams)
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] Begin TfmParameters.CreateOwned
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 8
+18.05.2015 15:46:35 [INFO] [4792] End TfmParameters.CreateOwned
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 7
+18.05.2015 15:46:35 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 8
+18.05.2015 15:46:35 [INFO] [4792] Begin CreateControls
+18.05.2015 15:46:35 [INFO] [4792] 1
+18.05.2015 15:46:37 [INFO] [4792] 2
+18.05.2015 15:46:37 [INFO] [4792] End CreateControls
+18.05.2015 15:46:38 [INFO] [4792] Begin TfmParameters.FormDestroy
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 7
+18.05.2015 15:46:38 [INFO] [4792] End TfmParameters.FormDestroy
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = OnAfterQueryParams)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = OnAfterQueryParams)
+18.05.2015 15:46:38 [INFO] [4792] End TAKReportBase.QueryParams
+18.05.2015 15:46:38 [INFO] [4792] Begin ActivateDataSet
+18.05.2015 15:46:38 [INFO] [4792] End ActivateDataSet
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:38 [INFO] [4792] Begin ExecProc(ProcName = OnEndReport)
+18.05.2015 15:46:38 [INFO] [4792] End ExecProc(ProcName = OnEndReport)
+18.05.2015 15:46:38 [INFO] [4792] End TAKRtfReportWrapper.Execute
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 4
+18.05.2015 15:46:38 [INFO] [4792] Begin TTAKReport.Close. RefCount = 4
+18.05.2015 15:46:38 [INFO] [4792] Begin TAKReportWrapper.Destroy
+18.05.2015 15:46:38 [INFO] [4792] Begin TAKRtfReportWrapper.Destroy
+18.05.2015 15:46:38 [INFO] [4792] Begin TAKDBReportBase.Destroy
+18.05.2015 15:46:38 [INFO] [4792] Begin TAKReportBase.Destroy
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 3
+18.05.2015 15:46:38 [INFO] [4792] End TAKReportBase.Destroy
+18.05.2015 15:46:38 [INFO] [4792] End TAKDBReportBase.Destroy
+18.05.2015 15:46:38 [INFO] [4792] End TAKRtfReportWrapper.Destroy
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 2
+18.05.2015 15:46:38 [INFO] [4792] End TAKReportWrapper.Destroy
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:38 [INFO] [4792] End TTAKReport.Close. RefCount = 1
+18.05.2015 15:46:38 [INFO] [4792] Begin TTAKReport.Destroy. RefCount=0
+18.05.2015 15:46:38 [INFO] [4792] Begin TTAKReport.DestroyObjects
+18.05.2015 15:46:38 [INFO] [4792] End TTAKReport.DestroyObjects
+18.05.2015 15:46:38 [INFO] [4792] End TTAKReport.Destroy. RefCount=0
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 0
+18.05.2015 15:46:38 [INFO] [4792] End TfmNCOrders.CreateOrder
+18.05.2015 15:46:38 [INFO] [4792] Begin TfmNCOrders.CreateOrder
+18.05.2015 15:46:38 [INFO] [4792] Begin TTAKReport.Initialize
+18.05.2015 15:46:38 [INFO] [4792] End TTAKReport.Initialize
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 1
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:38 [INFO] [4792] Begin TTAKReport.Open(FileName = C:\Program Files (x86)\CSMU\Contingent5\Orders\Подпись.xrp). RefCount = 1
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 3
+18.05.2015 15:46:38 [INFO] [4792] TAKReportWrapper.Create(FileName = C:\Program Files (x86)\CSMU\Contingent5\Orders\Подпись.xrp)
+18.05.2015 15:46:38 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 4
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 5
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:39 [INFO] [4792] Start TAKReportBase.Create
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:39 [INFO] [4792] End TAKReportBase.Create
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:39 [INFO] [4792] Start TAKReportBase.ParseReportEvents
+18.05.2015 15:46:39 [INFO] [4792] Events: Vis1_OnFirstPrintBand=Vis1_OnFirstPrintBand
+Vis2_OnFirstPrintBand=Vis2_OnFirstPrintBand
+Vis3_OnFirstPrintBand=Vis3_OnFirstPrintBand
+Vis4_OnFirstPrintBand=Vis4_OnFirstPrintBand
+Vis5_OnFirstPrintBand=Vis5_OnFirstPrintBand
+Vis6_OnFirstPrintBand=Vis6_OnFirstPrintBand
+Vis7_OnFirstPrintBand=Vis7_OnFirstPrintBand
+Vis8_OnFirstPrintBand=Vis8_OnFirstPrintBand
+Vis9_OnFirstPrintBand=Vis9_OnFirstPrintBand
+Vis10_OnFirstPrintBand=Vis10_OnFirstPrintBand
+Vis11_OnFirstPrintBand=Vis11_OnFirstPrintBand
+Vis12_OnFirstPrintBand=Vis12_OnFirstPrintBand
+
+18.05.2015 15:46:39 [INFO] [4792] End TAKReportBase.ParseReportEvents
+18.05.2015 15:46:39 [INFO] [4792] Start TAKReportBase.PrepareScript
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:39 [INFO] [4792] End TAKReportBase.PrepareScript
+18.05.2015 15:46:39 [INFO] [4792] Begin TAKReportBase.FillUserParams
+18.05.2015 15:46:39 [INFO] [4792] End TAKReportBase.FillUserParams
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 4
+18.05.2015 15:46:39 [INFO] [4792] End TTAKReport.Open. RefCount = 4
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 5
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:39 [INFO] [4792] Begin TAKRtfReportWrapper.Execute
+18.05.2015 15:46:39 [INFO] [4792] Begin TAKDBReportBase.ParseReportDataSets
+18.05.2015 15:46:39 [INFO] [4792] End TAKDBReportBase.ParseReportDataSets
+18.05.2015 15:46:39 [INFO] [4792] Begin TAKReportBase.QueryParams
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:39 [INFO] [4792] Begin TfmParameters.CreateOwned
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 8
+18.05.2015 15:46:39 [INFO] [4792] End TfmParameters.CreateOwned
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 7
+18.05.2015 15:46:39 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 8
+18.05.2015 15:46:39 [INFO] [4792] Begin CreateControls
+18.05.2015 15:46:39 [INFO] [4792] 1
+18.05.2015 15:46:39 [INFO] [4792] 2
+18.05.2015 15:46:39 [INFO] [4792] End CreateControls
+18.05.2015 15:46:40 [INFO] [4792] Begin TfmParameters.FormDestroy
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 7
+18.05.2015 15:46:40 [INFO] [4792] End TfmParameters.FormDestroy
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.QueryParams
+18.05.2015 15:46:40 [INFO] [4792] Begin ActivateDataSet
+18.05.2015 15:46:40 [INFO] [4792] End ActivateDataSet
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis1_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis1_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis2_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis2_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis3_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis3_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis9_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis9_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis4_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis4_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis5_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis5_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis6_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis6_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis7_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis7_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis8_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis8_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis10_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis10_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis11_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis11_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin ExecProc(ProcName = Vis12_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] End ExecProc(ProcName = Vis12_OnFirstPrintBand)
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKReportBase.OnTimer
+18.05.2015 15:46:40 [INFO] [4792] TfmNCOrders.OrderProgress
+18.05.2015 15:46:40 [INFO] [4792] End TfmNCOrders.OrderProgress
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.OnTimer
+18.05.2015 15:46:40 [INFO] [4792] End TAKRtfReportWrapper.Execute
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 4
+18.05.2015 15:46:40 [INFO] [4792] Begin TTAKReport.Close. RefCount = 4
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKReportWrapper.Destroy
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKRtfReportWrapper.Destroy
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKDBReportBase.Destroy
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKReportBase.Destroy
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 3
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.Destroy
+18.05.2015 15:46:40 [INFO] [4792] End TAKDBReportBase.Destroy
+18.05.2015 15:46:40 [INFO] [4792] End TAKRtfReportWrapper.Destroy
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 2
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportWrapper.Destroy
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:40 [INFO] [4792] End TTAKReport.Close. RefCount = 1
+18.05.2015 15:46:40 [INFO] [4792] Begin TTAKReport.Destroy. RefCount=0
+18.05.2015 15:46:40 [INFO] [4792] Begin TTAKReport.DestroyObjects
+18.05.2015 15:46:40 [INFO] [4792] End TTAKReport.DestroyObjects
+18.05.2015 15:46:40 [INFO] [4792] End TTAKReport.Destroy. RefCount=0
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 0
+18.05.2015 15:46:40 [INFO] [4792] End TfmNCOrders.CreateOrder
+18.05.2015 15:46:40 [INFO] [4792] Begin TfmNCOrders.CreateOrder
+18.05.2015 15:46:40 [INFO] [4792] Begin TTAKReport.Initialize
+18.05.2015 15:46:40 [INFO] [4792] End TTAKReport.Initialize
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 1
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:40 [INFO] [4792] Begin TTAKReport.Open(FileName = C:\Program Files (x86)\CSMU\Contingent5\Orders\Реестр рассылки.xrp). RefCount = 1
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 2
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 3
+18.05.2015 15:46:40 [INFO] [4792] TAKReportWrapper.Create(FileName = C:\Program Files (x86)\CSMU\Contingent5\Orders\Реестр рассылки.xrp)
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 4
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 5
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] Start TAKReportBase.Create
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.Create
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:40 [INFO] [4792] Start TAKReportBase.ParseReportEvents
+18.05.2015 15:46:40 [INFO] [4792] Events: root_OnGetFieldData=root_OnGetFieldData
+Vis1_OnBeforePrintBand=Vis_OnBeforePrintBand
+Vis2_OnBeforePrintBand=Vis_OnBeforePrintBand
+Vis3_OnBeforePrintBand=Vis_OnBeforePrintBand
+Vis4_OnBeforePrintBand=Vis_OnBeforePrintBand
+Vis5_OnBeforePrintBand=Vis_OnBeforePrintBand
+Vis6_OnBeforePrintBand=Vis_OnBeforePrintBand
+Vis7_OnBeforePrintBand=Vis_OnBeforePrintBand
+
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.ParseReportEvents
+18.05.2015 15:46:40 [INFO] [4792] Start TAKReportBase.PrepareScript
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.PrepareScript
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKReportBase.FillUserParams
+18.05.2015 15:46:40 [INFO] [4792] End TAKReportBase.FillUserParams
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 4
+18.05.2015 15:46:40 [INFO] [4792] End TTAKReport.Open. RefCount = 4
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 5
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:40 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKRtfReportWrapper.Execute
+18.05.2015 15:46:40 [INFO] [4792] Begin TAKDBReportBase.ParseReportDataSets
+18.05.2015 15:46:41 [INFO] [4792] End TAKDBReportBase.ParseReportDataSets
+18.05.2015 15:46:41 [INFO] [4792] Begin TAKReportBase.QueryParams
+18.05.2015 15:46:41 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 7
+18.05.2015 15:46:41 [INFO] [4792] Begin TfmParameters.CreateOwned
+18.05.2015 15:46:41 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 8
+18.05.2015 15:46:41 [INFO] [4792] End TfmParameters.CreateOwned
+18.05.2015 15:46:41 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 7
+18.05.2015 15:46:41 [INFO] [4792] TTAKReport.ObjAddRef. RefCount = 8
+18.05.2015 15:46:41 [INFO] [4792] Begin CreateControls
+18.05.2015 15:46:41 [INFO] [4792] 1
+18.05.2015 15:46:41 [INFO] [4792] 2
+18.05.2015 15:46:41 [INFO] [4792] End CreateControls
+18.05.2015 15:46:41 [INFO] [4792] Begin TfmParameters.FormDestroy
+18.05.2015 15:46:41 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 7
+18.05.2015 15:46:41 [INFO] [4792] End TfmParameters.FormDestroy
+18.05.2015 15:46:41 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 6
+18.05.2015 15:46:41 [INFO] [4792] End TAKReportBase.QueryParams
+18.05.2015 15:46:41 [INFO] [4792] Begin ActivateDataSet
+18.05.2015 15:46:41 [INFO] [4792] End ActivateDataSet
+18.05.2015 15:46:41 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:41 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:41 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = root_OnGetFieldData)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] Begin ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End ExecProc(ProcName = Vis_OnBeforePrintBand)
+18.05.2015 15:46:42 [INFO] [4792] End TAKRtfReportWrapper.Execute
+18.05.2015 15:46:42 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 5
+18.05.2015 15:46:42 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 4
+18.05.2015 15:46:42 [INFO] [4792] Begin TTAKReport.Close. RefCount = 4
+18.05.2015 15:46:42 [INFO] [4792] Begin TAKReportWrapper.Destroy
+18.05.2015 15:46:42 [INFO] [4792] Begin TAKRtfReportWrapper.Destroy
+18.05.2015 15:46:42 [INFO] [4792] Begin TAKDBReportBase.Destroy
+18.05.2015 15:46:42 [INFO] [4792] Begin TAKReportBase.Destroy
+18.05.2015 15:46:42 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 3
+18.05.2015 15:46:42 [INFO] [4792] End TAKReportBase.Destroy
+18.05.2015 15:46:42 [INFO] [4792] End TAKDBReportBase.Destroy
+18.05.2015 15:46:42 [INFO] [4792] End TAKRtfReportWrapper.Destroy
+18.05.2015 15:46:42 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 2
+18.05.2015 15:46:42 [INFO] [4792] End TAKReportWrapper.Destroy
+18.05.2015 15:46:42 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 1
+18.05.2015 15:46:42 [INFO] [4792] End TTAKReport.Close. RefCount = 1
+18.05.2015 15:46:42 [INFO] [4792] Begin TTAKReport.Destroy. RefCount=0
+18.05.2015 15:46:42 [INFO] [4792] Begin TTAKReport.DestroyObjects
+18.05.2015 15:46:42 [INFO] [4792] End TTAKReport.DestroyObjects
+18.05.2015 15:46:42 [INFO] [4792] End TTAKReport.Destroy. RefCount=0
+18.05.2015 15:46:42 [INFO] [4792] TTAKReport.ObjRelease. RefCount = 0
+18.05.2015 15:46:42 [INFO] [4792] End TfmNCOrders.CreateOrder
+18.05.2015 15:46:45 [INFO] [4792] Begin TfmStudentList.FormCloseQuery
+18.05.2015 15:46:45 [INFO] [4792] End TfmStudentList.FormCloseQuery
+18.05.2015 15:46:45 [INFO] [4792] Begin TfmStudentList.FormCloseQuery
+18.05.2015 15:46:45 [INFO] [4792] End TfmStudentList.FormCloseQuery
+18.05.2015 15:46:45 [INFO] [4792] Start application unpreparing
+18.05.2015 15:46:45 [INFO] [4792] Start plugins destroying
+18.05.2015 15:46:45 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] Start PluginItem destroying
+18.05.2015 15:46:46 [INFO] [4792] End PluginItem destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] End plugins destroying. RefCount = 0
+18.05.2015 15:46:46 [INFO] [4792] fmStudentList destroy
+18.05.2015 15:46:46 [INFO] [4792] Begin TDM.Logout
+18.05.2015 15:46:46 [INFO] [4792] Begin dsUsersSETTINGS.Save
+18.05.2015 15:46:46 [INFO] [4792] End dsUsersSETTINGS.Save
+18.05.2015 15:46:46 [INFO] [4792] End TDM.Logout
+18.05.2015 15:46:46 [INFO] [4792] End application unpreparing
+18.05.2015 15:46:46 [INFO] [4792] Start application destroying
+18.05.2015 15:46:46 [INFO] [4792] End application destroying. RefCount=0
+28.09.2015 15:32:38 [ERROR] [25616] DM.UsersTran:
+Unsuccessful execution caused by a system error that precludes
+successful execution of subsequent statements.
+Unable to complete network request to host "10.21.0.203".
+Error writing data to the connection.
+

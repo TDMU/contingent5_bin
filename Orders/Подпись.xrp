@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Подпись" ProgressMax="100" ID="{597D375F-09DD-4AB7-ACCF-167FC1C74E67}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметри наказу" Title="Параметри наказу" PersonalSettings="True" SaveCheckBox="False" Position="poScreenCenter" FontName="MS Sans Serif" FontSize="11" Color="clNavy"><Parameter Name="RectorName" DisplayLabel="Керівник" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 2"/><Parameter Name="Prorector1" DisplayLabel="Проректор" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Prorector2" DisplayLabel="Проректор" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="EduBoss" DisplayLabel="Начальник навчального відділу" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Decan" DisplayLabel="Декан/завідувач" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Sekretar1" DisplayLabel="Відповідальний секретар ком. з перев." ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Sekretar" DisplayLabel="Відповідальний секретар пр. ком" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Lower" DisplayLabel="Юрисконсульт" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="MoneyBoss" DisplayLabel="Головний бухгалтер " ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="PracticeBoss" DisplayLabel="Начальник відділу виробн. практики" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="PFO" DisplayLabel="Начальник ПФВ" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Profkom" DisplayLabel="Голова профкому студентів" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/><Parameter Name="Inspector" DisplayLabel="Провідний спеціаліст" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" CommonValue="True" ShowCheck="False" SaveCheck="True" Visible="True"/><Events OnBeforeQueryParams="" OnAfterQueryParams=""/><Parameter Name="Visa" DisplayLabel="Начальник відділу паспартно-візового режиму" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" CommonValue="True" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EMP_ID, EMP_FIO, EMP_DEGREE, EMP_POSTFULL
+from GUIDE_EMPLOYER
+order by 1"/></UserParameters><Bands><Band Name="Vis1" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis1_OnFirstPrintBand"/></Band><Band Name="Vis2" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis2_OnFirstPrintBand"/></Band><Band Name="Vis3" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis3_OnFirstPrintBand"/></Band><Band Name="Vis4" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis4_OnFirstPrintBand"/></Band><Band Name="Vis5" AutoOpen="False" UniDirectional="False"><Events OnFirstPrintBand="Vis5_OnFirstPrintBand"/></Band><Band Name="Vis6" AutoOpen="True" UniDirectional="False"><Events OnFirstPrintBand="Vis6_OnFirstPrintBand"/></Band><Band Name="Vis7" AutoOpen="True" UniDirectional="False"><Events OnFirstPrintBand="Vis7_OnFirstPrintBand"/></Band><Band Name="Vis8" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis8_OnFirstPrintBand"/></Band><Band Name="Vis9" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis9_OnFirstPrintBand"/></Band><Band Name="Vis10" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis10_OnFirstPrintBand"/></Band><Band Name="Vis11" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis11_OnFirstPrintBand"/></Band><Band Name="Vis12" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnFirstPrintBand="Vis12_OnFirstPrintBand"/></Band></Bands><Script>procedure Vis1_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Prorector1_Enabled').Value;
+end;
+
+procedure Vis2_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Prorector2_Enabled').Value;
+end;
+
+procedure Vis3_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('EduBoss_Enabled').Value;
+end;
+
+procedure Vis4_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Sekretar1_Enabled').Value;
+end;
+
+procedure Vis5_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Sekretar_Enabled').Value;
+end;
+
+procedure Vis6_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Lower_Enabled').Value;
+end;
+
+procedure Vis7_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('MoneyBoss_Enabled').Value;
+end;
+
+procedure Vis8_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('PracticeBoss_Enabled').Value;
+end;
+
+procedure Vis9_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Decan_Enabled').Value;
+end;
+
+procedure Vis10_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('PFO_Enabled').Value;
+end;
+
+procedure Vis11_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Profkom_Enabled').Value;
+end;
+
+procedure Vis12_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not Params.Item('Visa_Enabled').Value;
+end;
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

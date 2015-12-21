@@ -1,0 +1,226 @@
+procedure UpdateStudents(studstr:String);
+var
+  v1,v2,SUMMA: variant;
+  GrantID: variant;
+  quGrant: TpFibQuery;
+  quStudent_Grant: TpFibQuery;
+  quInsertSTUDENT_GRANT: TpFibQuery;
+  quInsertGRANTS: TpFibQuery;
+  quInsertAccaunting: TpFibQuery;
+  quCheck: TpFibQuery;
+  quSemester: TpFibQuery;
+  StrStudent: variant;
+  Semester: variant;
+  s: string;
+  WarnCode: integer;
+  WarnMessage: string;
+  WarnMessages: array[1..3] of string;
+  i: integer;
+	 
+begin
+  WarnMessages[1] := _('не сдан зачет');
+  WarnMessages[2] := _('отсутствует дата сдачи');
+  WarnMessages[3] := _('отсутствует обязательная оценка');
+//  reMessages.Lines.Clear;
+//  OutMessage('fvbvtbtbt',clred,7,clWindow);
+  CheckStud:=false;
+  quGrant:= TpFibQuery.Create(nil);
+  try
+    quGrant.Database := DB;
+    quGrant.Transaction := Transac;
+    quGrant.SQL.Text :='SELECT GRANTID, SUMMA  FROM GUIDE_GRANT';
+    quGrant.ExecQuery;
+
+    while not (quGrant.Eof) do
+    begin
+      if quGrant.FN('GRANTID').Value = 1 then v1 := quGrant.FN('SUMMA').Value
+      else if quGrant.FN('GRANTID').Value = 2 then v2 := quGrant.FN('SUMMA').Value;
+      quGrant.Next;
+    end;
+  finally
+    quGrant.Free; 
+  end; 
+
+  quStudent_Grant:=TpFibQuery.Create(nil);
+  try
+    quStudent_Grant.Database := DB;
+    quStudent_Grant.Transaction := Transac;
+    quStudent_Grant.SQL.Text := 'select S.FIO, GSI.STUDENTID, GSI.EDUYEAR, GSI.AVG_MARK, GSI.SEMESTER ,GSI.STATUS,GSI.EDUBASISID,GSI.DEPARTMENTID,GSI.WARN_CODE from  STUDENTS S left join SP_GET_STUDENT_ACCOUNT_INFO (S.STUDENTID,:dtDATE) GSI  on (1=1)  where (S.STUDENTID in (@@StudentsID%0@)) order by S.FIO ';
+    quStudent_Grant.PN('StudentsID').Value := FStringStudent;
+    quStudent_Grant.PN('dtDATE').Value := dtDate;
+    quStudent_Grant.ExecQuery;
+    if not quStudent_Grant.IsEmpty then
+    begin
+      quInsertAccaunting := TpFibQuery.Create(nil);
+      try
+        quInsertAccaunting.Database := DB;
+        quInsertAccaunting.Transaction := Transac;
+	    quInsertAccaunting.SQL.Text := 'INSERT INTO ACCOUNTING (ACCOUNTINGID, EDUYEAR, CREATEUSERID, ACCOUNTINGDATE, DEPARTMENTID, EDUFORMID, SPECIALITYID, REACCOUNTING)'+
+                                     ' VALUES (:ACCOUNTINGID, :EDUYEAR, :CREATEUSERID, :ACCOUNTINGDATE, :DEPARTMENTID, :EDUFORMID, :SPECIALITYID, :REACCOUNTING)';
+
+	    quInsertAccaunting.PN('ACCOUNTINGID').Value:=AccountingID ;
+        quInsertAccaunting.PN('EDUYEAR').Value := EduYear;
+        quInsertAccaunting.PN('CREATEUSERID').Value:=UserID ;
+        quInsertAccaunting.PN('ACCOUNTINGDATE').Value:=dtDate;
+	    quInsertAccaunting.PN('DEPARTMENTID').Value := DepartmentID;
+	    quInsertAccaunting.PN('EDUFORMID').Value := EduformID;
+	    quInsertAccaunting.PN('SPECIALITYID').Value := SpecialityID;
+		if Reaccounting = True then quInsertAccaunting.PN('REACCOUNTING').Value := 1
+		else quInsertAccaunting.PN('REACCOUNTING').Value := 0;
+        quInsertAccaunting.ExecQuery;
+	  finally	
+        quInsertAccaunting.Free;
+	  end;	
+    end;
+
+    quCheck:= TpFibQuery.Create(nil);
+	try
+	  quCheck.Database := DB;
+      quCheck.Transaction := Transac;
+      quCheck.SQL.Text :=' select distinct SG.STUDENTID, SG.SEMESTER, A.EDUYEAR from STUDENT_GRANT SG'+
+
+                             ' inner join ACCOUNTING A  on (SG.ACCOUNTINGID = A.ACCOUNTINGID)'+
+ 
+                             ' inner join HS_MOVEMENT_FULL HF on ((HF.STUDENTID = SG.STUDENTID) and (HF.SEMESTER= (SG.SEMESTER)+1) and (HF.BEGINDATE <= :ACDATE) and (HF.ENDDATE > :ACDATE) )'+
+
+                             ' where (sg.STUDENTID = :StudentID)';
+	  quSemester:= TpFibQuery.Create(nil);
+	  try
+	    quSemester.Database := DB;
+            quSemester.Transaction := Transac;
+            quSemester.SQL.Text := 'select   (HF.SEMESTER-1)as SEMESTER, HF.EDUYEAR, S.FIO from HS_MOVEMENT_FULL HF inner join STUDENTS S on (:STUDENTID = S.STUDENTID)'+
+
+                                   ' where  (HF.BEGINDATE <= :ACDATE) and (HF.ENDDATE > :ACDATE) and (HF.STUDENTID = :STUDENTID)';
+		
+        while not (quStudent_Grant.Eof) do
+        begin
+          if not quStudent_Grant.FN('STUDENTID').isNull then
+          begin
+	        StrStudent := quStudent_Grant.FN('STUDENTID').value;
+            
+
+            quCheck.PN('ACDATE').Value := dtDate;
+            quCheck.PN('StudentID').Value := StrStudent;
+            quCheck.ExecQuery;
+
+      
+            
+
+
+            quSemester.PN('ACDATE').Value := dtDate;
+            quSemester.PN('STUDENTID').Value := StrStudent;
+            quSemester.ExecQuery;
+
+//   OutMessage(inttostr(quSemester.FN('SEMESTER').asInteger),clred,7,clWindow);
+            if  (quCheck.FN('STUDENTID').IsNull) or
+	            ((quCheck.FN('SEMESTER').AsInteger <> quSemester.FN('SEMESTER').asInteger)
+	            and (not quCheck.FN('STUDENTID').IsNull )) or
+				(Reaccounting = True)
+            then
+            begin
+	          CheckStud:=True;
+              if (quStudent_Grant.FN('AVG_MARK').Value = 5)and
+                 (quStudent_Grant.FN('STATUS').Value = 'С')and
+                 (quStudent_Grant.FN('EDUBASISID').Value = 'Б')and
+	        	 (quStudent_Grant.FN('SEMESTER').Value <> '0')
+              then
+              begin
+                GRANTID := 2 ;
+                SUMMA := v2 ;
+              end
+              else 
+			  if (((quStudent_Grant.FN('AVG_MARK').Value < 5)and
+                 (quStudent_Grant.FN('AVG_MARK').Value >= 4))
+				 or ((quStudent_Grant.FN('AVG_MARK').Value  = Null)))
+				 and              
+				 (quStudent_Grant.FN('STATUS').Value = 'С')and
+                 (quStudent_Grant.FN('EDUBASISID').Value = 'Б')and
+     	         (quStudent_Grant.FN('SEMESTER').Value <> '0')
+              then
+              begin
+                GRANTID := 1 ;
+                SUMMA := v1 ;
+              end
+              else
+              if (quStudent_Grant.FN('STATUS').Value = 'С') and
+                 (quStudent_Grant.FN('EDUBASISID').Value = 'Б') and
+                 (quStudent_Grant.FN('SEMESTER').Value = 0)
+              then
+              begin
+                GRANTID := 1 ;
+                SUMMA := v1 ;
+              end
+	          else
+	          begin
+                GRANTID := 0 ;
+                SUMMA := 0 ;
+              end;
+	          semester := quSemester.FN('SEMESTER').AsInteger;
+
+//	  OutMessage(vartostr(quCheck.FN('STUDENTID').Value ),clred,7,clWindow);
+
+	          quInsertSTUDENT_GRANT := TpFibQuery.Create(nil);
+              quInsertSTUDENT_GRANT.Database := DB;
+              quInsertSTUDENT_GRANT.Transaction := Transac;
+	          quInsertSTUDENT_GRANT.SQL.Text := 'insert into STUDENT_GRANT(STUDENTID, ACCOUNTINGID, AVG_MARK, STATUS, EDUBASISID, SEMESTER)'+
+	                                           ' values (:STUDENTID, :ACCOUNTINGID, :AVG_MARK, :STATUS, :EDUBASISID, :SEMESTER)';
+              quInsertSTUDENT_GRANT.PN('ACCOUNTINGID').Value := AccountingID;
+              quInsertSTUDENT_GRANT.PN('STUDENTID').Value := quStudent_Grant.FN('STUDENTID').Value;
+              quInsertSTUDENT_GRANT.PN('AVG_MARK').Value := quStudent_Grant.FN('AVG_MARK').Value;
+              quInsertSTUDENT_GRANT.PN('STATUS').Value := quStudent_Grant.FN('STATUS').Value;
+              quInsertSTUDENT_GRANT.PN('EDUBASISID').Value := quStudent_Grant.FN('EDUBASISID').Value;
+              quInsertSTUDENT_GRANT.PN('SEMESTER').Value := quStudent_Grant.FN('SEMESTER').Value;
+              quInsertSTUDENT_GRANT.ExecQuery;
+              quInsertSTUDENT_GRANT.Free;
+
+	          if GRANTID <> 0 then
+	          begin
+	            quInsertGRANTS := TpFibQuery.Create(nil);
+                quInsertGRANTS.Database := DB;
+                quInsertGRANTS.Transaction := Transac;
+	            quInsertGRANTS.SQL.Text := ' insert into GRANTS(STUDENTID, ACCOUNTINGID, SUMMA, GRANTID)'+
+	                               ' values (:STUDENTID, :ACCOUNTINGID, :SUMMA, :GRANTID)';
+                quInsertGRANTS.PN('ACCOUNTINGID').Value := AccountingID;
+                quInsertGRANTS.PN('STUDENTID').Value := quStudent_Grant.FN('STUDENTID').Value;
+                quInsertGRANTS.PN('GRANTID').Value := GrantID;
+                quInsertGRANTS.PN('SUMMA').Value  := SUMMA;
+                quInsertGRANTS.ExecQuery;
+                quInsertGRANTS.Free;
+        	  end;
+	          WarnCode := quStudent_Grant.FN('WARN_CODE').AsInteger;
+	          WarnMessage := '';
+	          if WarnCode <> 0 then
+	          begin
+	            for i := 1 to 3 do
+	            begin
+	              if ((WarnCode and (1 shl (i - 1))) <> 0) then
+	        	  begin
+		            if WarnMessage = '' then WarnMessage := WarnMessages[i]
+		        	else WarnMessage := WarnMessage + ', ' + WarnMessages[i];
+		          end;
+	            end;
+	          end;
+	          s := Format('%s (%s)', [quStudent_Grant.FN('FIO').AsString, VarToStr(SUMMA)]);
+	          OutMessage(s, clBlue, 7, clWindow);
+              if WarnMessage <> '' then OutMessage(' - ' + WarnMessage, clRed, 7, clWindow);
+	          OutMessage(#13#10, clBlue, 7, clWindow);
+	        end
+            else OutMessage(quStudent_Grant.FN('FIO').AsString + ' - ' + _('расчитан') + #13#10, clred, 7, clWindow);
+            quStudent_Grant.Next;
+          end; 
+		end;
+        finally
+	      quSemester.Free;
+		end;
+	  finally
+	    quCheck.Free;
+    end;		
+  finally
+    quStudent_Grant.Free;
+  end;
+
+end;
+
+
+begin
+end.

@@ -1,0 +1,12 @@
+<?xml version="1.0"?>
+<Options>
+  <Folder Caption="Пользователи и группы" ImageIndex="2" SelectedIndex="2" ClassName="TfrNodeInfo" Expanded="True">
+    <Node Caption="Пользователи программы" ImageIndex="0" SelectedIndex="1" ClassName="TfrProgramUsers" />
+    <Node Caption="Пользователи сервера" ImageIndex="0" SelectedIndex="1" ClassName="TfrServerUsers" />
+    <Node Caption="Группы" ImageIndex="0" SelectedIndex="1" ClassName="TfrGroups" />
+  </Folder>
+  <Folder Caption="Параметры" ImageIndex="3" SelectedIndex="3" ClassName="TfrNodeInfo" Expanded="True">
+    <Node Caption="Параметры организации" ImageIndex="0" SelectedIndex="1" ClassName="TfrParams" />
+    <Node Caption="Параметры БД" ImageIndex="0" SelectedIndex="1" ClassName="TfrDBOptions" />
+  </Folder>
+</Options>

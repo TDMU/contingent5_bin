@@ -1,0 +1,388 @@
+const
+  cPackVersion = 3;
+
+var
+  InfoXML: Variant;
+  PackageInfoNode: Variant;
+  OptionsNode: Variant;
+  TablesNode: Variant;
+  PackageID: integer;
+  DBCode, PackageDBCode: integer;
+
+  
+function GetOptions: Variant;
+begin
+//  Log('9');
+  Result := OptionsNode;
+//  Log('10');
+end;
+
+function GetOptionAttrValue(NodeName, AttrName: string): Variant;
+var
+  Node, Attr: Variant;
+begin
+  Result := '';
+  Node := OptionsNode.SelectSingleNode(NodeName);
+  if VarIsClear(Node) then RaiseException('Node "' + NodeName + '" not found');
+  Attr := Node.attributes.getNamedItem(AttrName);
+  if VarIsClear(Node) then RaiseException('Attr "' + AttrName + '" not found');
+  Result := Attr.nodeValue;
+end;
+
+function GetParameter(ParameterName: string): string;
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = ''' + ParameterName + '''';
+      ExecQuery;
+      Result := Fields[0].AsString;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+function GetPackageInfoValue(NodeName: string): Variant;
+var
+  Node: Variant;
+begin
+  Result := '';
+  Node := PackageInfoNode.SelectSingleNode(NodeName);
+  if VarIsClear(Node) then RaiseException('Node "' + NodeName + '" not found');
+  Result := Node.Text
+//  else Result := '';
+end;
+
+function GetNewPackageID: integer;
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select * from SP_GEN_PACKAGE_ID';
+      ExecQuery;
+      Result := Fields[0].AsInteger;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure ExecuteSQL(ASQL: string);
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := ASQL;
+      ExecQuery;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+
+
+function FieldExists(TableName, FieldName: string): Boolean;
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select 1 from RDB$RELATION_FIELDS rdbf ' +
+                  'where rdbf.RDB$RELATION_NAME = ''' + TableName + ''' ' +
+                  'and rdbf.RDB$FIELD_NAME = ''' + FieldName + '''';
+      ExecQuery;
+      Result := not Eof;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure GenerateSQLsEvent(Sender: TFIBImport; Fields: TStringList);
+begin
+  if FieldExists(Sender.TableName, 'PACKAGEID') then Fields.Add('PACKAGEID');
+  if FieldExists(Sender.TableName, 'DBCODE') then
+  begin
+    Fields.Add('DBCODE');
+//    ShowMessage(Sender.TableName);
+  end;
+end;
+
+procedure QueryBeforeExecute(Sender: TpFIBQuery);
+var
+  Param: TFIBXSQLVAR;
+begin
+  Param := Sender.Params.FindParam('PACKAGEID');
+  if Param <> nil then Param.Value := PackageID;
+  
+  Param := Sender.Params.FindParam('DBCODE');
+  if (Param <> nil) then
+  begin
+    Param.Value := PackageDBCode;
+//    ShowMessage(IntToStr(PackageDBCode));
+  end;
+
+{
+  Param := Sender.Params.FindParam('PARENTVARIANTID');
+  if (Param <> nil) then
+  begin
+    Log('VARIANTID=' + Sender.Params.FindParam('VARIANTID').AsString + '; PARENTVARIANTID=' + Param.AsString);
+  end;
+}
+//  Log(Sender.SQL.Text);
+end;
+
+
+function ImportTable(TableName, TableTitle: string; RecordCount: integer): Boolean;
+var
+  StartTime: TDateTime;
+begin
+  StartTime := Now;
+  OutMessage(#13#10 + _('Таблица') + ' "' + TableTitle + '"');
+  DeCompress(ArchFileName, TableName + '.xml', TempDir);
+  Import.UpdateMethod := umFirstUpdate;
+  Import.TableName := TableName;
+  Result := Import.Execute(TempDir + '\' + TableName + '.xml', RecordCount);
+  if not Result then Exit;
+  Log(TableName + ' imported');
+  if FieldExists(TableName, 'PACKAGEID')
+     and not ((TableName = 'ORDERS')
+               or (TableName = 'STUDENTTESTLIST')
+               or (TableName = 'EPTITLE')
+               or (TableName = 'PLANRASP')
+               or (TableName = 'B_EDUPLAN_TITLE')) then
+  begin
+    if ((TableName = 'STUDENTS'){ or (TableName = 'ORDERS') or (TableName = 'STUDENTTESTLIST')}) then
+    begin
+      if not GetOptionAttrValue('OnlySelected', 'Checked') then
+        ExecuteSQL(Format('delete from %s where DBCODE = %d and PACKAGEID <> %d',
+                   [TableName, PackageDBCode, PackageID]));
+    end
+    else
+    begin
+      if TableName = 'EPDISCIPLINE' then
+        ExecuteSQL(Format('delete from %s TBL ' +
+                          'where TBL.PACKAGEID <> %d ' +
+                          'and Exists ( ' +
+                          'select 1 from EPTITLE EPT ' +
+                          'where EPT.EPTITLEID = TBL.EPTITLEID ' +
+                          'and EPT.PACKAGEID = %d)',
+                   [TableName, PackageID, PackageID]))
+      else
+      if TableName = 'B_EDUPLAN_ITEMS' then
+        ExecuteSQL(Format('delete from %s TBL ' +
+                          'where TBL.PACKAGEID <> %d ' +
+                          'and Exists ( ' +
+                          'select 1 from B_EDUPLAN_TITLE S ' +
+                          'where S.EDUPLANID = TBL.EDUPLANID ' +
+                          'and S.DBCODE = %d and S.PACKAGEID = %d)',
+                   [TableName, PackageID, PackageDBCode, PackageID]))
+       else
+        ExecuteSQL(Format('delete from %s TBL ' +
+                          'where TBL.PACKAGEID <> %d ' +
+                          'and Exists ( ' +
+                          'select 1 from STUDENTS S ' +
+                          'where S.STUDENTID = TBL.STUDENTID ' +
+                          'and S.DBCODE = %d and S.PACKAGEID = %d)',
+                   [TableName, PackageID, PackageDBCode, PackageID]));
+    end;
+  end;
+  
+//  OutMessage(FormatDateTime(' (hh:mm:ss)', Now - StartTime));
+end;
+
+
+procedure ImportStudents;
+var
+  i: integer;
+  TableNode: Variant;
+  TableName, TableTitle: string;
+  RecordCount: integer;
+begin
+  if VarIsClear(TablesNode) then
+       RaiseException(_('Пакет имеет неверный формат или повреждён.'));
+
+  Import.OnGenerateSQLs := @GenerateSQLsEvent;
+  Import.BeforeQueryExecute := @QueryBeforeExecute;
+
+  for i := 0 to TablesNode.childNodes.Length - 1 do
+  begin
+    TableNode := TablesNode.childNodes.Item(i);
+    TableName := TableNode.getAttribute('Name');
+    TableTitle := TableNode.getAttribute('Title');
+    RecordCount := TableNode.getAttribute('RecordCount');
+    if RecordCount > 0 then
+    begin
+      if not ImportTable(TableName, TableTitle, RecordCount) then Abort;
+    end;
+  end;
+
+  if GetOptionAttrValue('Delete', 'Checked') then
+  begin
+    OutMessage(#13#10#13#10 + _('Обновление идентификаторов ... '));
+    ExecuteSQL(Format('update STUDENTS ' +
+                      'set DBCODE = %d, ' +
+                      'STUDENTID = (select ID from SP_GEN_UID) ' +
+                      'where PACKAGEID = %d',
+               [DBCode, PackageID]));
+    PackageDBCode := DBCode;
+    OutMessage(_('ОК'));
+  end;
+
+  OutMessage(#13#10#13#10 + _('Удаление лишних приказов ... '));
+  ExecuteSQL('delete from ORDERS O ' +
+             'where not Exists ( ' +
+             'select STO.ORDERID from STUDENTTOORDER STO '+
+             'where STO.ORDERID = O.ORDERID)');
+  OutMessage(_('ОК'));
+
+  OutMessage(#13#10 + _('Удаление лишних ведомостей ... '));
+  ExecuteSQL('delete from STUDENTTESTLIST STL ' +
+             'where not Exists ( ' +
+             'select 1 from STUDENTMARK SM '+
+             'where SM.TESTLISTID = STL.TESTLISTID)');
+  OutMessage(_('ОК'));
+
+  OutMessage(#13#10#13#10 + _('Вычисление состояния ... '));
+  ExecuteSQL(Format('execute procedure SP_IMP_MOVEMENT_CALC(%d, %d)', [PackageDBCode, PackageID]));
+  OutMessage(_('ОК'));
+  OutMessage(#13#10 + _('Вычисление последних данных ... '));
+  ExecuteSQL(Format('execute procedure SP_IMP_LASTDATA_CALC(%d, %d)', [PackageDBCode, PackageID]));
+  OutMessage(_('ОК'));
+  
+end;
+
+procedure ImportPlans;
+var
+  i: integer;
+  TableNode: Variant;
+  TableName, TableTitle: string;
+  RecordCount: integer;
+begin
+  if VarIsClear(TablesNode) then
+       RaiseException(_('Пакет имеет неверный формат или повреждён.'));
+
+  Import.OnGenerateSQLs := @GenerateSQLsEvent;
+  Import.BeforeQueryExecute := @QueryBeforeExecute;
+
+  for i := 0 to TablesNode.childNodes.Length - 1 do
+  begin
+    TableNode := TablesNode.childNodes.Item(i);
+    TableName := TableNode.getAttribute('Name');
+    TableTitle := TableNode.getAttribute('Title');
+    RecordCount := TableNode.getAttribute('RecordCount');
+    if RecordCount > 0 then
+    begin
+      if not ImportTable(TableName, TableTitle, RecordCount) then Abort;
+    end;
+  end;
+end;
+
+procedure ImportPlansECTS;
+var
+  i: integer;
+  TableNode: Variant;
+  TableName, TableTitle: string;
+  RecordCount: integer;
+begin
+  if VarIsClear(TablesNode) then
+       RaiseException(_('Пакет имеет неверный формат или повреждён.'));
+
+  Import.OnGenerateSQLs := @GenerateSQLsEvent;
+  Import.BeforeQueryExecute := @QueryBeforeExecute;
+
+  for i := 0 to TablesNode.childNodes.Length - 1 do
+  begin
+    TableNode := TablesNode.childNodes.Item(i);
+    TableName := TableNode.getAttribute('Name');
+    TableTitle := TableNode.getAttribute('Title');
+    RecordCount := TableNode.getAttribute('RecordCount');
+    if RecordCount > 0 then
+    begin
+      if not ImportTable(TableName, TableTitle, RecordCount) then Abort;
+    end;
+  end;
+end;
+
+procedure ImportGuides;
+begin
+  ImportPlans;
+end;
+
+procedure ImportPlanRasp;
+begin
+  ImportPlans;
+  
+  if GetOptionAttrValue('CurrentOnly', 'Checked') then
+  begin
+    ExecuteSQL(Format('delete from PLANRASP where PLANYEAR = %s and PACKAGEID <> %d',
+               [GetPackageInfoValue('PlanYear'), PackageID]));
+  end
+  else
+  begin
+    ExecuteSQL(Format('delete from PLANRASP where PACKAGEID <> %d', [PackageID]));
+  end
+
+end;
+
+procedure Start;
+var
+  StartTime: TDateTime;
+  PackageType: string;
+begin
+  StartTime := Now;
+  OutMessage(#13#10 + _('Проверка версии пакета ... '));
+  if GetPackageInfoValue('Version') <> cPackVersion then RaiseException(_('Неверная версия пакета'));
+  OutMessage(_('ОК'));
+  
+  PackageType := GetPackageInfoValue('PackageType');
+  DBCode := StrToInt(GetParameter('DBCode'));
+  PackageDBCode := StrToInt(GetPackageInfoValue('DBCode'));
+  PackageID := GetNewPackageID;
+
+
+  if PackageType = 'Students' then ImportStudents
+  else if PackageType = 'Plans' then ImportPlans
+  else if PackageType = 'Plans_ECTS' then ImportPlansECTS
+  else if PackageType = 'Guides' then ImportGuides
+  else if PackageType = 'PlanRasp' then ImportPlanRasp
+  else if (PackageType = 'MOZStat') or (PackageType = 'MOZRasp') then
+         RaiseException(_('Этот пакет можно принять в форме "Подготовка статистики"'))
+  else RaiseException(_('Неизвестный тип пакета'));
+
+  OutMessage(#13#10#13#10 + _('Время приёма пакета: ') + FormatDateTime('hh:mm:ss', Now - StartTime));
+end;
+
+
+begin
+//  Log('1');
+  try
+    InfoXML := CreateOleObject('Msxml2.DOMDocument.3.0');
+  except
+    RaiseException(_('В системе не установлена библиотека msxml3'));
+  end;
+//  Log('2');
+  DeCompress(ArchFileName, 'info.xml', TempDir);
+//  Log('3');
+  InfoXML.Load(TempDir + '\info.xml');
+//  Log('4');
+  PackageInfoNode := InfoXML.DocumentElement.SelectSingleNode('PackageInfo');
+
+  if VarIsClear(PackageInfoNode) then
+       RaiseException(_('Пакет имеет неверный формат или повреждён.'));
+//  Log('5');
+  OptionsNode := InfoXML.DocumentElement.SelectSingleNode('Options');
+//  Log('6');
+  TablesNode := InfoXML.DocumentElement.SelectSingleNode('Tables');
+//  Log('7');
+//  Log('8');
+end.

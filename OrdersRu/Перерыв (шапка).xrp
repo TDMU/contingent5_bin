@@ -1,0 +1,18 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перерыв (шапка)" ProgressMax="100" ID="{F7ABA1E5-E286-4A4F-98BB-020022EB78A2}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="IntReason" DisplayLabel="Предоставление" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="академического отпуска по состоянию здоровья
+академического отпуска по уходу за ребенком
+академического отпуска в связи с беременностью и родами
+права прохождения повторного курса обучения" KeyItems="3001
+3002
+3003
+0" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands/><Script>procedure OnAfterQueryParams;
+begin
+  OrderParams.Item('IntReason_KEY').Value :=
+    Params.Item('IntReason_KEY').Value;
+
+  OrderParams.Item('IntReason').Value :=
+    Params.Item('IntReason').Value;
+end;
+
+
+begin
+end.</Script></Report>

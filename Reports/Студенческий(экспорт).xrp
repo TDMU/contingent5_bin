@@ -1,0 +1,183 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Студенческий(экспорт)" ProgressMax="100" EncodeText="False" ID="{006C6637-4093-44CA-82A3-65F619E92B47}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="FromDate" DisplayLabel="Дата видачі" ParamType="Date" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Parameter Name="ToDate" DisplayLabel="Дійсний до" ParamType="Date" Required="True" AutoSize="-1" SaveValue="-1" ShowCheck="0" SaveCheck="-1" Visible="-1" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams" OnBeforeQueryParams=""/><Parameter Name="FileName" DisplayLabel="Експорт в файл" ParamType="FileName" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" DefaulDir="" FileTypes="Текстовий файл(*.txt)|*.txt"/><Parameter Name="Privileges" DisplayLabel="Пільги" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+   ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL
+    ('STUDENTID,FIO,SEX,BIRTHDATE,PASSPORTNUM,EDUBASISID,IDCODE,EDUFORMID,' +
+     'DEPARTMENT,CODE,SPECIALITY,QUALIFICATION,GROUPNUM,PHOTO,PASSPORTGIVEDATE,' +
+     'PASSPORTGIVEPLACE,COUNTRYNAME,PREVIOUSEDUCATION,PREVIOUSDOCUMENTNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value :=  HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+  i: integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+//    if (SL.Count &gt; 3) then RaiseException('Не можливо експортувати заявку тому що ПІБ містить більше 3 слів.'#13#10 + s);
+    Result := '';
+    if (SL.Count &gt; 3) and (Num = 3) then
+    begin
+      for i := 2 to SL.Count - 1 do
+      begin
+        if (Length(Result) &gt; 0) then
+          Result := Result + ' ';
+        Result := Result + SL[i];
+      end
+    end
+    else
+    if (Num &lt;= SL.Count) then
+      Result := SL[Num - 1]
+    else
+      Result := '.';
+  finally
+    SL.Free;
+  end;
+end;
+
+procedure GetWordDocument(Src: string; var DocSer, DocNum: string);
+var
+  SL: TStringList;
+  i: Integer;
+  FName, FPassportnum, FPassportser : String;
+  s: string;
+begin
+  DocSer := '';
+  DocNum := '';
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := '№';
+    SL.DelimitedText := Src;
+    if (SL.Count = 2) then
+    begin
+      DocSer := Trim(SL[0]);
+      DocNum := Trim(SL[1]);
+    end
+    else
+    if (SL.Count &gt; 2) then
+    begin
+      DocSer := Trim(SL[0]);
+      s := '';
+      for i := 1 to SL.Count - 1 do
+      begin
+        if (Length(s) &gt; 0) then
+          s := s + ' ';
+        s := s + Trim(SL[i]);
+      end;
+      DocNum := s;
+    end
+    else
+    begin
+      DocSer := Trim(Copy(Src, 1, 2));
+      DocNum := Trim(Copy(Src, 3, Length(Src)));
+    end;
+
+  finally
+    SL.Free;
+  end;
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  Fld: TBlobField;
+  Year, Month, Day: Word;
+  FName,
+  FDoc,
+  FPassportSer, FPassportNum : String;
+  FPreviousDocumentSer, FPreviousDocumentNum : String;
+begin
+  FDoc := Field.DataSet.FieldByName('PASSPORTNUM').AsString;
+  GetWordDocument(FDoc, FPassportser, FPassportnum);
+  FDoc := Field.DataSet.FieldByName('PREVIOUSDOCUMENTNUM').AsString;
+  GetWordDocument(FDoc, FPreviousDocumentSer, FPreviousDocumentNum);
+
+  if Field.FieldName = 'PASSPORTSER' then
+  begin
+    Field.Value := FPassportser;
+  end
+  else
+  if Field.FieldName = 'PASSPORTNUM' then
+  begin
+    Field.Value := FPassportnum;
+  end
+  else
+  if Field.FieldName = 'PREVIOUSDOCUMENTSER' then
+  begin
+    Field.Value := FPreviousDocumentSer;
+  end
+  else
+  if Field.FieldName = 'PREVIOUSDOCUMENTNUM' then
+  begin
+    Field.Value := FPreviousDocumentNum;
+  end
+  else
+  if Field.FieldName = 'SURNAME' then
+  begin
+    Field.Value := GetWord(1, Field.DataSet.FieldByName('FIO').AsString);
+  end
+  else
+  if Field.FieldName = 'NAME' then
+  begin
+    Field.Value := GetWord(2, Field.DataSet.FieldByName('FIO').AsString);
+  end
+  else
+  if Field.FieldName = 'PATRONYMIC' then
+  begin
+    Field.Value := GetWord(3, Field.DataSet.FieldByName('FIO').AsString);
+  end
+  else
+  if (Field.FieldName = 'FileNamePhoto') then
+  begin
+     FName := VarToStr(Field.DataSet.FieldByName('STUDENTID').Value) + '.jpg';
+     Fld := TBlobField(Field.DataSet.FieldByName('PHOTO'));
+     if not Fld.IsNull then
+     begin
+       Fld.SaveToFile(FName);
+       Field.Value := FName;
+     end;
+  end
+  else
+  if (Field.FieldName = 'BIRTHDATE') then
+  begin
+    if Field.Value = '' then
+      RaiseException(Format('У &quot;%s&quot; не проставлено дату народження',
+                     [Field.DataSet.FieldByName('FIO').AsString]));
+                     
+    DecodeDate(StrToDate(Field.Value), Year, Month, Day);
+    if (Year &lt; 1950) or (Year &gt; 2000) then
+      RaiseException(Format('У &quot;%s&quot; невірна дата народження',
+                     [Field.DataSet.FieldByName('FIO').AsString]));
+  end
+  else
+  if (Field.FieldName = 'CODE') then
+  begin
+    Field.Value :=
+      copy(Field.DataSet.FieldByName('CODE').AsString, 3, 99);
+  end;
+  
+end;
+
+
+procedure OnAfterQueryParams;
+begin
+  Report.ShowType := 0;
+  Report.DestinationDoc := Params.Item('FileName').Value;
+end;
+
+
+procedure OnEndReport;
+begin
+  ShowMessage('Експорт здійснено успішно.');
+end;
+
+
+begin
+end.</Script><Events OnEndReport="OnEndReport"/></Report>

@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Справка о самостоятельном трудоустройстве" ID="{E49B114F-3C85-46C1-B9D0-44EA3810E5F9}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/><SQL>select S.FIO, PR.PLANYEAR, (GS.CODE || ' - ' || GS.SPECIALITY) as SPECIALITY, GP.POST
+from STUDENTS S
+     left join PLANRASP PR on (PR.PLANRASPID = S.PLANRASPID)
+     left join GUIDE_SPECIALITY GS on (GS.SPECIALITYID = S.SPECIALITYID)
+     left join GUIDE_POST GP on (GP.POSTID = S.POSTID)
+where S.STUDENTID in (@@StudentsID%0@)
+order by 1
+</SQL></Band><Band Name="dsParameters" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'OrgName') as OrgName,
+(select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = 'Ministry') as Ministry
+from RDB$DATABASE
+</SQL></Band></Bands><Script>procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  If (Field.FieldName = 'NewPage')
+      and (Field.Dataset.RecNo &gt; 1)
+      //and (Field.Dataset.RecNo &lt; Field.Dataset.RecordCount)
+   Then Field.Value := '&amp;page&amp;'
+end;
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+   Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+Begin
+End.</Script></Report>

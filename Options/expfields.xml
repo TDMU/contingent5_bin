@@ -1,0 +1,51 @@
+<?xml version='1.0' encoding='ISO-8859-1' ?>
+<ExpFields>
+  <Domains>
+    <Domain>
+      <Fields>
+        <Field Name='SPECIALITY' KeyField='SPECIALITYID' Caption='Ñïåöèàëüíîñòü' Type='ComboBox'>
+          <LookupSQL>select GSP.SPECIALITYID, GSP.SPECIALITY
+              from GUIDE_SPECIALITY GSP
+              where GSP.USE = 1
+              order by GSP.SPECIALITY
+          </LookupSQL>
+        </Field>
+
+        <Field Name='CSALL' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|Âñåãî' Alignment='2'/>
+        <Field Name='CS1' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|I' Alignment='2'/>
+        <Field Name='CS2' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|II' Alignment='2'/>
+        <Field Name='CS3' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|III' Alignment='2'/>
+        <Field Name='CS4' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|IV' Alignment='2'/>
+        <Field Name='CS5' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|V' Alignment='2'/>
+        <Field Name='CS6' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|VI' Alignment='2'/>
+        <Field Name='CS7' Caption='Íàëè÷èå ñòóäåíòîâ ïî êóðñàì|VII' Alignment='2'/>
+
+        <Field Name='CINALL' Caption='Ïðèáûëî|Âñåãî' Alignment='2'/>
+        <Field Name='CIN1' Caption='Ïðèáûëî|I' Alignment='2'/>
+        <Field Name='CIN2' Caption='Ïðèáûëî|II' Alignment='2'/>
+        <Field Name='CIN3' Caption='Ïðèáûëî|III' Alignment='2'/>
+        <Field Name='CIN4' Caption='Ïðèáûëî|IV' Alignment='2'/>
+        <Field Name='CIN5' Caption='Ïðèáûëî|V' Alignment='2'/>
+        <Field Name='CIN6' Caption='Ïðèáûëî|VI' Alignment='2'/>
+        <Field Name='CIN7' Caption='Ïðèáûëî|VII' Alignment='2'/>
+
+        <Field Name='COUTALL' Caption='Âûáûëî|Âñåãî' Alignment='2'/>
+        <Field Name='COUT1' Caption='Âûáûëî|I' Alignment='2'/>
+        <Field Name='COUT2' Caption='Âûáûëî|II' Alignment='2'/>
+        <Field Name='COUT3' Caption='Âûáûëî|III' Alignment='2'/>
+        <Field Name='COUT4' Caption='Âûáûëî|IV' Alignment='2'/>
+        <Field Name='COUT5' Caption='Âûáûëî|V' Alignment='2'/>
+        <Field Name='COUT6' Caption='Âûáûëî|VI' Alignment='2'/>
+        <Field Name='COUT7' Caption='Âûáûëî|VII' Alignment='2'/>
+      </Fields>
+    </Domain>
+
+
+    <Domain Name='RASP'>
+      <Fields>
+        <Field Name='FIO' Caption='ÔÈÎ'/>
+        <Field Name='APPOINTMENT' Caption='Ìåñòî ðàñïðåäåëåíèÿ'/>
+      </Fields>
+    </Domain>
+  </Domains>
+</ExpFields>

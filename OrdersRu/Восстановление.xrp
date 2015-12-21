@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Восстановление" ProgressMax="100" EncodeText="False" ID="{ADF50DEA-F756-43B2-9FBB-8625EB419535}" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="EnterDate" DisplayLabel="Дата зачисления" ParamType="Date" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="NewSemester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="NewEduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="NewSpeciality" DisplayLabel="Специальность" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SPECIALITYID,
+(CODE || ' - ' || SPECIALITY) as SPECIALITY
+from V_GUIDE_SPECIALITY
+where USE = 1
+order by SPECIALITY" CommonValue="False"/><Parameter Name="NewEduBasis" DisplayLabel="Форма финансирования" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUBASISID, EDUBASIS, EDUBASIS_RUS_CASE9
+from V_GUIDE_EDUBASIS
+where USE = 1
+order by EDUBASIS" CommonValue="False"/><Parameter Name="NewEduTerm" DisplayLabel="Срок обучения" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EDUTERM, EDUTERMNAME
+from V_GUIDE_EDUTERM
+order by 1" CommonValue="False"/><Parameter Name="NewGroupNum" DisplayLabel="№ группы" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="FromVuz" DisplayLabel="С какого ВУЗа (другого)" ParamType="Edit" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Stip" DisplayLabel="Стипендия" ParamType="CheckBox" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="EduPlanDiff" DisplayLabel="Лквидировать расхождения в планах до" ParamType="Date" Required="False" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Bands><Band Name="Vis3" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><Events OnBeforePrintBand="Vis3_OnBeforePrintBand"/></Band><Band Name="dsOutOrder" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 SO.ORDERNUM, SO.ORDERDATE, GR.REASON
+from V_STUDENTORDERS SO
+inner join V_GUIDE_REASON GR
+on (GR.REASONID = SO.REASONID)
+where SO.STUDENTID = ?MAS_STUDENTID
+and SO.REASONID between 1000 and 1499
+and SO.ORDERDATE &lt;= ?CurDate
+order by SO.ORDERDATE desc
+</SQL><Events OnBeforeOpenDataSet=""/></Band></Bands><Events OnGetFieldData="dsStudents_OnGetFieldData" OnBeforeOpenDataSet="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL></Band></Bands><Script>function StipIndex(Field: TDBFieldInfo): integer;
+begin
+  if Params.Item('NewEduBasis_EDUBASISID').Value = 'К' then
+    Result := 1
+  else
+  begin
+    if Params.Item('Stip').Value then Result := 2
+    else Result := 3;
+  end;
+end;
+
+
+procedure Vis3_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := (StipIndex(nil) = 1);
+end;
+
+
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text := HostAppl.Data.GetSQL('STUDENTID,FIO,COUNTRYNAME,SEX,CODE,SPECIALITY,' +
+     'SEMESTER,COURSE,EDUYEARSTR,EDUBASIS_RUS_CASE9,DEPARTMENTID,DEPARTMENT_CASE6,' +
+     'EDUFORM,EDUFORM_CASE6,EDUTERMNAME') +
+     ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+var
+  v1, v2: Variant;
+begin
+  if Field.FieldName = 'FIO' then
+  begin
+    Field.Value := Utils.GetFIOPadeg(Field.Value, 0, 4);
+  end
+  else
+  if Field.FieldName = 'COURSE' then
+  begin
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').AsInteger + 1)/2);
+  end
+  else
+  if Field.FieldName = 'OldDepartment' then
+  begin
+    v1 := Field.DataSet.FieldByName('DEPARTMENTID').Value;
+    v2 := OrderParams.Item('Department_DEPARTMENTID').Value;
+
+    Field.Visible := (v1 &lt;&gt; v2);
+  end
+  else
+  if Field.FieldName = 'OldEduForm' then
+  begin
+    v1 := Field.DataSet.FieldByName('EDUFORM').Value;
+    v2 := OrderParams.Item('EduForm_EDUFORM').Value;
+
+    Field.Visible := (v1 &lt;&gt; v2);
+  end;
+end;
+
+
+procedure grOldEduForm_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := FindDataSet('dsStudents').FieldByName('EDUFORM').Value =
+    Params.Item('NewEduForm_EDUFORM').Value;
+end;
+
+
+procedure OnAfterQueryParams;
+begin
+  Params.Item('NewCourse').Value := Trunc((Params.Item('NewSemester_SEMESTER').Value + 1)/2);
+end;
+
+begin
+end.</Script></Report>

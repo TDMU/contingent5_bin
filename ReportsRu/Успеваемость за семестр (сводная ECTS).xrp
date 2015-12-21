@@ -1,0 +1,255 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Успеваемость за семестр (сводная ECTS)" ProgressMax="100" EncodeText="False" ID="{49F04D19-EE97-4083-866A-F86A554C2BA3}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 2"/><Parameter Name="EduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="SessionBeginDate" DisplayLabel="№ группы на дату" ParamType="Date" Required="True" AutoSize="True" SaveValue="svDontSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="UseGroup" DisplayLabel="По группам" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ShowAllProtocols" DisplayLabel="Показать все протоколы" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master=""><SQL>select
+  S.STUDENTID, S.FIO,
+  GD.DISCIPLINEID, GD.DISCIPLINE,
+  S2P.CREDITS_AVG, S2P.ECTS, GTM.TRADITIONAL_MARK,
+
+  (select first 1 HG.GROUPNUM
+   from HS_GROUPNUM HG
+   where HG.STUDENTID = S.STUDENTID
+     and HG.BEGINDATE &lt;= :SESSIONBEGINDATE
+   order by HG.BEGINDATE desc) as GROUPNUM,
+
+  (select  AVG(cast(S2P1.TRADITIONALMARK as numeric(5, 2)))
+  from STUDENT2PROTOCOL S2P1
+  left join RANKING_PROTOCOLS RP1
+   on (RP1.PROTOCOLID = S2P1.PROTOCOLID)
+
+  left join GUIDE_ECTS GE1
+   on (GE1.ECTS = S2P1.ECTS)
+
+  inner join V_LASTPROTOCOL VLP1
+   on (S2P1.PROTOCOLID = VLP1.PROTOCOLID
+      and VLP1.STUDENTID = S2P1.STUDENTID
+       and VLP1.EDUYEAR = RP1.EDUYEAR
+       and VLP1.SEMESTER = RP1.SEMESTER
+       and VLP1.DISCIPLINEID = RP1.DISCIPLINEID)
+ where (S2P1.STUDENTID = S.STUDENTID)
+   and RP1.SEMESTER = ?SEMESTER_SEMESTER
+   and RP1.EDUYEAR = ?EDUYEAR_EDUYEAR
+   and (S2P1.TRADITIONALMARK in (2,3,4,5))
+) as AVGMARK,
+
+  S2P.TRADITIONALMARK as TRADITIONALMARKID
+
+from STUDENTS S
+
+left join STUDENT2PROTOCOL S2P
+  on (S2P.STUDENTID = S.STUDENTID)
+
+left join RANKING_PROTOCOLS RP
+  on (RP.PROTOCOLID = S2P.PROTOCOLID)
+  and (RP.EDUYEAR = ?EDUYEAR_EDUYEAR)
+  and (RP.SEMESTER = ?SEMESTER_SEMESTER)
+
+left join V_GUIDE_DISCIPLINE GD
+  on (GD.DISCIPLINEID = RP.DISCIPLINEID)
+
+left join GUIDE_ECTS GE
+  on (GE.ECTS = S2P.ECTS)
+
+left join V_GUIDE_TRADITIONAL_MARK GTM
+  on (GTM.TRADITIONAL_MARKID = S2P.TRADITIONALMARK)
+
+where (S.STUDENTID in (@@STUDENTSID@))
+order by @@sortorder@ S.FIO, GD.DISCIPLINE, RP.PROTOCOLDATE desc nulls first
+</SQL></Band></Bands><Script>const
+  FirstRow = 4;
+  FirstCol = 6;
+  xlLeft = $FFFFEFDD;
+
+procedure OnAfterQueryParams;
+var
+  App : Variant;
+  sheet, range : Variant;
+//  dsL : TpFibDataSet;
+  Row,Col : Integer;
+  // Предыдущие значения
+  LStudentID : Variant;
+  LDisciplineID: Integer;    // add 07.02.2012
+  DisciplinePos,             // add 07.02.2012
+  MaxDisciplinePos: Integer; // add 07.02.2012   // max in line
+  SL : TStringList;
+  j : Integer;
+  NStudent: Integer;
+    //************************************
+    function GetCol(Discipline: string; var Added: Boolean): integer;
+    var
+      i : Integer;
+    begin
+       Result := -1;
+       if Length(Discipline) = 0 then Exit;
+       
+       for i := 0 to SL.Count-1 do
+       begin
+          if (SL[i] = Discipline) then
+          begin
+             Result := i;
+             Break;
+          end;
+       end;
+       Added := (Result = -1);
+       if (Added) then
+       begin
+         Result := SL.Add(Discipline);
+       end;
+       Result := Result * 3 + FirstCol;
+    end;
+    //************************************
+    
+var
+  AddedCol: Boolean;
+  TblWidth: Integer;
+  TblHeight: Integer;
+begin
+   SL := TstringList.Create;
+   App := CreateOleObject('Excel.Application');
+   App.Visible := True;
+   App.WorkBooks.Add(Report.TemplateDoc);
+   Report.TemplateDoc := '';
+   Sheet := App.ActiveSheet;
+   
+   Sheet.Cells(1,1).Value := Params.Item('Semester_SEMESTER').Value;
+   Sheet.Cells(2,1).Value := Params.Item('EduYear_EDUYEARSTR').Value;
+
+//   dsL := FindDataSet('dsList');
+   Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+//   '7010000034506,7010000034450,7010000034522,7010000034524,7010000034526,7010000034523,7010000033573,7010000034563';
+   if Params.Item('UseGroup').Value then
+     Params.Item('sortorder').Value := 'GROUPNUM, ';
+   dsList.Active := True;
+   dsList.First;
+   Row := FirstRow;
+   LStudentID := 0;
+   LDisciplineID := -1;
+   MaxDisciplinePos := 0;
+   Col := -1;
+   NStudent := 0;
+   while not dsList.Eof do
+   begin
+     // сменился студент
+     if (LStudentID &lt;&gt; dsList.FieldByName('STUDENTID').Value) then
+     begin
+       Row := Row + MaxDisciplinePos; // MaxDisciplinePos - это результаты
+       // непоследних протоколов. Откладываются они каждому студенту по ВЕРТИКАЛИ!
+       NStudent := NStudent + 1;
+       Sheet.Cells(Row,2).Value := '''' + IntToStr(NStudent) + '.'; // Номер п.п.
+       Sheet.Cells(Row,3).Value := dsList.FieldByName('FIO').AsString; //ФИО
+       Sheet.Cells(Row,4).Value := dsList.FieldByName('GROUPNUM').AsString; // Группа
+       Sheet.Cells(Row, 5).Value := dsList.FieldByName('AVGMARK').AsString;
+   //    Sheet.Cells(Row, 5).FormulaR1C1 := dsList.FieldByName('AVGMARK').AsString;
+   //      '=AVERAGE(RC[3],RC[6],RC[9],RC[12],RC[15],RC[18],RC[21],RC[24],RC[27],RC[30],RC[33],RC[35],RC[35],RC[36],RC[39],RC[42],RC[45],RC[48])';
+       MaxDisciplinePos := 0;
+       DisciplinePos := 0;
+       LStudentID := dsList.FieldByName('STUDENTID').Value;
+     end;
+     
+     if not (Length(dsList.FieldByName('DISCIPLINE').AsString) = 0) then
+     begin
+
+       // смена дисциплины
+       if (LDisciplineID &lt;&gt; dsList.FieldByName('DISCIPLINEID').AsInteger) then
+       begin
+         Col := GetCol(dsList.FieldByName('DISCIPLINE').AsString, AddedCol);
+
+         if AddedCol then
+         begin
+           Sheet.Columns(Col).ColumnWidth := 5.8; // 5.71
+           Sheet.Columns(Col).NumberFormat := '0,00';
+           Sheet.Columns(Col+1).ColumnWidth := 3.1;
+         end;
+         LDisciplineID := dsList.FieldByName('DISCIPLINEID').AsInteger;
+         DisciplinePos := 0;
+       end;
+
+       if ((DisciplinePos = 0) or
+           (DisciplinePos &lt;&gt; 0) and Params.Item('ShowAllProtocols').Value) then
+       begin
+         if (dsList.FieldByName('TRADITIONALMARKID').AsInteger &gt; 12) then
+         begin
+           Sheet.Cells(Row + DisciplinePos,Col+2).HorizontalAlignment := xlLeft;
+           Sheet.Cells(Row + DisciplinePos,Col+2).WrapText := False;
+         end;
+
+
+
+         Sheet.Cells(Row + DisciplinePos,Col).Value := dsList.FieldByName('CREDITS_AVG').AsString;
+         Sheet.Cells(Row + DisciplinePos,Col+1).Value := dsList.FieldByName('ECTS').AsString;
+         Sheet.Cells(Row + DisciplinePos,Col+2).Value := dsList.FieldByName('TRADITIONAL_MARK').AsString;
+
+         Inc(DisciplinePos);
+         if (DisciplinePos &gt; MaxDisciplinePos) then
+           MaxDisciplinePos := DisciplinePos;
+
+       end;
+     
+     end
+     else
+     begin
+       if (MaxDisciplinePos = 0) then MaxDisciplinePos := 1; // перейдет на следующую строку
+     end;
+
+     dsList.Next;
+   end;
+   //*************************
+   for j := 0 to SL.Count-1 do
+   begin
+      range := Sheet.Range(Sheet.Cells(2,3*j+FirstCol), Sheet.Cells(2,3*j+FirstCol+2));
+      range.MergeCells := True;
+      Sheet.Cells(FirstRow-1, 3 * j + FirstCol).Value := 'С.б.';
+      Sheet.Cells(FirstRow-1, 3 * j + FirstCol + 1).Value := 'ECTS';
+      Sheet.Cells(FirstRow-1, 3 * j + FirstCol + 2).Value := 'Трад.';
+      Sheet.Cells(FirstRow - 2, 3 * j + FirstCol).Value := SL[j];
+   end;
+
+   TblWidth := SL.Count * 3 + FirstCol - 1;
+   TblHeight := Row; //+ MaxDisciplinePos - 1;
+   
+   range := Sheet.Range(Sheet.Cells(2,2), Sheet.Cells(TblHeight, TblWidth));
+   range.Borders(7).LineStyle := 1; //xlContinuous
+   range.Borders(8).LineStyle := 1; //xlContinuous
+   range.Borders(9).LineStyle := 1; //xlContinuous
+   range.Borders(10).LineStyle := 1; //xlContinuous
+   range.Borders(11).LineStyle := 1; //xlContinuous
+   range.Borders(12).LineStyle := 1; //xlContinuous
+   
+   for j := FirstRow to TblHeight do
+   begin
+     if (Sheet.Cells(j, 3).Value = '') then
+     begin
+       range := Sheet.Range(Sheet.Cells(j,2), Sheet.Cells(j, TblWidth));
+       range.Interior.ColorIndex := 34;
+//       range.Interior.Pattern := xlSolid;
+     end;
+   end;
+end;
+
+begin
+end.</Script></Report>

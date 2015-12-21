@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Зачисление на курс" ProgressMax="100" ID="{FAC4D317-2045-4CBC-9200-3CD619C9F340}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="True" SaveCheckBox="False" Position="poScreenCenter" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="EnterDate" DisplayLabel="Дата зачисления" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="True"/><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1"/><Parameter Name="EduYear" DisplayLabel="Учебный год" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="False" Visible="True" CommonValue="False" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000
+2001
+2002
+2003
+2004
+2005
+2006
+2007
+2008
+2009" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="Speciality" DisplayLabel="Специальность" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" SQL="select S.SPECIALITYID,
+(S.CODE || ' - ' || S.SPECIALITY) as SPECIALITY,
+ED.EDUDIRECTION_CODE,
+ED.EDUDIRECTION,
+EL.EDULEVEL
+from V_GUIDE_SPECIALITY S
+inner join GUIDE_EDUDIRECTION ED
+  on (ED.EDUDIRECTIONID = S.EDUDIRECTIONID)
+inner join V_GUIDE_EDULEVEL EL
+  on (EL.EDULEVELID = S.EDULEVELID)
+where S.USE = 1
+order by SPECIALITY" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="True"/><Parameter Name="EduForm" DisplayLabel="Форма обучения" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" SQL="select EDUFORMID, EDUFORM, EDUFORM_RUS_CASE4
+from V_GUIDE_EDUFORM
+where USE = 1
+order by EDUFORM" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="False"/><Parameter Name="EduBasis" DisplayLabel="Форма финансирования" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" SQL="select EDUBASISID, EDUBASIS, EDUBASIS_RUS_CASE9
+from V_GUIDE_EDUBASIS
+where USE = 1
+order by EDUBASIS" CommonValue="False" ShowCheck="False" SaveCheck="True" Visible="True"/><Events OnBeforeQueryParams="OnBeforeQueryParams"/><Parameter Name="Department" DisplayLabel="Подразделение" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False" SQL="select DEPARTMENTID, DEPARTMENT
+from V_GUIDE_DEPARTMENT
+where USE = 1
+order by DEPARTMENT"/><Parameter Name="EduTerm" DisplayLabel="Cрок обучения" ParamType="Lookup" Required="True" AutoSize="False" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EDUTERM, EDUTERMNAME
+from V_GUIDE_EDUTERM
+order by 1" CommonValue="False"/><Parameter Name="ProtNum" DisplayLabel="№ протокола" ParamType="Edit" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="ProtDate" DisplayLabel="Дата протокола" ParamType="Date" Required="False" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Events OnAfterOpenDataSet="" OnBeforeOpenDataSet="" OnGetFieldData="" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL><Bands><Band Name="grEdu2" Master="dsStudents" AutoOpen="True" UniDirectional="False"><Events OnFirstPrintBand="grEdu2_OnFirstPrintBand"/></Band></Bands></Band><Band Name="Vis1" AutoOpen="True" UniDirectional="False"><Events OnBeforePrintBand="Vis1_OnBeforePrintBand"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('FIO,SEX,COUNTRYNAME') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+     
+  Params.Item('StudentsID').Value :=
+    HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure OnBeforeQueryParams;
+var
+  i: integer;
+begin
+  for i := Report.UserParams.Count - 1 downto 0 do
+    if OrderParams.Exists(Report.UserParams.Item(i).Name) then
+      Report.UserParams.Delete(i);
+end;
+
+
+procedure Vis1_OnBeforePrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := Params.Item('EduBasis_EDUBASISID').Value = 'К';
+end;
+
+
+procedure grEdu2_OnFirstPrintBand(Band: TDBBandInfo);
+begin
+  Band.Stop := not OrderParams.Item('Edu2').Value
+end;
+
+
+begin
+end.</Script><Events OnStartReport=""/></Report>

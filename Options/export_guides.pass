@@ -1,0 +1,182 @@
+const
+  cPackVersion = 3;
+
+var
+  InfoXML: Variant;
+  PackageInfoNode: Variant;
+  OptionsNode: Variant;
+  TablesNode: Variant;
+
+const
+  SelJoin = 'inner join SELECTEDIDS SS ' +
+            'on (SS.SELID = S.STUDENTID) ' +
+            'and (SS.TRANID = current_transaction)';
+            
+  AllJoin = 'inner join VW_USERACCESS2 VWUA ' +
+            'on (VWUA.STUDENTID = S.STUDENTID)';
+
+
+function GetParameter(ParameterName: string): string;
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := 'select PARAMETERVALUE from PARAMETERS where PARAMETERNAME = ''' + ParameterName + '''';
+      ExecQuery;
+      Result := Fields[0].AsString;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure ExecuteSQL(ASQL: string);
+begin
+  with TpFIBQuery.Create(nil) do
+  begin
+    try
+      Database := DB;
+      Transaction := Tran;
+      SQL.Text := ASQL;
+      ExecQuery;
+    finally
+      Free;
+    end;
+  end;
+end;
+
+procedure SetPackageInfo(ParameterName: string; ParameterValue: variant);
+var
+  Node: Variant;
+begin
+  Node := InfoXML.CreateElement(ParameterName);
+  PackageInfoNode.AppendChild(Node);
+  Node.Text := ParameterValue;
+end;
+
+function GetOptions: Variant;
+
+  procedure AddOption(Name: string; Caption: string; Checked: Boolean);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement(Name);
+    OptionsNode.AppendChild(Node);
+    Node.SetAttribute('Caption', Caption);
+    Node.SetAttribute('Checked', Checked);
+  end;
+  
+begin
+  AddOption('GUIDE_COUNTRY', _('Страны'), True);
+  AddOption('GUIDE_REGION', _('Области'), True);
+  AddOption('GUIDE_SPECIALITY', _('Специальности'), True);
+  AddOption('GUIDE_DEPARTMENT', _('Подразделения'), True);
+  AddOption('GUIDE_DISCIPLINE', _('Дисциплины'), True);
+  AddOption('GUIDE_APPOINTMENT', _('Места распределения'), True);
+  AddOption('GUIDE_POST', _('Должности'), True);
+  AddOption('GUIDE_FAMILYSTATUS', _('Семейное положение'), True);
+  AddOption('GUIDE_EDUTERM', _('Сроки обучения'), True);
+  AddOption('GUIDE_EMPLOYER', _('Руководители'), True);
+  
+  Result := OptionsNode;
+end;
+
+function GetOptionAttrValue(NodeName, AttrName: string): Variant;
+var
+  Node, Attr: Variant;
+begin
+  Result := '';
+  Node := OptionsNode.SelectSingleNode(NodeName);
+  Attr := Node.attributes.getNamedItem(AttrName);
+  Result := Attr.nodeValue;
+end;
+
+procedure ValidateOptions;
+var
+  i: Integer;
+begin
+  for i := 0 to OptionsNode.childNodes.Length -1 do
+  begin
+    if GetOptionAttrValue(OptionsNode.childNodes.Item(i).NodeName, 'Checked') then Exit;
+  end;
+  RaiseException(_('Для продолжения необходимо выбрать экспортируемые справочники'));
+
+end;
+
+procedure StartExport;
+
+  procedure AddTableInfo(TableName, TableTitle: string; RecordCount: integer);
+  var
+    Node: Variant;
+  begin
+    Node := InfoXML.CreateElement('Table');
+    TablesNode.AppendChild(Node);
+    Node.SetAttribute('Name', TableName);
+    Node.SetAttribute('Title', TableTitle);
+    Node.SetAttribute('RecordCount', RecordCount);
+  end;
+
+  procedure ProcessTable(TableName, TableTitle, SQL: string; ExcludeFields: string = ''; AddJoin: Boolean = True);
+  var
+    RecCount: integer;
+  begin
+    OutMessage(#13#10 + _('Таблица') + ' "' + TableTitle + '"');
+
+    RecCount := SQL2XML(SQL, TableName + '.xml', ExcludeFields);
+
+    AddTableInfo(TableName, TableTitle, RecCount);
+  end;
+
+begin
+  SetPackageInfo('PackageType', 'Guides');
+  SetPackageInfo('Version', cPackVersion);
+  SetPackageInfo('OrgCode', GetParameter('OrgCode'));
+  SetPackageInfo('DBCode', GetParameter('DBCode'));
+  SetPackageInfo('CreateDate', FormatDateTime('dd.mm.yyyy hh:mm:ss', Now));
+  SetPackageInfo('OrgName', GetParameter('OrgName'));
+  SetPackageInfo('ARMName', GetRegValue(rgContKey, rgARMName));
+
+  if GetOptionAttrValue('GUIDE_COUNTRY', 'Checked') then
+    ProcessTable('GUIDE_COUNTRY', _('Страны'), 'select S.* from GUIDE_COUNTRY S');
+  if GetOptionAttrValue('GUIDE_REGION', 'Checked') then
+    ProcessTable('GUIDE_REGION', _('Области'), 'select S.* from GUIDE_REGION S');
+  if GetOptionAttrValue('GUIDE_SPECIALITY', 'Checked') then
+    ProcessTable('GUIDE_SPECIALITY', _('Специальности'), 'select S.* from GUIDE_SPECIALITY S');
+  if GetOptionAttrValue('GUIDE_DEPARTMENT', 'Checked') then
+    ProcessTable('GUIDE_DEPARTMENT', _('Подразделения'), 'select S.* from GUIDE_DEPARTMENT S');
+  if GetOptionAttrValue('GUIDE_DISCIPLINE', 'Checked') then
+    ProcessTable('GUIDE_DISCIPLINE', _('Дисциплины'), 'select S.* from GUIDE_DISCIPLINE S');
+  if GetOptionAttrValue('GUIDE_APPOINTMENT', 'Checked') then
+    ProcessTable('GUIDE_APPOINTMENT', _('Места распределения'), 'select S.* from GUIDE_APPOINTMENT S');
+  if GetOptionAttrValue('GUIDE_POST', 'Checked') then
+    ProcessTable('GUIDE_POST', _('Должности'), 'select S.* from GUIDE_POST S');
+  if GetOptionAttrValue('GUIDE_FAMILYSTATUS', 'Checked') then
+    ProcessTable('GUIDE_FAMILYSTATUS', _('Семейное положение'), 'select S.* from GUIDE_FAMILYSTATUS S');
+  if GetOptionAttrValue('GUIDE_EDUTERM', 'Checked') then
+    ProcessTable('GUIDE_EDUTERM', _('Сроки обучения'), 'select S.* from GUIDE_EDUTERM S');
+  if GetOptionAttrValue('GUIDE_EMPLOYER', 'Checked') then
+    ProcessTable('GUIDE_EMPLOYER', _('Руководители'), 'select S.* from GUIDE_EMPLOYER S');
+
+  InfoXML.Save(TempDir + '\info.xml');
+
+  OutMessage(#13#10#13#10 + _('Архивирование'));
+  Compress(ArchFileName, TempDir + '\*.*');
+
+  Tran.Commit;
+
+end;
+
+
+begin
+  try
+    InfoXML := CreateOleObject('Msxml2.DOMDocument.3.0');
+  except
+    RaiseException(_('В системе не установлена библиотека msxml3'));
+  end;
+  InfoXML.LoadXML('<?xml version="1.0" encoding="windows-1251"?><Info><PackageInfo/><Options/><Tables/></Info>');
+  PackageInfoNode := InfoXML.DocumentElement.SelectSingleNode('PackageInfo');
+  OptionsNode := InfoXML.DocumentElement.SelectSingleNode('Options');
+  TablesNode := InfoXML.DocumentElement.SelectSingleNode('Tables');
+end.

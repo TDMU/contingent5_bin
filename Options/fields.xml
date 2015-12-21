@@ -1,0 +1,1132 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<Fields>
+	<CurJoins>
+		<Join Name="STUDENTS" Alias="S">
+			<SQL>STUDENTS S</SQL>
+			<Join Name="COUNTRY" Alias="GC">
+				<SQL>
+          left join V_GUIDE_COUNTRY GC on (GC.COUNTRYID = S.COUNTRYID)
+				</SQL>
+			</Join>
+			<Join Name="SPECIALITY" Alias="GSP">
+				<SQL>
+          left join V_GUIDE_SPECIALITY GSP on (GSP.SPECIALITYID = S.SPECIALITYID)
+				</SQL>
+				<Join Name="EDULEVEL" Alias="GEL">
+					<SQL>
+            left join V_GUIDE_EDULEVEL GEL on (GEL.EDULEVELID = GSP.EDULEVELID)
+					</SQL>
+				</Join>
+				<Join Name="EDUDIRECTION" Alias="GER">
+					<SQL>
+            left join GUIDE_EDUDIRECTION GER on (GER.EDUDIRECTIONID = GSP.EDUDIRECTIONID)
+					</SQL>
+				</Join>
+			</Join>
+			<Join Name="SPECIALITY_CODE" Alias="GSPC">
+				<SQL>
+          left join V_SPECIALITYCODE GSPC on (GSPC.SPECIALITYID = S.SPECIALITYID)
+				</SQL>
+			</Join>
+			<Join Name="STATUS" Alias="GST">
+				<SQL>
+          left join V_GUIDE_STATUS GST
+          on (GST.STATUS = S.STATUS)
+				</SQL>
+			</Join>
+			<Join Name="EDUYEAR" Alias="GEY">
+				<SQL>left join GUIDE_EDUYEAR GEY
+          on (GEY.EDUYEAR = S.EDUYEAR)
+				</SQL>
+			</Join>
+			<Join Name="EDUFORM" Alias="GEF">
+				<SQL>left join V_GUIDE_EDUFORM GEF
+          on (GEF.EDUFORMID = S.EDUFORMID)
+				</SQL>
+			</Join>
+			<Join Name="EDUBASIS" Alias="GEB">
+				<SQL>left join V_GUIDE_EDUBASIS GEB
+          on (GEB.EDUBASISID = S.EDUBASISID)
+				</SQL>
+			</Join>
+			<Join Name="EDUTERM" Alias="GET">
+				<SQL>left join V_GUIDE_EDUTERM GET
+          on (GET.EDUTERM = S.EDUTERM)
+				</SQL>
+			</Join>
+			<Join Name="DEPARTMENT" Alias="GED">
+				<SQL>left join V_GUIDE_DEPARTMENT GED
+          on (GED.DEPARTMENTID = S.DEPARTMENTID)
+        
+				</SQL>
+				<Join Name="EMPLOYER" Alias="GEMP">
+					<SQL>left join GUIDE_EMPLOYER GEMP
+            on (GEMP.EMP_ID = GED.BOSSID)
+          
+					</SQL>
+				</Join>
+			</Join>
+			<Join Name="HS_FIO_PREV" Alias="HSFP">
+				<SQL>left join SP_FIO_PREV(S.STUDENTID, '01.01.3000', 0) HSFP on (1 = 1)</SQL>
+			</Join>
+			<Join Name="COURSE" Alias="GSEM">
+				<SQL>left join GUIDE_SEMESTER GSEM on (GSEM.SEMESTER = S.SEMESTER)</SQL>
+			</Join>
+  		<Join Name="REGION" Alias="GRG">
+  			<SQL>left join V_GUIDE_REGION GRG on (GRG.REGIONID = S.REGIONID)</SQL>
+  		</Join>
+  		<Join Name="REGION1" Alias="GRG1">
+  			<SQL>left join V_GUIDE_REGION GRG1 on (GRG1.REGIONID = S.DIRECTIONPLACEID)</SQL>
+  		</Join>
+  		<Join Name="FAMILYSTATUS" Alias="GFS">
+  			<SQL>left join V_GUIDE_FAMILYSTATUS GFS on (GFS.FAMILYSTATUS = S.FAMILYSTATUS)</SQL>
+  		</Join>
+  		<Join Name="PLANRASP" Alias="PS">
+  			<SQL>left join PLANRASP PS on (PS.PLANRASPID = S.PLANRASPID)</SQL>
+  			<Join Name="APPOINTMENT" Alias="APP">
+  				<SQL>left join GUIDE_APPOINTMENT APP on (APP.APPOINTMENTID = PS.APPOINTMENTID)</SQL>
+  			</Join>
+  		</Join>
+  		<Join Name="POST" Alias="GPST">
+  			<SQL>left join GUIDE_POST GPST on (GPST.POSTID = S.POSTID)</SQL>
+  		</Join>
+  		<Join Name="MINISTRY" Alias="GMS">
+  			<SQL>left join GUIDE_MINISTRY GMS on (GMS.MINISTRYID = S.MINISTRYID)</SQL>
+  		</Join>
+  		<Join Name="HOSPITALTYPE" Alias="GHT">
+  			<SQL>left join GUIDE_HOSPITALTYPE GHT on (GHT.HOSPITALTYPEID = S.HOSPITALTYPEID)</SQL>
+  		</Join>
+  		<Join Name="HOSPITALSTATUS" Alias="GHS">
+  			<SQL>left join GUIDE_HOSPITALSTATUS GHS on (GHS.HOSPITALSTATUSID = S.HOSPITALSTATUSID)</SQL>
+  		</Join>
+  		<Join Name="PRIVILEGE" Alias="GP">
+  			<SQL>left join GUIDE_PRIVILEGE GP on (GP.PRIVILEGEID = S.PRIVILEGEID)</SQL>
+  		</Join>
+  		
+  		<Join Name="STUDENT2PROTOCOL" Alias="S2P">
+  			<SQL>inner join STUDENT2PROTOCOL S2P on (S2P.STUDENTID = S.STUDENTID)</SQL>
+  		</Join>
+
+			<Join Name="V_STUDENT_MODULES" Alias="VS2M">
+				<SQL>inner join V_STUDENT_MODULES VS2M
+          on (VS2M.STUDENTID = S.STUDENTID)
+				</SQL>
+			</Join>
+			<Join Name="DIC_USTAN" Alias="DU">
+  			<SQL>left join DIC_USTAN DU on (DU.DIC_USTAN_UID = S.DIC_USTAN_UID)</SQL>
+  		</Join>
+      <Join Name="DIC_PODRAZD" Alias="DP">
+  			<SQL>left join DIC_PODRAZD DP on (DP.DIC_PODRAZD_UID = S.DIC_PODRAZD_UID)</SQL>
+  		</Join>
+		</Join>
+	</CurJoins>
+	
+	
+	<HistJoins>
+		<Join Name="STUDENTS" Alias="S">
+			<SQL>STUDENTS S</SQL>
+			<Join Name="FIO" Alias="HSF">
+				<SQL>left join HS_FIO HSF
+          on (HSF.STUDENTID = S.STUDENTID)
+          and (HSF.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_FIO
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+				</SQL>
+			</Join>
+			<Join Name="MOVEMENT" Alias="HSM">
+				<SQL>left join HS_MOVEMENT_FULL HSM
+          on (HSM.STUDENTID = S.STUDENTID)
+          and HSM.BEGINDATE &lt;= ?CurDate
+          and HSM.ENDDATE &gt; ?CurDate
+/*          left join STUDENTTOORDER STO
+          on (STO.STUDENTID = S.STUDENTID)
+          and (STO.ORDERID = HSM.ORDERID)
+          and STO.CANCELED = 0*/
+				</SQL>
+				<Join Name="SPECIALITY" Alias="GSP">
+					<SQL>left join V_GUIDE_SPECIALITY GSP
+            on (GSP.SPECIALITYID = HSM.SPECIALITYID)
+					</SQL>
+					
+					<Join Name="EDULEVEL" Alias="GEL">
+						<SQL>left join V_GUIDE_EDULEVEL GEL on (GEL.EDULEVELID = GSP.EDULEVELID)</SQL>
+					</Join>
+					<Join Name="EDUDIRECTION" Alias="GER">
+					<SQL>left join GUIDE_EDUDIRECTION GER on (GER.EDUDIRECTIONID = GSP.EDUDIRECTIONID)</SQL>
+				</Join>
+					<Join Name="STRUCTURE" Alias="GSTR">
+					<SQL>left join GUIDE_STRUCTURE GSTR on (GSTR.STRUCTUREID = GSP.STRUCTUREID)</SQL>
+				</Join>
+					<Join Name="EDUDIRECTION_RASP" Alias="GEDR">
+					<SQL>left join GUIDE_EDUDIRECTION_RASP GSTR on (GEDR.EDUDIRECTION_RASPID = GSP.EDUDIRECTION_RASPID)</SQL>
+				</Join>
+				</Join>
+				<Join Name="SPECIALITY_CODE" Alias="GSPC">
+					<SQL>left join V_SPECIALITYCODE GSPC
+            on (GSPC.SPECIALITYID = HSM.SPECIALITYID)
+					</SQL>
+				</Join>
+				<Join Name="EDUYEAR" Alias="GEY">
+					<SQL>left join GUIDE_EDUYEAR GEY
+            on (GEY.EDUYEAR = HSM.EDUYEAR)
+					</SQL>
+				</Join>
+				<Join Name="STATUS" Alias="GST">
+					<SQL>left join V_GUIDE_STATUS GST
+            on (GST.STATUS = HSM.STATUS)
+					</SQL>
+				</Join>
+				<Join Name="EDUFORM" Alias="GEF">
+					<SQL>left join V_GUIDE_EDUFORM GEF
+            on (GEF.EDUFORMID = HSM.EDUFORMID)
+					</SQL>
+				</Join>
+				<Join Name="EDUBASIS" Alias="GEB">
+					<SQL>left join V_GUIDE_EDUBASIS GEB
+            on (GEB.EDUBASISID = HSM.EDUBASISID)
+					</SQL>
+				</Join>
+  			<Join Name="EDUTERM" Alias="GET">
+  				<SQL>left join V_GUIDE_EDUTERM GET
+            on (GET.EDUTERM = HSM.EDUTERM)
+  				</SQL>
+  			</Join>
+				<Join Name="DEPARTMENT" Alias="GED">
+					<SQL>left join V_GUIDE_DEPARTMENT GED
+            on (GED.DEPARTMENTID = HSM.DEPARTMENTID)
+					</SQL>
+					<Join Name="EMPLOYER" Alias="GEMP">
+						<SQL>left join GUIDE_EMPLOYER GEMP
+              on (GEMP.EMP_ID = GED.BOSSID)
+						</SQL>
+					</Join>
+				</Join>
+				<Join Name="COURSE" Alias="GSEM">
+  				<SQL>left join GUIDE_SEMESTER GSEM
+            on (GSEM.SEMESTER = HSM.SEMESTER)
+  				</SQL>
+				</Join>
+			</Join>
+			<Join Name="COUNTRY" Alias="GC">
+				<SQL>left join HS_COUNTRY HSC
+          on (HSC.STUDENTID = S.STUDENTID)
+          and (HSC.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_COUNTRY
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+          left join V_GUIDE_COUNTRY GC on (GC.COUNTRYID = HSC.COUNTRYID)
+				</SQL>
+			</Join>
+			<Join Name="GROUPNUM" Alias="HSGN">
+				<SQL>left join HS_GROUPNUM HSGN
+          on (HSGN.STUDENTID = S.STUDENTID)
+          and (HSGN.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_GROUPNUM
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+				</SQL>
+			</Join>
+			<Join Name="HOSTEL" Alias="HSH">
+				<SQL>left join HS_HOSTEL HSH
+          on (HSH.STUDENTID = S.STUDENTID)
+          and (HSH.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_HOSTEL
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+				</SQL>
+			</Join>
+			<Join Name="ORPHAN" Alias="HSO">
+				<SQL>left join HS_ORPHAN HSO
+          on (HSO.STUDENTID = S.STUDENTID)
+          and (HSO.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_ORPHAN
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+				</SQL>
+			</Join>
+			<Join Name="STREAM" Alias="HSSTM">
+				<SQL>left join HS_STREAM HSSTM
+          on (HSSTM.STUDENTID = S.STUDENTID)
+          and (HSSTM.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_STREAM
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+				</SQL>
+			</Join>
+			<Join Name="FAMILYSTATUS" Alias="GFS">
+				<SQL>left join HS_FAMILYSTATUS HSFS
+          on (HSFS.STUDENTID = S.STUDENTID)
+          and (HSFS.BEGINDATE =
+            (
+              select first 1 BEGINDATE
+              from HS_FAMILYSTATUS
+              where STUDENTID = S.STUDENTID
+              and BEGINDATE &lt;= ?CurDate
+              order by BEGINDATE desc)
+            )
+          left join V_GUIDE_FAMILYSTATUS GFS
+          on (GFS.FAMILYSTATUS = HSFS.FAMILYSTATUS)
+				</SQL>
+			</Join>
+			<Join Name="HS_FIO_PREV" Alias="HSFP">
+				<SQL>left join SP_FIO_PREV(S.STUDENTID, ?CurDate, 1) HSFP on (1 = 1)</SQL>
+			</Join>
+  		<Join Name="REGION" Alias="RG">
+  			<SQL>left join V_GUIDE_REGION RG on (RG.REGIONID = S.REGIONID)</SQL>
+  		</Join>
+  		<Join Name="REGION1" Alias="RG1">
+  			<SQL>left join V_GUIDE_REGION RG1 on (RG1.REGIONID = S.DIRECTIONPLACEID)</SQL>
+  		</Join>
+  		<Join Name="PLANRASP" Alias="PS">
+  			<SQL>left join PLANRASP PS on (PS.PLANRASPID = S.PLANRASPID)</SQL>
+  			<Join Name="APPOINTMENT" Alias="APP">
+  				<SQL>left join GUIDE_APPOINTMENT APP on (APP.APPOINTMENTID = PS.APPOINTMENTID)</SQL>
+  			</Join>
+  		</Join>
+  		<Join Name="POST" Alias="GPST">
+  			<SQL>left join GUIDE_POST GPST on (GPST.POSTID = S.POSTID)</SQL>
+  		</Join>
+  		<Join Name="MINISTRY" Alias="GMS">
+  			<SQL>left join GUIDE_MINISTRY GMS on (GMS.MINISTRYID = S.MINISTRYID)</SQL>
+  		</Join>
+  		<Join Name="HOSPITALTYPE" Alias="GHT">
+  			<SQL>left join GUIDE_HOSPITALTYPE GHT on (GHT.HOSPITALTYPEID = S.HOSPITALTYPEID)</SQL>
+  		</Join>
+  		<Join Name="HOSPITALSTATUS" Alias="GHS">
+  			<SQL>left join GUIDE_HOSPITALSTATUS GHS on (GHS.HOSPITALSTATUSID = S.HOSPITALSTATUSID)</SQL>
+  		</Join>
+  		<Join Name="PRIVILEGE" Alias="GP">
+  			<SQL>left join GUIDE_PRIVILEGE GP on (GP.PRIVILEGEID = S.PRIVILEGEID)</SQL>
+  		</Join>
+
+  		<Join Name="STUDENT2PROTOCOL" Alias="S2P">
+  			<SQL>inner join STUDENT2PROTOCOL S2P on (S2P.STUDENTID = S.STUDENTID)</SQL>
+  		</Join>
+
+			<Join Name="V_STUDENT_MODULES" Alias="VS2M">
+				<SQL>inner join V_STUDENT_MODULES VS2M
+          on (VS2M.STUDENTID = S.STUDENTID)
+				</SQL>
+			</Join>
+
+		</Join>
+	</HistJoins>
+	<Domains>
+		<Domain Name="StudentList">
+			<Fields>
+				<Field Name="STUDENTID" Caption="ID" CurJoin="STUDENTS" HistJoin="STUDENTS" Required="True" Type="Edit"/>
+				<Field Name="IDCODE" Caption="Код" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="FIO" Caption="ФИО" CurJoin="STUDENTS" HistJoin="FIO" Required="True" Type="Edit" HistoryReadOnly="False">
+					<History Table="HS_FIO" ShowFields="FIO,ORDERNUM"/>
+				</Field>
+				<Field Name="FIO_PREV" Origin="FIO" Caption="ФИО (предыдущее)" CurJoin="HS_FIO_PREV" HistJoin="HS_FIO_PREV" Type="Edit"/>
+				<Field Name="NFIO" Caption="ФИО (англ.)" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="PHOTO" Caption="Фото" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Image"/>
+				<Field Name="SEX" Caption="Пол" CurJoin="STUDENTS" HistJoin="STUDENTS" Alignment="2" Type="Edit"/>
+				<Field Name="SEX1" Origin="SEX" Caption="Пол" CurJoin="STUDENTS" HistJoin="STUDENTS" Alignment="2" Type="ComboBox" Hidden="True">
+					<Items>
+						<Item Key="Ч" Value="Мужской"/>
+						<Item Key="Ж" Value="Женский"/>
+					</Items>
+				</Field>
+				<Field Name="BIRTHDATE" Caption="Дата рождения" CurJoin="STUDENTS" HistJoin="STUDENTS" Alignment="2" Type="Date"/>
+				<Field Name="COUNTRYNAME" KeyField="COUNTRYID" Caption="Гражданство" CurJoin="COUNTRY" HistJoin="COUNTRY" Type="LookupComboBox" HistoryReadOnly="False">
+					<LookupSQL>select COUNTRYID, COUNTRYNAME
+            from V_GUIDE_COUNTRY
+            where USE = 1
+            order by COUNTRYNAME
+					</LookupSQL>
+					<History Table="HS_COUNTRY"/>
+				</Field>
+				<Field Name="COUNTRYNAME_ENG" KeyField="COUNTRYID" Caption="Гражданство (англ.)" CurJoin="COUNTRY" HistJoin="COUNTRY" Type="LookupComboBox" HistoryReadOnly="False">
+					<LookupSQL>select COUNTRYID, COUNTRYNAME_ENG
+            from V_GUIDE_COUNTRY
+            where USE = 1
+            order by COUNTRYNAME
+					</LookupSQL>
+					<History Table="HS_COUNTRY"/>
+				</Field>
+				<Field Name="COUNTRYTYPE" Caption="Тип страны" CurJoin="COUNTRY" HistJoin="COUNTRY" Type="ComboBox">
+					<Items>
+						<Item Key="УКР" Value="Украина"/>
+						<Item Key="RUS" Value="Российская федерация"/>
+						<Item Key="СНД" Value="СНГ"/>
+						<Item Key="ЗАК" Value="Зарубежье"/>
+					</Items>
+				</Field>
+				<Field Name="SEMESTER" Caption="Семестр" CurJoin="STUDENTS" HistJoin="MOVEMENT" Alignment="2" Type="LookupComboBox">
+					<LookupSQL>select GS.SEMESTER, GS.SEMESTER
+              from GUIDE_SEMESTER GS
+              where GS.USE = 1
+              order by GS.SEMESTER
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="SEMESTER,EDUYEARSTR,ORDERNUM"/>
+				</Field>
+				<Field Name="COURSE" Caption="Курс" CurJoin="COURSE" HistJoin="COURSE" Alignment="2" Type="LookupComboBox"/>
+				<Field Name="EDUYEARSTR" KeyField="EDUYEAR" Caption="Уч. год" CurJoin="EDUYEAR" HistJoin="EDUYEAR" Alignment="2" Type="LookupComboBox">
+					<LookupSQL>select GEY.EDUYEAR, GEY.EDUYEARSTR
+              from GUIDE_EDUYEAR GEY
+              where GEY.USE = 1
+              order by GEY.EDUYEAR
+					</LookupSQL>
+				</Field>
+				<Field Name="SPECIALITY" KeyField="SPECIALITYID" Caption="Специальность" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Type="LookupComboBox">
+					<LookupSQL>select SPECIALITYID, SPECIALITY
+              from V_GUIDE_SPECIALITY
+              where USE = 1
+              order by SPECIALITY
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="SPECIALITY,ORDERNUM"/>
+				</Field>
+
+				
+				<Field Name="SPECIALITY_CODE" KeyField="SPECIALITYID" Caption="Специальность с кодом" CurJoin="SPECIALITY_CODE" HistJoin="SPECIALITY_CODE" Type="LookupComboBox">
+					<LookupSQL>select SPECIALITYID, CODE || ' - ' || SPECIALITY as SPECIALITY_CODE
+              from V_GUIDE_SPECIALITY
+              where USE = 1
+              order by 2
+					</LookupSQL>
+				</Field>
+				
+				<Field Name="STATUSNAME" KeyField="STATUS" Caption="Статус" CurJoin="STATUS" HistJoin="STATUS" Type="LookupComboBox">
+					<LookupSQL>select STATUS, STATUSNAME
+              from V_GUIDE_STATUS
+              order by STATUSNAME
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="STATUSNAME,ORDERNUM"/>
+				</Field>
+				<Field Name="EDUFORM" KeyField="EDUFORMID" Caption="Форма обучения" CurJoin="EDUFORM" HistJoin="EDUFORM" Type="LookupComboBox">
+					<LookupSQL>select EDUFORMID, EDUFORM
+              from V_GUIDE_EDUFORM
+              where USE = 1
+              order by EDUFORM
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="EDUFORM,ORDERNUM"/>
+				</Field>
+				<Field Name="EDUBASIS" KeyField="EDUBASISID" Caption="Форма финансирования" CurJoin="EDUBASIS" HistJoin="EDUBASIS" Type="LookupComboBox">
+					<LookupSQL>select EDUBASISID, EDUBASIS
+              from V_GUIDE_EDUBASIS
+              where USE = 1
+              order by EDUBASIS
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="EDUBASIS,ORDERNUM"/>
+				</Field>
+				<Field Name="EDUTERMNAME" KeyField="EDUTERM" Caption="Срок обучения" CurJoin="EDUTERM" HistJoin="EDUTERM" Type="LookupComboBox">
+					<LookupSQL>select EDUTERM, EDUTERMNAME
+              from V_GUIDE_EDUTERM
+              where USE = 1
+              order by 1
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="EDUTERMNAME,ORDERNUM"/>
+				</Field>
+				<Field Name="DEPARTMENT" KeyField="DEPARTMENTID" Caption="Подразделение" CurJoin="DEPARTMENT" HistJoin="DEPARTMENT" Type="LookupComboBox">
+					<LookupSQL>select DEPARTMENTID, DEPARTMENT
+              from V_GUIDE_DEPARTMENT
+              where USE = 1
+              order by DEPARTMENT
+					</LookupSQL>
+					<History Table="HS_MOVEMENT" ShowFields="DEPARTMENT,ORDERNUM"/>
+				</Field>
+				<Field Name="EMP_FIO" Caption="Руководитель подразделения" CurJoin="EMPLOYER" HistJoin="EMPLOYER" Type="LookupComboBox">
+					<LookupSQL>select EMP_ID, EMP_FIO
+              from GUIDE_EMPLOYER
+              order by EMP_FIO
+					</LookupSQL>
+				</Field>
+				<Field Name="EMP_FIO_ENG" Caption="Руководитель подразделения (англ.)" CurJoin="EMPLOYER" HistJoin="EMPLOYER" Type="LookupComboBox">
+					<LookupSQL>select EMP_ID, EMP_FIO_ENG
+              from GUIDE_EMPLOYER
+              order by EMP_FIO_ENG
+					</LookupSQL>
+				</Field>
+				<Field Name="GROUPNUM" Caption="№ группы" CurJoin="STUDENTS" HistJoin="GROUPNUM" Type="Edit" Alignment="2" HistoryReadOnly="False">
+					<History Table="HS_GROUPNUM" ShowFields="GROUPNUM,ORDERNUM"/>
+				</Field>
+				<Field Name="NOTE" Caption="Примечание" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="SOCIALORIGIN" Caption="Социальное происхождение" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="" Value=" "/>
+						<Item Key="Р" Value="из рабочих"/>
+						<Item Key="К" Value="из крестьян"/>
+						<Item Key="С" Value="из служащих"/>
+					</Items>
+				</Field>
+				<Field Name="FAMILY" Caption="Состав семьи" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="REGIONNAME" KeyField="REGIONID" Caption="Область проживания" CurJoin="REGION" HistJoin="REGION" Type="LookupComboBox">
+					<LookupSQL>select REGIONID, REGIONNAME
+              from V_GUIDE_REGION
+              where USE = 1
+              order by COUNTRY, REGIONNAME
+					</LookupSQL>
+				</Field>
+				<Field Name="BIRTHADDRESS" Caption="Место рождения" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="ADDRESSBEFORE" Caption="Место жительства до поступления" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="ADDRESSNOW" Caption="Место жительства в настоящее время" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="ADDRESSOFPARENTS" Caption="Адрес родителей" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="JURIDICALPERSON" Caption="Юридическое лицо, заключившее контракт" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="PROTOCOLNUM" Caption="№ протокола заседания приемной комиссии" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="PROTOCOLDATE" Caption="Дата протокола заседания приемной комиссии" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Date"/>
+				<Field Name="PREVIOUSEDUCATION" Caption="Образование" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="" Value=" "/>
+						<Item Key="НЧ" Value="начальное общее"/>
+						<Item Key="НС" Value="базовое общее среднее"/>
+						<Item Key="С" Value="полное общее среднее"/>
+						<Item Key="СТ" Value="профессионально-техническое"/>
+						<Item Key="НВ" Value="неполное высшее"/>
+						<Item Key="БВ" Value="базовое высшее"/>
+						<Item Key="В" Value="полное высшее"/>
+					</Items>
+				</Field>
+				<Field Name="PREVIOUSDOCUMENT" Caption="Документ при поступлении" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="" Value=" "/>
+						<Item Key="АТ" Value="аттестат"/>
+						<Item Key="ДП" Value="диплом"/>
+						<Item Key="СВ" Value="свидетельство"/>
+					</Items>
+				</Field>
+				<Field Name="PREVIOUSDOCUMENTNUM" Caption="№ документа при поступлении" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EDUCATIONALINSTITUTION" Caption="Название и дата окончания уч. зав." CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="RECORDBOOKNUM" Caption="№ зачетной книжки" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="PRIVATEAFFAIRNUM" Caption="№ личного дела" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="DIRECTIONPLACE" Origin="REGIONNAME" KeyField="DIRECTIONPLACEID" Caption="Область целевого направления" CurJoin="REGION1" HistJoin="REGION1" Type="LookupComboBox">
+					<LookupSQL>select REGIONID, REGIONNAME
+              from V_GUIDE_REGION
+              where USE = 1
+              order by COUNTRY, REGIONNAME
+					</LookupSQL>
+				</Field>
+				<Field Name="DIRECTIONPLACETYPE" Caption="Тип целевого направления" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="" Value=" "/>
+						<Item Key="С" Value="сельское"/>
+						<Item Key="Ч" Value="ЧАЭС"/>
+					</Items>
+				</Field>
+				<Field Name="MEDICALARMTRAINING" Caption="Военно-медицинская подготовка" CurJoin="STUDENTS" HistJoin="STUDENTS" Alignment="2" Type="ComboBox">
+					<Items>
+						<Item Key="False" Value="нет"/>
+						<Item Key="True" Value="есть"/>
+					</Items>
+				</Field>
+				<Field Name="CERTIFICATENUM" Caption="№ аттестата" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="CERTIFICATEREGNUM" Caption="Рег. № аттестата" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="DIPLOMANUM" Caption="№ диплома выпускника" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="DIPLOMAREGNUM" Caption="Рег. № диплома выпускника" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="WORKBOOKNUM" Caption="№ трудовой книжки" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="WORKBOOKGIVEDATE" Caption="Дата выдачи трудовой книжки" CurJoin="STUDENTS" HistJoin="STUDENTS" Alignment="2" Type="Date"/>
+				<Field Name="WORKPERIOD" Caption="Стаж" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="PASSPORTNUM" Caption="№ паспорта" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="LIBRARYNUM" Caption="Библиотечный номер" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EMAIL" Caption="Е-Mail" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="KROKID" Caption="Крок id" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="ZNOMARK" Caption="Балл ВНО" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="PASSPORTGIVEDATE" Caption="Дата выдачи паспорта" CurJoin="STUDENTS" HistJoin="STUDENTS" Alignment="2" Type="Date"/>
+				<Field Name="PASSPORTGIVEPLACE" Caption="Место выдачи паспорта" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="PASSPORTREGISTRATION" Caption="№ и место регистрации паспорта" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+        <Field Name="TEMPORARY_LISTENER" Caption="Временный слушатель" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="False" Value="нет"/>
+						<Item Key="True" Value="да"/>
+					</Items>
+				</Field>
+        <Field Name="REFUGEE_STATUS" Caption="Имеет статус беженца" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="False" Value="нет"/>
+						<Item Key="True" Value="да"/>
+					</Items>
+				</Field>
+				<Field Name="EDBO_IDPERSON" Caption="EDBO, заказ документов|IdPerson" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EDBO_KOATUUCODE" Caption="EDBO, заказ документов|КОАТУУ код" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit" ReadOnly="True"/>
+				<Field Name="EDBO_KOATUUADDRESS" Caption="EDBO, заказ документов|КОАТУУ адрес" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo" ReadOnly="True"/>
+				<Field Name="EDBO_CITY" Caption="EDBO, заказ документов|Город" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EDBO_STREET" Caption="EDBO, заказ документов|Улица" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EDBO_HOUSE" Caption="EDBO, заказ документов|Дом" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EDBO_BUILDING" Caption="EDBO, заказ документов|Корпус" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="EDBO_FLAT" Caption="EDBO, заказ документов|Квартира" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit"/>
+				<Field Name="OWNER" KeyField="OWNER" Caption="Ответственный" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="LookupComboBox">
+					<LookupSQL>select UGNAME, UGNAME
+              from SEC_USERSGROUPS
+              where RTYPE = 'U'
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="HOSTEL" Caption="Общежитие" CurJoin="STUDENTS" HistJoin="HOSTEL" Type="ComboBox" HistoryReadOnly="False">
+					<Items>
+						<Item Key="False" Value="нет"/>
+						<Item Key="True" Value="да"/>
+					</Items>
+					<History Table="HS_HOSTEL" ShowFields="HOSTEL"/>
+				</Field>
+				<Field Name="ORPHAN" Caption="Сирота" CurJoin="STUDENTS" HistJoin="ORPHAN" Type="ComboBox" HistoryReadOnly="False">
+					<Items>
+						<Item Key="False" Value="нет"/>
+						<Item Key="True" Value="да"/>
+					</Items>
+					<History Table="HS_ORPHAN" ShowFields="ORPHAN"/>
+				</Field>
+				<Field Name="STREAM" Caption="Поток" CurJoin="STUDENTS" HistJoin="STREAM" Type="Edit" HistoryReadOnly="False">
+					<History Table="HS_STREAM" ShowFields="STREAM"/>
+				</Field>
+				<Field Name="FAMILYSTATUSNAME" KeyField="FAMILYSTATUS" Caption="Семейное положение" CurJoin="FAMILYSTATUS" HistJoin="FAMILYSTATUS" Type="LookupComboBox" HistoryReadOnly="False">
+					<LookupSQL>select FAMILYSTATUS, FAMILYSTATUSNAME
+              from V_GUIDE_FAMILYSTATUS
+              order by 1
+					</LookupSQL>
+					<History Table="HS_FAMILYSTATUS" ShowFields="FAMILYSTATUSNAME"/>
+				</Field>
+				<Field Name="RATING" Caption="Рейтинг" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit" Alignment="2"/>
+				<Field Name="RANK_AKADEM" Caption="Распределение|Оценка академической успеваемости" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit" Alignment="2"/>
+				<Field Name="RANK_SCIENCE" Caption="Распределение|Оценка научной работы" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit" Alignment="2"/>
+				<Field Name="RANK_CIVIL" Caption="Распределение|Оценка общественной работы" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit" Alignment="2"/>
+				<Field Name="HOSPITAL" Caption="Распределение|Учреждение" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Memo"/>
+				<Field Name="HABITATION" Caption="Распределение|Сведения о жилье" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Value="комната"/>
+						<Item Value="квартира"/>
+						<Item Value="по месту проживания"/>
+						<Item Value="в соответствии с законодательством"/>
+					</Items>
+				</Field>
+				<Field Name="CONSENT" Caption="Распределение|Согласен" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox">
+					<Items>
+						<Item Key="False" Value="нет"/>
+						<Item Key="True" Value="да"/>
+					</Items>
+				</Field>
+				<Field Name="PLANYEAR" Caption="Распределение|Год выпуска" CurJoin="PLANRASP" HistJoin="PLANRASP" Type="Edit" Alignment="2"/>
+				<Field Name="APPOINTMENT" KeyField="APPOINTMENTID" Caption="Распределение|Место распределения" CurJoin="APPOINTMENT" HistJoin="APPOINTMENT" Type="LookupComboBox">
+					<LookupSQL>select APPOINTMENTID, APPOINTMENT
+              from GUIDE_APPOINTMENT
+              where USE = 1
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="MINISTRY" KeyField="MINISTRYID" Caption="Распределение|Министерство" CurJoin="MINISTRY" HistJoin="MINISTRY" Type="LookupComboBox">
+					<LookupSQL>select MINISTRYID, MINISTRY
+              from GUIDE_MINISTRY
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="POST" KeyField="POSTID" Caption="Распределение|Должность" CurJoin="POST" HistJoin="POST" Type="LookupComboBox">
+					<LookupSQL>select POSTID, POST
+              from GUIDE_POST
+              where USE = 1
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="HOSPITALTYPE" KeyField="HOSPITALTYPEID" Caption="Распределение|Тип учреждения" CurJoin="HOSPITALTYPE" HistJoin="HOSPITALTYPE" Type="LookupComboBox">
+					<LookupSQL>select HOSPITALTYPEID, HOSPITALTYPE
+              from GUIDE_HOSPITALTYPE
+              where USE = 1
+              order by 2
+					</LookupSQL>
+				</Field>
+				<Field Name="HOSPITALSTATUS" KeyField="HOSPITALSTATUSID" Caption="Распределение|Статус учреждения" CurJoin="HOSPITALSTATUS" HistJoin="HOSPITALSTATUS" Type="LookupComboBox">
+					<LookupSQL>select HOSPITALSTATUSID, HOSPITALSTATUS
+              from GUIDE_HOSPITALSTATUS
+              where USE = 1
+              order by 1
+					</LookupSQL>
+				</Field>
+        <Field Name="NAZVA_USTAN" Origin="NAZVA" KeyField="DIC_USTAN_UID" Caption="Распределение|Учреждение(Мед.Кадры)" CurJoin="DIC_USTAN"/>
+        <Field Name="NAZVA_PODRAZD" Origin="NAZVA" KeyField="DIC_PODRAZD_UID" Caption="Распределение|Подразделение(Мед.Кадры)" CurJoin="DIC_PODRAZD"/>
+				<Field Name="PRIVILEGE" KeyField="PRIVILEGEID" Caption="Льготы при поступлении" CurJoin="PRIVILEGE" HistJoin="PRIVILEGE" Type="LookupComboBox">
+					<LookupSQL>select PRIVILEGEID, PRIVILEGE
+              from GUIDE_PRIVILEGE
+              where USE = 1
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="ENTERDATE" Caption="Дата зачисления" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Date" Alignment="2"/>
+				<Field Name="ENTERCLAUSE" Caption="Условия зачисления" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="ComboBox" WordWrap="True">
+					<Items>
+						<Item Value="По конкурсу"/>
+						<Item Value="По результатам вступительных экзаменов"/>
+						<Item Value="Вне конкурса"/>
+						<Item Value="По льготе: "/>
+						<Item Value="По собеседованию"/>
+					</Items>
+				</Field>
+				<Field Name="OLDARMID" Caption="Старый № АРМа" CurJoin="STUDENTS" HistJoin="STUDENTS" Type="Edit" Alignment="2"/>
+				<Field Name="BEGINDATE" Caption="Дата начала" Hidden="True"/>
+				<Field Name="ORDERNUM" Caption="№ приказа" Type="Edit" Hidden="True"/>
+				<Field Name="OLDCOUNTRYID" Origin="OLDID" Caption="Старый ID гражданства" CurJoin="COUNTRY" HistJoin="COUNTRY" Type="LookupComboBox" Hidden="True"/>
+				<Field Name="EDUBASISID" Caption="Форма финансирования (ID)" CurJoin="EDUBASIS" HistJoin="EDUBASIS" Hidden="True"/>
+				<Field Name="EDUBASIS_CASE5" Caption="Форма финансирования" CurJoin="EDUBASIS" HistJoin="EDUBASIS" Hidden="True"/>
+				<Field Name="EDUBASIS_RUS_CASE9" Caption="Форма финансирования" CurJoin="EDUBASIS" HistJoin="EDUBASIS" Hidden="True"/>
+				<Field Name="EDUFORMID" Caption="Форма обучения (ID)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUFORM_CASE2" Caption="Форма обучения (р.п.)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUFORM_CASE4" Caption="Форма обучения (в.п.)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUFORM_CASE5" Caption="Форма обучения (т.п.)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUFORM_CASE6" Caption="Форма обучения (п.п.)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUFORM_RUS_CASE2" Caption="Форма обучения (р.п.)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUFORM_RUS_CASE4" Caption="Форма обучения (в.п.)" CurJoin="EDUFORM" HistJoin="EDUFORM" Hidden="True"/>
+				<Field Name="EDUTERM" Caption="Срок обучения (ID)" CurJoin="EDUTERM" HistJoin="EDUTERM" Hidden="True"/>
+				<Field Name="CODE" KeyField="SPECIALITYID" Caption="Код специальности" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Hidden="True"/>
+				<Field Name="EDUDIRECTIONID" Caption="Направление подготовки" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Hidden="True"/>
+				<Field Name="EDUDIRECTION" KeyField="EDUDIRECTIONID" Caption="Направление подготовки" CurJoin="EDUDIRECTION" HistJoin="EDUDIRECTION" Hidden="True"/>
+				<Field Name="EDUDIRECTION_CODE" KeyField="EDUDIRECTION_CODE" Caption="Код направления подготовки" CurJoin="EDUDIRECTION" HistJoin="EDUDIRECTION" Hidden="True"/>
+				<Field Name="STRUCTUREID" Caption="Структура вуза" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Hidden="True"/>
+				<Field Name="STRUCTURE" KeyField="STRUCTUREID" Caption="Структура вуза" CurJoin="STRUCTURE" HistJoin="STRUCTURE" Hidden="True"/>
+				<Field Name="EDUDIRECTION_RASPID" Caption="Направления распределения" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Hidden="True"/>
+				<Field Name="EDUDIRECTION_RASP" KeyField="EDUDIRECTION_RASPID" Caption="Направления распределения" CurJoin="EDUDIRECTION_RASP" HistJoin="EDUDIRECTION_RASP" Hidden="True"/>
+				<Field Name="QUALIFICATION" KeyField="SPECIALITYID" Caption="Квалификация" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Hidden="True"/>
+				<Field Name="SPECIALITYID" Caption="Специальность" CurJoin="STUDENTS" HistJoin="MOVEMENT" Hidden="True"/>
+				<Field Name="STATUS" Caption="Статус" CurJoin="STUDENTS" HistJoin="MOVEMENT" Hidden="True"/>
+				<Field Name="EDULEVEL" KeyField="EDULEVEL" Caption="Уровень" CurJoin="EDULEVEL" HistJoin="EDULEVEL" Hidden="True"/>
+				<Field Name="EDULEVEL_CASE2" KeyField="EDULEVEL" Caption="Уровень" CurJoin="EDULEVEL" HistJoin="EDULEVEL" Hidden="True"/>
+				<Field Name="EDULEVEL_RUS_CASE2" KeyField="EDULEVEL" Caption="Уровень" CurJoin="EDULEVEL" HistJoin="EDULEVEL" Hidden="True"/>
+				<Field Name="DEPARTMENTID" Caption="Подразделение (ID)" CurJoin="STUDENTS" HistJoin="MOVEMENT" Hidden="True"/>
+				<Field Name="DEPARTMENT_CASE2" Caption="Подразделение (р.п.)" CurJoin="DEPARTMENT" HistJoin="DEPARTMENT" Hidden="True"/>
+				<Field Name="DEPARTMENT_CASE6" Caption="Подразделение (п.п.)" CurJoin="DEPARTMENT" HistJoin="DEPARTMENT" Hidden="True"/>
+				<Field Name="DEPARTMENT_RUS_CASE2" Caption="Подразделение (р.п.)" CurJoin="DEPARTMENT" HistJoin="DEPARTMENT" Hidden="True"/>
+				<Field Name="DEPARTMENT_RUS_CASE6" Caption="Подразделение (п.п.)" CurJoin="DEPARTMENT" HistJoin="DEPARTMENT" Hidden="True"/>
+				<Field Name="SPECIALITY_ENG" Caption="Специальность (англ.)" CurJoin="SPECIALITY" HistJoin="SPECIALITY" Hidden="True"/>
+				<Field Name="EMP_POST" Caption="Должность руководителя" CurJoin="EMPLOYER" HistJoin="EMPLOYER" Hidden="True"/>
+				<Field Name="EMP_POSTFULL" Caption="Должность руководителя (полностью)" CurJoin="EMPLOYER" HistJoin="EMPLOYER" Hidden="True"/>
+				<Field Name="EMP_POSTFULL_ENG" Caption="Должность руководителя (полностью на англ.)" CurJoin="EMPLOYER" HistJoin="EMPLOYER" Hidden="True"/>
+				<Field Name="EDUYEAR" KeyField="EDUYEAR" Caption="Уч. год" CurJoin="EDUYEAR" HistJoin="EDUYEAR" Hidden="True"/>
+				<Field Name="PROTOCOLID" Caption="Протокол (ID)" CurJoin="STUDENT2PROTOCOL" HistJoin="STUDENT2PROTOCOL" Hidden="True"/>
+				<Field Name="L_SEMESTER" Caption="Семестр" CurJoin="STUDENTS" HistJoin="MOVEMENT" Alignment="2"/>
+
+				<Field Name="PLANRASP" KeyField="PLANRASPID" Caption="Место распределения" Type="LookupComboBox" Hidden="True">
+					<LookupSQL>select PR.PLANRASPID, cast(PR.PLANYEAR as varchar(4)) || '. ' || GAP.APPOINTMENT
+              from PLANRASP PR
+              inner join GUIDE_APPOINTMENT GAP
+              on (GAP.APPOINTMENTID = PR.APPOINTMENTID)
+              where PR.PLANYEAR = (
+                select EDUYEAR + 1
+                from STUDENTS
+                where STUDENTID = ?STUDENTID
+              )
+              or PR.PLANRASPID = (
+                select PLANRASPID
+                from STUDENTS
+                where STUDENTID = ?STUDENTID
+              )
+              order by PR.PLANRASPNUM
+					</LookupSQL>
+				</Field>
+				
+				<Field Name="EDUPLANID" Caption="ID плана" CurJoin="V_STUDENT_MODULES" HistJoin="V_STUDENT_MODULES" Hidden="True"/>
+				<Field Name="VARIANTID" Origin="VARIANTID" Caption="VARIANTID записи плана" CurJoin="V_STUDENT_MODULES" HistJoin="V_STUDENT_MODULES" Hidden="True"/>
+
+				<Field Name="F1" Origin="0" Caption="F1" Hidden="True"/>
+				<Field Name="F2" Origin="0" Caption="F2" Hidden="True"/>
+				<Field Name="F3" Origin="0" Caption="F3" Hidden="True"/>
+				<Field Name="F4" Origin="0" Caption="F4" Hidden="True"/>
+				<Field Name="F5" Origin="0" Caption="F5" Hidden="True"/>
+				<Field Name="F6" Origin="0" Caption="F6" Hidden="True"/>
+				<Field Name="F7" Origin="0" Caption="F7" Hidden="True"/>
+				<Field Name="F8" Origin="0" Caption="F8" Hidden="True"/>
+				<Field Name="F9" Origin="0" Caption="F9" Hidden="True"/>
+			</Fields>
+		</Domain>
+
+		<Domain Name="ECard">
+			<Fields>
+				<Field Name="NUMORDER" Caption="№"/>
+				<Field Name="DISCIPLINE" Caption="Дисциплина"/>
+				<Field Name="DISCIPLINETYPE" Caption="Тип" Type="ComboBox">
+					<LookupSQL>select DISCIPLINETYPE, DISCIPLINETYPENAME
+              from V_GUIDE_DISCIPLINETYPE
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="FORMREPORT" Caption="Контроль" Type="ComboBox">
+					<LookupSQL>select FORMREPORT, FORMREPORTNAME
+              from V_GUIDE_FORMREPORT
+              where USE = 1
+              order by 2
+					</LookupSQL>
+				</Field>
+				<Field Name="MARK" Caption="Результат" Alignment="2"/>
+				<Field Name="MARKID" KeyField="MARKID" Caption="Результат" Type="ComboBox" Alignment="2">
+					<LookupSQL>select MARKID, MARKNAME
+              from V_GUIDE_MARKTYPE
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="EXAMINATIONDATE" Caption="Дата экз." Alignment="2"/>
+				<Field Name="LISTNUM" Caption="№ ведом."/>
+				<Field Name="ALLHOURS" Caption="Часов" Alignment="2"/>
+				<Field Name="AUDITHOURS" Caption="Аудиторных" Alignment="2"/>
+				<Field Name="ORDERNUM" Caption="№ приказа"/>
+				<Field Name="ORDERDATE" Caption="Дата утверждения"/>
+				<Field Name="BEGINDATE" Caption="Дата начала действия"/>
+				<Field Name="REASON" Caption="Основание"/>
+				<Field Name="REASONFULL" Caption="Основание"/>
+				<Field Name="NUM" Caption="№"/>
+				<Field Name="EDUYEAR" Caption="Учебный год"/>
+				<Field Name="SEMESTER" Caption="Семестр"/>
+				<Field Name="ISRETAKE" Caption="Пересдача"/>
+			</Fields>
+		</Domain>
+
+		<Domain Name="B_ECard">
+			<Fields>
+				<Field Name="NUMORDER" Caption="№"/>
+				<Field Name="DISCIPLINETYPE" Caption="Тип" Type="ComboBox">
+					<LookupSQL>select DISCIPLINETYPE, DISCIPLINETYPENAME
+              from V_GUIDE_DISCIPLINETYPE
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="ORDERNUM" Caption="№ приказа"/>
+				<Field Name="ORDERDATE" Caption="Дата утверждения"/>
+				<Field Name="NUM" Caption="№"/>
+				<Field Name="EDUYEAR" Caption="Учебный год"/>
+				<Field Name="SEMESTER" Caption="Семестр"/>
+				<Field Name="ISRETAKE" Caption="Пересдача"/>
+				
+				<Field Name="DMTITLE" Caption="Дисциплина/модуль"/>
+				<Field Name="HOURS_ALL" Caption="Часы" Alignment="2" Required="True"/>
+				<Field Name="CREDITS" Caption="Кредиты" Alignment="2" Required="True"/>
+				<Field Name="CREDITS_ALL_AVG" Caption="Баллы|ср./сум." Alignment="2" Required="True"/>
+				<Field Name="CREDITS_CUR_IND" Caption="Баллы|текущ./инд." Alignment="2" Required="True"/>
+				<Field Name="CREDITS_TEST" Caption="Баллы|итог." Alignment="2" Required="True"/>
+				<Field Name="CREDITS_AVG" Caption="Баллы|средн." Alignment="2" Required="True"/>
+				<Field Name="TESTDATE" Caption="Дата контр." Alignment="2"/>
+				<Field Name="TESTLISTNUM" Caption="№ ведом."/>
+
+			</Fields>
+		</Domain>
+
+		<Domain Name="B_ECard_TestList">
+			<Fields>
+				<Field Name="NUM" Caption="№"/>
+				<Field Name="FIO" Caption="ФИО"/>
+				<Field Name="ONLY_E" Caption="Тільки E" Alignment="2" Required="True"/>
+				<Field Name="CREDITS_IND" Caption="Индив. работа" Alignment="2" Required="True"/>
+				<Field Name="CREDITS_CUR" Caption="Текущ. успев." Alignment="2" Required="True"/>
+				<Field Name="CREDITS_TEST" Caption="Итог. контроль" Alignment="2" Required="True"/>
+				<Field Name="TRADITIONAL_MARK" Caption="Трад. оценка" Alignment="2" Required="True"/>
+			</Fields>
+		</Domain>
+
+		<Domain Name="EduPlan">
+			<Fields>
+				<Field Name="SORTORDER" Caption="№"/>
+				<Field Name="DISCIPLINEID" Caption="Дисциплина"/>
+				<Field Name="DISCIPLINE" Caption="Дисциплина"/>
+				<Field Name="DISCIPLINETYPE" Caption="Тип" Type="ComboBox">
+					<LookupSQL>select DISCIPLINETYPE, DISCIPLINETYPENAME
+              from V_GUIDE_DISCIPLINETYPE
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="FORMREPORT" Caption="Контроль" Type="ComboBox">
+					<LookupSQL>select FORMREPORT, FORMREPORTNAME
+              from V_GUIDE_FORMREPORT
+              where USE = 1
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="ALLHOURS" Caption="Часов|Всего" Alignment="2"/>
+				<Field Name="HOURSTHEORETICAL" Caption="Часов|Лекц." Alignment="2"/>
+				<Field Name="HOURSPRACTICAL" Caption="Часов|Практ." Alignment="2"/>
+				<Field Name="HOURSLABORATORIAL" Caption="Часов|Лаб." Alignment="2"/>
+				<Field Name="HOURSSELF" Caption="Часов|Сам." Alignment="2"/>
+				<Field Name="HOURSSEMINAR" Caption="Часов|Семин." Alignment="2"/>
+				<Field Name="HOURSEXAM" Caption="Часов|Экзам." Alignment="2"/>
+				<Field Name="ORDERNUM" Caption="№ приказа"/>
+				<Field Name="ORDERDATE" Caption="Дата"/>
+				<Field Name="EDUYEAR" Caption="Учебный год"/>
+				<Field Name="EDUYEARSTR" Caption="Учебный год"/>
+				<Field Name="SEMESTER" Caption="Семестр"/>
+				<Field Name="ABOUT" Caption="Доп. информация"/>
+				<Field Name="TITLE" Caption="Учебный план"/>
+			</Fields>
+		</Domain>
+		
+		<Domain Name="B_EduPlan">
+			<Fields>
+				<Field Name="DISCIPLINEID" Caption="Дисциплина" Required="True"/>
+				<Field Name="DISCIPLINE" Caption="Дисциплина" Required="True"/>
+				<Field Name="DISCIPLINETYPE" Caption="Тип" Type="ComboBox" Required="True">
+					<LookupSQL>select DISCIPLINETYPE, DISCIPLINETYPENAME
+              from V_GUIDE_DISCIPLINETYPE
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="HOURS_ALL" Caption="Часов|Всего" Alignment="2" Required="True"/>
+				<Field Name="HOURS_AUD_LECT" Caption="Часов|Лекц." Alignment="2" Required="True"/>
+				<Field Name="HOURS_AUD_PRACT" Caption="Часов|Практ." Alignment="2" Required="True"/>
+				<Field Name="HOURS_AUD_LAB" Caption="Часов|Лаб." Alignment="2" Required="True"/>
+				<Field Name="HOURS_AUD_SEMINAR" Caption="Часов|Семин." Alignment="2" Required="True"/>
+				<Field Name="HOURS_SELF" Caption="Часов|Сам." Alignment="2" Required="True"/>
+				<Field Name="HOURS_PRACT" Caption="Часов" Alignment="2" Required="True"/>
+				<Field Name="DMTITLE" Caption="Дисциплина/модуль"/>
+				<Field Name="MODULENUM" Caption="№"/>
+				<Field Name="MODULETHEME" Caption="Название модуля"/>
+				<Field Name="CREDITS" Caption="Количество кредитов" Alignment="2" Required="True"/>
+
+				<Field Name="ORDERNUM" Caption="№ приказа"/>
+				<Field Name="ORDERDATE" Caption="Дата"/>
+				<Field Name="EDUYEAR" Caption="Учебный год"/>
+				<Field Name="EDUYEARSTR" Caption="Учебный год"/>
+				<Field Name="SEMESTER" Caption="Семестр"/>
+				<Field Name="ABOUT" Caption="Доп. информация"/>
+				<Field Name="TITLE" Caption="Учебный план"/>
+
+				<Field Name="PRACTICE" Caption="Производственная практика"/>
+				<Field Name="HOURS" Caption="Часов" Alignment="2" Required="True"/>
+				<Field Name="WEEKS" Caption="Недель" Alignment="2" Required="True"/>
+				<Field Name="POST" Caption="Должность"/>
+			</Fields>
+		</Domain>
+		
+		<Domain Name="Protocols">
+			<Fields>
+				<Field Name="PROTOCOLID" Caption="Протокол" Required="True"/>
+				<Field Name="PROTOCOLNUM" Caption="№ протокола" Required="True"/>
+				<Field Name="PROTOCOLDATE" Caption="Дата протокола" Required="True"/>
+				<Field Name="SPECIALITY" Caption="Специальность" Required="True"/>
+				<Field Name="DEPARTMENT" Caption="Подразделение" Required="True"/>
+				<Field Name="DISCIPLINE" Caption="Дисциплина" Required="True"/>
+				<Field Name="SEMESTER" Caption="Семестр" Required="True"/>
+				<Field Name="EDUYEARSTR" Caption="Уч. год" Required="True"/>
+				<Field Name="PROTOCOLTYPENAME" Caption="Тип протокола" Required="True"/>
+				<Field Name="USETESTLIST" Caption="Способ выбора ведомости" Required="True"/>
+				<Field Name="SELECTEDTYPENAME" Caption="Способ выбора студентов" Required="True"/>
+				<Field Name="CREATEDATE" Caption="По состоянию на" Required="True"/>
+				<Field Name="REAL_CREATEDATE" Caption="Создан" Required="True"/>
+				<Field Name="MODULENUM" Caption="№ модуля" Required="True"/>
+				<Field Name="ISRETAKE" Caption="Сдача/Пересдача" Required="True"/>
+				<Field Name="TESTDATE" Caption="Дата ведом." Alignment="2"/>
+				<Field Name="TESTLISTNUM" Caption="№ ведом."/>
+			</Fields>
+		</Domain>
+
+		<Domain Name="Guides">
+			<Fields>
+				<Field Name="SEMESTER" Caption="Семестр"/>
+				<Field Name="EDUYEAR" Caption="1-й год уч. года"/>
+				<Field Name="EDUYEARSTR" Caption="Учебный год"/>
+
+				<Field Name="COUNTRYID" Caption="ID"/>
+				<Field Name="COUNTRYNAME" Caption="Название страны"/>
+				<Field Name="COUNTRYNAME_ENG" Caption="Название страны (английский)"/>
+				<Field Name="COUNTRYTYPE" Caption="Тип" Type="ComboBox">
+					<Items>
+						<Item Key="УКР" Value="Украина"/>
+						<Item Key="RUS" Value="Российская федерация"/>
+						<Item Key="СНД" Value="СНГ"/>
+						<Item Key="ЗАК" Value="Зарубежье"/>
+					</Items>
+				</Field>
+				<Field Name="CITIZENSHIPTYPEID" Caption="Тип" Type="ComboBox">
+					<Items>
+						<Item Key="1" Value="Украина"/>
+						<Item Key="2" Value="Зарубежье"/>
+						<Item Key="3" Value="Российская федерация"/>
+					</Items>
+				</Field>
+				<Field Name="A2" Caption="Код(2)"/>
+				<Field Name="A3" Caption="Код(3)"/>
+				<Field Name="USE" Caption="Выбор"/>
+				<Field Name="REGIONID" Caption="ID"/>
+				<Field Name="REGIONNAME" Caption="Область"/>
+				<Field Name="SPECIALITYID" Caption="ID"/>
+				<Field Name="CODE" Caption="Код"/>
+				<Field Name="SPECIALITY" Caption="Специальность"/>
+				<Field Name="SPECIALITY_ENG" Caption="Специальность (англ.)"/>
+				<Field Name="QUALIFICATION" Caption="Квалификация"/>
+				<Field Name="EDULEVEL" Caption="Общеобразовательный уровень"/>
+				<Field Name="EDULEVELID" Caption="Общеобразовательный уровень" Type="ComboBox">
+					<LookupSQL>select EDULEVELID, EDULEVEL
+              from V_GUIDE_EDULEVEL
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="EDUDIRECTION" Caption="Направление подготовки"/>
+				<Field Name="EDUDIRECTIONID" Caption="Направление распределения (ID)"/>
+				<Field Name="EDUDIRECTIONID_LOOKUP" Caption="Направление подготовки (ID)" Type="ComboBox">
+					<LookupSQL>select EDUDIRECTIONID, EDUDIRECTION
+              from GUIDE_EDUDIRECTION
+							where USE = 1
+              order by 2
+					</LookupSQL>
+				</Field>
+				<Field Name="EDUDIRECTION_CODE" Caption="Код направления подготовки"/>
+				<Field Name="EDUDIRECTION_RASP" Caption="Направление распределения"/>
+				<Field Name="EDUDIRECTION_RASPID" Caption="Направление распределения (ID)"/>
+				<Field Name="EDUDIRECTION_RASPID_LOOKUP" Caption="Направление распределения (ID)" Type="ComboBox">
+					<LookupSQL>select EDUDIRECTION_RASPID, EDUDIRECTION_RASP
+              from GUIDE_EDUDIRECTION_RASP
+							where USE = 1
+              order by 2
+					</LookupSQL>
+				</Field>
+				<Field Name="STRUCTURE" Caption="Структура вуза"/>
+				<Field Name="STRUCTUREID" Caption="Структура вуза (ID)" Type="ComboBox">
+					<LookupSQL>select STRUCTUREID, STRUCTURE
+											from GUIDE_STRUCTURE
+              order by 2
+					</LookupSQL>
+				</Field>
+				<Field Name="DEPARTMENTID" Caption="ID"/>
+				<Field Name="DEPARTMENT" Caption="Подразделение"/>
+				<Field Name="DEPARTMENT_ENG" Caption="Подразделение (англ)"/>
+				<Field Name="DEPARTMENT_CASE2" Caption="Родительный падеж"/>
+				<Field Name="DEPARTMENT_CASE6" Caption="Предложный падеж"/>
+				<Field Name="DEPARTMENTTYPE" Caption="Тип подразделения"/>
+				<Field Name="EDUFORMID" Caption="ID"/>
+				<Field Name="EDUFORM" Caption="Форма обучения"/>
+				<Field Name="EDUFORM_CASE2" Caption="Форма обучения (р.п.)"/>
+				<Field Name="EDUFORM_CASE4" Caption="Форма обучения (в.п.)"/>
+				<Field Name="EDUFORM_CASE5" Caption="Форма обучения (т.п.)"/>
+				<Field Name="EDUFORM_CASE6" Caption="Форма обучения (п.п.)"/>
+				<Field Name="BOSSPOST" Caption="Должность руководителя"/>
+				<Field Name="BOSSPOSTFULL" Caption="Должность руководителя (полностью)"/>
+				<Field Name="BOSSDEGREE" Caption="Звание руководителя"/>
+				<Field Name="BOSSNAME" Caption="ФИО руководителя"/>
+				<Field Name="DISCIPLINEID" Caption="ID"/>
+				<Field Name="DISCIPLINE" Caption="Дисциплина"/>
+				<Field Name="DISCIPLINE_ENG" Caption="Дисциплина (англ)"/>
+				<Field Name="DISCIPLINETYPE" Caption="Тип" Type="ComboBox">
+					<LookupSQL>select DISCIPLINETYPE, DISCIPLINETYPENAME
+              from V_GUIDE_DISCIPLINETYPE
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="REASONID" Caption="ID"/>
+				<Field Name="REASON" Caption="Основание"/>
+				<Field Name="REASONFULL" Caption="Полное название"/>
+				<Field Name="DEPRECATED" Caption="Устаревшее"/>
+				<Field Name="REASONCATEGORY" Caption="Категория основания" Type="ComboBox">
+					<LookupSQL>select REASONCATEGORYID, REASONCATEGORY
+              from V_GUIDE_REASONCATEGORY
+              order by 1
+					</LookupSQL>
+				</Field>
+				<Field Name="APPOINTMENTID" Caption="ID"/>
+				<Field Name="APPOINTMENT" Caption="Место распределения"/>
+				<Field Name="SUBORDINATION" Caption="Подчинение"/>
+				<Field Name="POSTID" Caption="ID"/>
+				<Field Name="POST" Caption="Должность"/>
+
+				<Field Name="FAMILYSTATUS" Caption="ID"/>
+				<Field Name="FAMILYSTATUSNAME" Caption="Семейное положение"/>
+				<Field Name="FORMREPORT" Caption="ID"/>
+				<Field Name="FORMREPORTNAME" Caption="Форма контроля"/>
+				<Field Name="EDUTERM" Caption="ID"/>
+				<Field Name="EDUTERMNAME" Caption="Срок обучения"/>
+				<Field Name="EMP_ID" Caption="ID" Visible="False"/>
+				<Field Name="EMP_POST" Caption="Должность" Type="ComboBox">
+					<Items>
+						<Item Value="Ректор"/>
+						<Item Value="Проректор"/>
+						<Item Value="Декан"/>
+						<Item Value="Заведующий"/>
+						<Item Value="Начальник учебного отдела"/>
+						<Item Value="Ответственный секретарь"/>
+						<Item Value="Ответственный секретарь"/>
+						<Item Value="Юрисконсульт"/>
+						<Item Value="Председатель"/>
+					</Items>
+				</Field>
+				<Field Name="EMP_POSTFULL" Caption="Должность (полностью)" Type="ComboBox">
+					<Items>
+						<Item Value="Ректор"/>
+						<Item Value="Проректор по учебной работе"/>
+						<Item Value="Декан факультета"/>
+						<Item Value="Заведующий отделением"/>
+						<Item Value="Начальник учебного отдела"/>
+						<Item Value="Ответственный секретарь комиссии по переводам и восстановлениям"/>
+						<Item Value="Ответственный секретарь приёмной комиссии"/>
+						<Item Value="Юрисконсульт"/>
+						<Item Value="Председатель стипендиальной комиссии"/>
+					</Items>
+				</Field>
+				<Field Name="EMP_FIO" Caption="ФИО"/>
+				<Field Name="EMP_FIO_ENG" Caption="ФИО (англ.)"/>
+				<Field Name="EMP_POSTFULL_ENG" Caption="Должность (полностью на англ.)"/>
+				<Field Name="EMP_DEGREE" Caption="Учёное звание" Type="ComboBox">
+					<Items>
+						<Item Value="академик"/>
+						<Item Value="профессор"/>
+						<Item Value="доцент"/>
+					</Items>
+				</Field>
+				<Field Name="BOSSID" Caption="ФИО руководителя" Type="ComboBox">
+					<LookupSQL>select EMP_ID, EMP_FIO
+              from GUIDE_EMPLOYER
+              order by 2
+					</LookupSQL>
+				</Field>
+				
+				<Field Name="ECTSID" Caption="ID"/>
+				<Field Name="ECTS" Caption="ID"/>
+				<Field Name="ECTS_PERCENT" Caption="%"/>
+				<Field Name="TRADITIONAL_MARK" Caption="Традиц. оценка"/>
+				<Field Name="CREDITS_MIN" Caption="Мин. кредитов"/>
+
+				<Field Name="PARAMETERID" Caption="ID"/>
+				<Field Name="PARAMETERNAME" Caption="Название параметра"/>
+				<Field Name="PARAMETERVALUE" Caption="Значение параметра"/>
+				
+				<Field Name="GRANTID" Caption="ID"/>
+				<Field Name="TITLE" Caption="Название стипендии"/>
+				<Field Name="SHORTTITLE" Caption="Короткое название"/>
+				<Field Name="SUMMA" Caption="Сумма"/>
+				<Field Name="TYPEGRANTS" Caption="Тип стипендии" Type="ComboBox">
+					<Items>
+						<Item Key="О" Value="Академическая"/>
+						<Item Key="С" Value="Социальная"/>
+						<Item Key="И" Value="Именная"/>
+					</Items>
+				</Field>
+
+			</Fields>
+		</Domain>
+		<Domain Name="Journal">
+			<Fields>
+				<Field Name="JOURNALID" Caption="ID"/>
+				<Field Name="STARTDATE" Caption="Дата"/>
+				<Field Name="STARTTIME" Caption="Начало"/>
+				<Field Name="ENDTIME" Caption="Окончание"/>
+				<Field Name="FIO" Caption="Пользователь"/>
+			</Fields>
+		</Domain>
+
+		<Domain Name="EnterPlan">
+			<Fields>
+				<Field Name="SPECIALITYID" Caption="Специальность"/>
+				<Field Name="SPECIALITY" Caption="Специальность"/>
+				<Field Name="EDUFORMID" Caption="Форма обучения"/>
+				<Field Name="EDUFORM" Caption="Форма обучения"/>
+				<Field Name="ENTERLICENSE" Caption="Лицензия"/>
+				<Field Name="ENTERPLAN" Caption="План"/>
+				<Field Name="ACCREDITLEVEL" Caption="Уровень аккредитации"/>
+			</Fields>
+		</Domain>
+	</Domains>
+</Fields>

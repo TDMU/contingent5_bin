@@ -1,0 +1,127 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Сдача экзаменов на контрактной основе" ProgressMax="100" EncodeText="False" ID="{2901A2AA-7376-43FD-BDB7-1A47A45C226E}" ScriptLanguage="PascalScript">
+<UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="" OnBeforeQueryParams="OnBeforeQueryParams"/><Parameter Name="NewSemester" DisplayLabel="Семестр" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="False" ShowCheck="False" SaveCheck="True" Visible="True" Items="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" KeyItems="1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12" CommonValue="False"/><Parameter Name="NewEduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="False" ShowCheck="False" SaveCheck="True" Visible="True" Items="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" KeyItems="2000/01
+2001/02
+2002/03
+2003/04
+2004/05
+2005/06
+2006/07
+2007/08
+2008/09
+2009/10" CommonValue="False" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+order by 1"/><Parameter Name="NewSpeciality" DisplayLabel="Спеціальність" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="False" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SPECIALITYID, SPECIALITY, CODE
+from GUIDE_SPECIALITY
+where USE = 1
+order by SPECIALITY" CommonValue="False"/><Parameter Name="ShowTitle" DisplayLabel="Додати заголовок наказу" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="True" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/></UserParameters><Bands><Band Name="dsOutOrder" Master="" AutoOpen="True" UniDirectional="False"><SQL>select first 1 HMF.SEMESTER, HMF.EDUYEAR, GEY.EDUYEARSTR, HMF.SPECIALITYID
+from V_STUDENTORDERS SO
+inner join REASONTOCATEGORY RTC
+on (RTC.REASONID = SO.REASONID)
+inner join HS_MOVEMENT_FULL HMF
+on (HMF.ORDERID = SO.ORDERID)
+inner join GUIDE_EDUYEAR GEY
+on (GEY.EDUYEAR = HMF.EDUYEAR)
+where SO.STUDENTID = ?STUDENTID
+and RTC.REASONCATEGORYID = 3 --Отчисление
+and SO.ORDERDATE &lt;= ?CurDate
+order by SO.ORDERDATE desc
+</SQL><Events OnBeforeOpenDataSet=""/></Band><Band Name="grStudentList" Master="" AutoOpen="True" UniDirectional="True"><SQL>1
+</SQL><Events OnAfterCreateDataSet="grStudentList_OnAfterCreateDataSet" OnGetFieldData="grStudentList_OnGetFieldData"/><Bands><Band Name="dsDisciplines" Master="grStudentList" AutoOpen="True" UniDirectional="False"><SQL>select GD.DISCIPLINE
+from V_LASTRETAKEMARKS VLRM
+inner join STUDENTPLAN SP
+on (SP.STUDENTID = VLRM.STUDENTID)
+and (SP.PLANID = VLRM.PLANID)
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VLRM.DISCIPLINEID)
+where VLRM.STUDENTID = ?MAS_STUDENTID
+and SP.SEMESTER = ?MAS_SEMESTER
+and SP.EDUYEAR = ?MAS_EDUYEAR
+and VLRM.FORMREPORT &lt;&gt; '-'
+and VLRM.MARKID in (0,20,10010,10030,10040,10050)
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData"/></Band></Bands></Band></Bands><Script>procedure grStudentList_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO,COUNTRYNAME,SEMESTER,EDUYEAR') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+  Params.Item('StudentID').Value := HostAppl.Data.GetData('STUDENTID');
+end;
+
+
+procedure grStudentList_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'COURSE' then
+    Field.Value := Trunc((Field.DataSet.FieldByName('SEMESTER').Value + 1) / 2);
+end;
+
+
+procedure OnBeforeQueryParams;
+var
+  ds: TpFIBDataSet;
+  NewSemester, NewEduYear: integer;
+begin
+  ds := FindDataSet('dsOutOrder');
+  ds.Active := True;
+
+  Report.UserParams.Item('NewSemester').Value := ds.FieldByName('SEMESTER').AsInteger;
+  Report.UserParams.Item('NewEduYear').Value := ds.FieldByName('EDUYEAR').AsInteger;
+  Report.UserParams.Item('NewSpeciality').Value := ds.FieldByName('SPECIALITYID').AsInteger;
+end;
+
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+var
+  s: string;
+begin
+  if Field.FieldName = 'Disciplines' then
+  begin
+    s := '';
+    while not Field.DataSet.Eof do
+    begin
+      if s &lt;&gt; '' then
+        s := s + ', ' + Field.DataSet.FieldByName('DISCIPLINE').Value
+      else
+        s := Field.DataSet.FieldByName('DISCIPLINE').Value;
+
+      Field.DataSet.Next;
+    end;
+
+    Field.Value := s
+  end;
+end;
+
+
+begin
+end.</Script><Events OnStartReport="" OnEndReport=""/></Report>

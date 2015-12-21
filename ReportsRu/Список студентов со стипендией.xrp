@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов со стипендией" ID="{41A4F0B7-198A-4395-9A53-6857F56FA978}" ProgressMax="100" EncodeText="False"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master=""><Events OnGetFieldData="dsStudents_OnGetFieldData" OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet"/><SQL>1
+</SQL><Bands><Band Name="dsLastOrderDate" Master="dsStudents" AutoOpen="True" UniDirectional="False"><SQL>select first 1 HM.BEGINDATE
+from V_STUDENTORDERS V_STO
+inner join GUIDE_REASON G_RN
+  on (V_STO.REASONID = G_RN.REASONID)
+inner join REASONTOCATEGORY RTC
+  on (G_RN.REASONID = RTC.REASONID)
+inner join HS_MOVEMENT HM
+  on (HM.ORDERID = V_STO.ORDERID and HM.STUDENTID = V_STO.STUDENTID)
+where
+  V_STO.STUDENTID = ?MAS_STUDENTID and
+  RTC.REASONCATEGORYID = 1 -- Движение кконтингента
+order by V_STO.ORDERDATE desc
+</SQL><Events OnGetFieldData=""/></Band></Bands></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+    dsStudents.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, BIRTHDATE, SEX, COUNTRYNAME, DEPARTMENT, CODE, COURSE, RECORDBOOKNUM, PRIVILEGE') +
+    ' where S.STUDENTID in (@@StudentsID%0@)  order by 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if (Field.FieldName = 'SEX') then
+  begin
+    if (Field.Value = 'Ч') then Field.Value := 'M';
+  end
+  else
+  if (Field.FieldName = 'PRIVILEGE') then
+  begin
+    if (Field.Value &lt;&gt; 'сирота') then Field.Value := '';
+  end;
+end;
+
+Begin
+End.</Script></Report>

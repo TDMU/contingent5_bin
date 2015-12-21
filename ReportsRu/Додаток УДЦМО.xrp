@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Додаток УДЦМО" ProgressMax="100" EncodeText="False" ID="{80A77E32-530F-4240-8138-7D9A298D141D}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"/><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master=""><Events OnAfterCreateDataSet="dsList_OnAfterCreateDataSet" OnGetFieldData="dsList_OnGetFieldData"/><SQL>1
+</SQL><Bands/></Band></Bands><Script>procedure dsList_OnAfterCreateDataSet(ds: TpFibDataSet);
+var
+  sql: String;
+  p, l: integer;
+begin
+  sql := HostAppl.Data.GetSQL('FIO,NFIO,F1,F2,F3,F4,F5,F6,F7,F8,F9,FF1,' +
+    'BIRTHDATE,SEX,COUNTRYNAME,PASSPORTNUM,GROUPNUM,SEMESTER,' +
+    'SPECIALITY, EDUFORMID, KROKID, ZNOMARK, CODE, ENTERDATE, EDULEVEL') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 1';
+  p := Pos('from', sql);
+  l := Length(sql) - p + 1;
+  ds.SelectSQL.Text :=  Copy(sql, 1, p - 1) + ','''' as PASSPORTSER, cast(((S.SEMESTER + 1)/2 - 0.5) as smallint) as COURSE, ' +
+
+  '(select first 1 O.ORDERNUM ' +
+  ' from ORDERS O ' +
+  ' inner join STUDENTTOORDER STO on (STO.ORDERID = O.ORDERID) ' +
+  ' inner join REASONTOCATEGORY RTC on (RTC.REASONID = STO.REASONID) ' +
+  ' where STO.STUDENTID = S.STUDENTID ' +
+  ' and STO.CANCELED = 0 and O.CANCELED = 0 and RTC.REASONCATEGORYID = 2 ' + // -- Зачисления
+  ' order by O.ORDERDATE desc) as ORDERNUM, ' +
+  
+  '(select first 1 O.ORDERDATE ' +
+  ' from ORDERS O ' +
+  ' inner join STUDENTTOORDER STO on (STO.ORDERID = O.ORDERID) ' +
+  ' inner join REASONTOCATEGORY RTC on (RTC.REASONID = STO.REASONID) ' +
+  ' where STO.STUDENTID = S.STUDENTID ' +
+  ' and STO.CANCELED = 0 and O.CANCELED = 0 and RTC.REASONCATEGORYID = 2 ' + // -- Зачисления
+  ' order by O.ORDERDATE desc) as ORDERDATE, ' +
+  ' GEL.EDULEVELID '
+
+  + Copy(sql, p, l);
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+  //ShowMessage(ds.SelectSQL.Text);
+end;
+
+function GetWord(Num: integer; s: string): string;
+var
+  SL: TStringList;
+  i: Integer;
+begin
+  SL := TStringList.Create;
+  try
+    SL.Delimiter := ' ';
+    SL.DelimitedText := s;
+    if Num &lt;= SL.Count then
+    begin
+      Result := SL[Num - 1];
+      if (SL.Count &gt; 3) and (Num = 3) then
+      begin
+        for i := Num + 1 to SL.Count do
+          Result := Result + ' ' + SL[i - 1];
+      end
+    end
+    else Result := '';
+  finally
+    SL.Free;
+  end;
+end;
+
+
+
+procedure dsList_OnGetFieldData(Field: TDBFieldInfo);
+var FIO : String;
+    s: string;
+    i: integer;
+begin
+  if Field.FieldName = 'EDULEVEL' then
+  begin
+    case Field.DataSet.FieldByName('EDULEVELID').AsInteger of
+      1: Field.Value := 'Вища освіта/Неповна вища освіта/Молодший спеціаліст';
+      2: Field.Value := 'Вища освіта/Базова вища освіта/Бакалавр';
+      3: Field.Value := 'Вища освіта/Повна вища освіта/Спеціаліст';
+      4: Field.Value := 'Вища освіта/Повна вища освіта/Магістр';
+    end;
+  end
+  else
+  if Field.FieldName = 'EDUFORMID' then
+  begin
+    s := Field.DataSet.FieldByName('EDUFORMID').AsString;
+    if (s = 'ДН') then Field.Value := 'очна'
+    else if (s = 'ЗЧ') then Field.Value := 'заочна'
+    else Field.Value := 'екстернатна';
+  end
+  else
+  if Field.FieldName = 'PASSPORTSER' then
+  begin
+    s := Field.DataSet.FieldByName('PASSPORTNUM').AsString;
+    s := Trim(s);
+    Field.Value := '';
+    if (Length(s)&gt;0) then
+    begin
+      i := 1;
+      repeat
+        if not(s[i] in ['0'..'9']) then
+          Field.Value := Field.Value + s[i];
+        Inc(i);
+      until ((i &gt;= Length(s)) or (s[i] = ' ') or (s[i] = '?'));
+      Field.Value := Trim(Field.Value);
+    end;
+  end
+
+  else
+  if Field.FieldName = 'PASSPORTNUM' then
+  begin
+    s := Field.DataSet.FieldByName('PASSPORTNUM').AsString;
+    if Length(s) &gt; 0 then
+    begin
+      i := Length(s);
+      while (i &gt; 1 ) and (s[i] in ['0'..'9']) do Dec(i);
+      if i = 1 then Field.Value := s
+      else
+      begin
+        Inc(i);
+        Field.Value := Trim(Copy(s, i, Length(s) - i + 1));
+      end;
+    end;
+  end
+  else
+   If (Field.FieldName = 'F1') Then Begin
+      Field.Value := GetWord(1, Field.DataSet.FieldByName('FIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F2') Then Begin
+      Field.Value := GetWord(2, Field.DataSet.FieldByName('FIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F3') Then Begin
+      Field.Value := GetWord(3, Field.DataSet.FieldByName('FIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F4') Then Begin
+      Field.Value := GetWord(1, Field.DataSet.FieldByName('NFIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F5') Then Begin
+      Field.Value := GetWord(2, Field.DataSet.FieldByName('NFIO').AsString);
+   End
+   else
+   If (Field.FieldName = 'F6') Then Begin
+      Field.Value := GetWord(3, Field.DataSet.FieldByName('NFIO').AsString);
+   End
+   Else
+   If (Field.FieldName = 'F7') Then Begin
+      Field.Value := FormatDateTime('dd-mm-yy',StrToDate(Report.UserParams.Item('TestDate').Value));
+   End
+   Else
+   If (Field.FieldName = 'F8') Then Begin
+      Field.Value := Field.DataSet.RecNo;
+   End
+   Else
+      If (Field.FieldName = 'F9') Then Begin
+      if Params.Item('TestCode_KEY').Value in [2,4,5]
+       then Field.Value := Field.DataSet.FieldByName('KROKID').AsString;
+   End;
+end;
+
+Begin
+
+End.</Script></Report>

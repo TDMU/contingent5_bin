@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов, имеющих задолженности" ProgressMax="100" EncodeText="False" ID="{5F4B51EB-0D7D-4B75-8FC4-46990D412BC7}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="onDate" DisplayLabel="Дата" ParamType="Date" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/><Parameter Name="Semester" DisplayLabel="Семестр" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select SEMESTER, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1" CommonValue="False"/><Parameter Name="Discipline" DisplayLabel="Дисциплина" ParamType="Lookup" Required="False" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select DISCIPLINEID, DISCIPLINE
+from GUIDE_DISCIPLINE
+where USE = 1
+order by DISCIPLINE" CommonValue="False"/><Events OnAfterCreateParams="" OnAfterQueryParams="OnAfterQueryParams"/><Parameter Name="EduYear" DisplayLabel="Навчальний рік" ParamType="Lookup" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="True" SaveCheck="True" Visible="True" SQL="select EDUYEAR, EDUYEARSTR
+from GUIDE_EDUYEAR
+where USE = 1
+order by EDUYEAR" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>1
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnBeforePrintRec="" OnGetFieldData=""/><Bands><Band Name="dsDisciplines" Master="dsStudents" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select VSDL.STUDENTID, BVM.VARIANTID,
+  VSDL.SEMESTER + BVI.SEMESTER_DELTA as SEMESTER,
+  cast(VSDL.EDUYEAR +
+     cast(((VSDL.SEMESTER + BVI.SEMESTER_DELTA + 1)/2 - 0.5) as smallint) -
+     cast(((VSDL.SEMESTER + 1)/2 - 0.5) as smallint)
+  as smallint) as EDUYEAR,
+  GD.DISCIPLINE, BVM.MODULENUM, BVM.MODULETHEME, GD.DISCIPLINEID
+from V_STUDENT_DISCIPLINES_LAST VSDL
+inner join GUIDE_DISCIPLINE GD
+on (GD.DISCIPLINEID = VSDL.DISCIPLINEID)
+inner join B_VARIANT_ITEMS BVI
+on (BVI.PARENTVARIANTID = VSDL.VARIANTID)
+inner join B_VARIANT_MODULE BVM
+on (BVM.VARIANTID = BVI.VARIANTID)
+where VSDL.STUDENTID = :MAS_STUDENTID
+
+
+</SQL><Events OnGetFieldData="dsDisciplines_OnGetFieldData" OnBeforePrintRec="dsDisciplines_OnBeforePrintRec" OnAfterOpenDataSet="dsDisciplines_OnAfterOpenDataSet" OnBeforeOpenDataSet="dsDisciplines_OnBeforeOpenDataSet"/><Bands><Band Name="dsMarks" Master="dsDisciplines" AutoOpen="True" UniDirectional="False" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select first 1 S2T.TESTRESULTID, S2T.CREDITS_TEST,
+  (
+    select GMB.MARKNAME
+    from GUIDE_MARKTYPE_B GMB
+    where (GMB.MARKID = S2T.TESTRESULTID)
+  ) as MARKNAME
+
+from STUDENT2TESTLIST S2T
+inner join B_TESTLIST TL
+on (TL.TESTLISTID = S2T.TESTLISTID)
+where TL.TESTLISTID = (
+  select first 1 TL1.TESTLISTID
+  from STUDENT2TESTLIST S2T1
+  inner join B_TESTLIST TL1
+  on (TL1.TESTLISTID = S2T1.TESTLISTID)
+  where S2T1.STUDENTID = S2T.STUDENTID
+  and TL1.VARIANTID = TL.VARIANTID
+  and TL1.TESTDATE &lt;= :ONDATE
+  order by TL1.TESTDATE desc nulls first, TL1.TESTLISTID desc
+)
+ and (S2T.STUDENTID = :STUDENTID)
+and (TL.VARIANTID = :VARIANTID)
+order by TL.TESTDATE desc
+</SQL></Band></Bands></Band></Bands></Band></Bands><Script>var
+  msg: string;
+  nodiscpline: string;
+procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+   ds.SelectSQL.Text :=
+    HostAppl.Data.GetSQL('STUDENTID, FIO, GROUPNUM') +
+    ' where S.STUDENTID in (@@StudentsID%0@) order by 3, 2';
+
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+{rocedure dsStudents_OnBeforePrintRec(Band: TDBBandInfo);
+
+  function md:string;
+  begin
+    Result := Format('(мод.%d, %s)', [dsMarks.FieldByName('MODULENUM').Value, dsMarks.FieldByName('DISCIPLINE').Value]);
+  end;
+  
+  procedure AddStr(s: string);
+  begin
+    if Length(curmes) = 0 then curmes := s
+    else curmes := curmes + '&amp;par&amp;' + s;
+  end;
+  
+begin
+  curmes := '';
+
+  if dsMarks.isEmpty then
+    curmes := 'нет изучаемых дисциплин'
+  else
+  begin
+    while not dsMarks.Eof do
+    begin
+         if (dsMarks.FieldByName('TESTLISTID').isNull) then
+           AddStr('нет ведомости ' + md)
+         else if ((not dsMarks.FieldByName('MARKNAME').isNull)
+                   and ((dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -5)and(dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -9))) then
+           AddStr(dsMarks.FieldByName('MARKNAME').Value + ' ' + md)
+         else if ((dsMarks.FieldByName('CREDITS_TEST').AsInteger &lt; 50) and (not dsMarks.FieldByName('CREDITS_TEST').isNull)) then
+           AddStr(Format('итог. контр.: %d ',[dsMarks.FieldByName('CREDITS_TEST').Value]) + md)
+         else if ((dsMarks.FieldByName('CREDITS_TEST').isNull) and ((dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -5)and(dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -9))) then
+           AddStr(Format('не внесен итог. контроль ',[dsMarks.FieldByName('CREDITS_TEST').Value]) + md + dsMarks.FieldByName('TESTRESULTID').AsString);
+
+      dsMarks.Next;
+    end;
+  end;
+  
+  Band.Visible := (Length(curmes) &gt; 0);
+end;}
+
+procedure dsDisciplines_OnBeforePrintRec(Band: TDBBandInfo);
+begin
+  msg := '';
+  if Params.Item('Semester_enabled').Value
+     and (dsDisciplines.FieldByName('SEMESTER').AsInteger
+         &lt;&gt; Params.Item('Semester_SEMESTER').Value) then
+  begin
+    Band.Visible := False;
+    Exit;
+  end;
+
+  if Params.Item('EduYear_enabled').Value
+     and (dsDisciplines.FieldByName('EDUYEAR').AsInteger
+         &lt;&gt; Params.Item('EduYear_EDUYEAR').Value) then
+  begin
+    Band.Visible := False;
+    Exit;
+  end;
+
+
+  if Params.Item('Discipline_enabled').Value
+     and (dsDisciplines.FieldByName('DISCIPLINEID').AsInteger
+         &lt;&gt; Params.Item('Discipline_DISCIPLINEID').Value) then
+  begin
+    msg := 'немає дисципліни';
+    Band.Visible := False;
+
+    Exit;
+  end;
+  if dsMarks.isEmpty then
+    msg := 'немає відомості'
+  else
+  begin
+     if ((not dsMarks.FieldByName('MARKNAME').isNull)
+          and ((dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -5)
+          and (dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -9))) then
+       msg := dsMarks.FieldByName('MARKNAME').AsString
+     else if ((dsMarks.FieldByName('CREDITS_TEST').AsInteger &lt; 50)
+               and (not dsMarks.FieldByName('CREDITS_TEST').isNull)) then
+       msg := 'підс. контр.: ' + dsMarks.FieldByName('CREDITS_TEST').AsString
+     else if ((dsMarks.FieldByName('CREDITS_TEST').isNull)
+               and ((dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -5)
+               and (dsMarks.FieldByName('TESTRESULTID').AsInteger &lt;&gt; -9))) then
+       msg := 'не внесено підс. контроль';
+  end;
+
+  Band.Visible := Length(msg) &gt; 0;
+end;
+
+procedure dsDisciplines_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'msg' then Field.Value := msg;
+end;
+
+procedure dsDisciplines_OnAfterOpenDataSet(ds: TpFibDataSet);
+begin
+  if ds.isEmpty then Params.Item('nodiscpline').Value := 'немає дисципліни'
+  else Params.Item('nodiscpline').Value := '';
+end;
+
+procedure OnAfterQueryParams;
+begin
+  if Params.Item('Discipline_enabled').Value then
+  dsDisciplines.SelectSQL.TEXT := dsDisciplines.SelectSQL.TEXT + 'and (VSDL.DISCIPLINEID = :Discipline_DISCIPLINEID) order by 3, 4'
+   else dsDisciplines.SelectSQL.TEXT := dsDisciplines.SelectSQL.TEXT + ' order by 3, 4';
+end;
+
+begin
+end.</Script></Report>
