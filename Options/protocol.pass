@@ -146,7 +146,7 @@ begin
 				  Continue;
 				end;
 				
-			  if ((info.Form_Report = 'мк') or (info.Form_Report = 'де')) then GetTradM := True;
+			  if ((info.Form_Report = 'мк') or (info.Form_Report = 'де') or (info.Form_Report = 'дз') or (info.Form_Report = 'іс')) then GetTradM := True;
 				
 			  case info.Form_Report of 
 				'зл':
@@ -248,6 +248,110 @@ begin
 							  Inc(PositiveCount);
 							end;
 					end; 
+                 
+                'дз':
+					begin
+	{						if qrStudentInfo.FN('EMPTY_CREDITS_EXISTS').AsInteger > 0 then
+							begin
+							  EmptyCreditsExists := True;
+							  info.SortOrder := -6;
+							  info.ECTS := '?';
+				  OutMessage(info.FIO + ' - ' +
+						Format(_('на %s баллы не найдены'),[DateToStr(ProtocolCreateDate)]) + #13#10, clRed, 8, clWhite) ;
+							end
+							else }
+							if (qrStudentInfo.FN('DISCIPLINE_FINISHED').AsInteger = 0) and (MaxModuleNum = 99) then
+							begin
+								info.SortOrder := -5;
+								info.ECTS := 'NV';
+								info.TraditionalMark := 11001;
+							end
+							else
+							if qrStudentInfo.FN('NOT_RANGE').AsInteger > 0 then
+							begin
+							  info.SortOrder := -4;
+							  info.ECTS := 'NR';
+							  info.TraditionalMark := 11000;
+							end
+							else
+							if qrStudentInfo.FN('F_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -1;
+							  info.ECTS := 'F';
+							end
+							else
+							if qrStudentInfo.FN('FX_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -2;
+							  info.ECTS := 'FX';
+							end
+							else
+							begin
+							  if (info.Full_Credits_Avg <> NULL) then
+							  begin
+								info.SortOrder := info.Full_Credits_Avg;
+								info.ECTS := '';
+								info.Only_E := qrStudentInfo.FN('ONLY_E').AsInteger;
+							  end
+							  else 
+							  begin
+								info.SortOrder := -3;
+							  end;
+							  Inc(PositiveCount);
+							end;
+					end; 
+                
+                'іс':
+					begin
+	{						if qrStudentInfo.FN('EMPTY_CREDITS_EXISTS').AsInteger > 0 then
+							begin
+							  EmptyCreditsExists := True;
+							  info.SortOrder := -6;
+							  info.ECTS := '?';
+				  OutMessage(info.FIO + ' - ' +
+						Format(_('на %s баллы не найдены'),[DateToStr(ProtocolCreateDate)]) + #13#10, clRed, 8, clWhite) ;
+							end
+							else }
+							if (qrStudentInfo.FN('DISCIPLINE_FINISHED').AsInteger = 0) and (MaxModuleNum = 99) then
+							begin
+								info.SortOrder := -5;
+								info.ECTS := 'NV';
+								info.TraditionalMark := 11001;
+							end
+							else
+							if qrStudentInfo.FN('NOT_RANGE').AsInteger > 0 then
+							begin
+							  info.SortOrder := -4;
+							  info.ECTS := 'NR';
+							  info.TraditionalMark := 11000;
+							end
+							else
+							if qrStudentInfo.FN('F_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -1;
+							  info.ECTS := 'F';
+							end
+							else
+							if qrStudentInfo.FN('FX_CREDITS').AsInteger > 0 then
+							begin
+							  info.SortOrder := -2;
+							  info.ECTS := 'FX';
+							end
+							else
+							begin
+							  if (info.Full_Credits_Avg <> NULL) then
+							  begin
+								info.SortOrder := info.Full_Credits_Avg;
+								info.ECTS := '';
+								info.Only_E := qrStudentInfo.FN('ONLY_E').AsInteger;
+							  end
+							  else 
+							  begin
+								info.SortOrder := -3;
+							  end;
+							  Inc(PositiveCount);
+							end;
+					end;                 
 
 				'де':
 					begin
@@ -575,6 +679,144 @@ begin
 			end;
 	
 	'мк':
+	begin
+	case Trim(info.ECTS) of 
+			
+			'F':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;					
+				end;
+			
+			'FX':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;			
+				end;
+				
+			'NR':
+			  begin
+					info.TraditionalMark := 11000;
+					info.Student_Info := Format(' %s - %s'#13#10, [info.FIO, _('не ранжировался')]);
+					info.Student_Info_color := clGreen;
+					info.Student_Info_back_color := clWindow;			
+				end;
+				
+			'NV':
+			  begin
+					info.TraditionalMark := 11001;
+					info.Student_Info := Format(_(' %s - не ранжировался. Нет ведомостей')+#13#10, [info.FIO]);
+					info.Student_Info_color := clRed;
+					info.Student_Info_back_color := clWindow;			
+				end;	
+				
+			else
+			begin
+				if GetTypeTraditionalMark = 'E' then
+				begin
+				  info.TraditionalMark := GetTraditionalMarkFromECTS(info.ECTS);
+				end
+				else
+				begin
+					i := 0;
+					while (info.Full_Credits_Avg <= strtoint(Guide_TradMarks.Names[i]))  do
+					begin
+						info.TraditionalMark := strtoint(Guide_TradMarks.Values[Guide_TradMarks.Names[i]]);
+					  if (i = Guide_TradMarks.count -1) then break
+						else i := i + 1;
+					end;
+				end;
+				if info.Full_Credits_Avg <> NULL then 
+				begin
+				  info.Student_Info := Format(' %s - %s(%f)  %d'#13#10, [info.FIO, info.ECTS, info.Full_Credits_Avg / 100, info.TraditionalMark]);
+				  info.Student_Info_color := clBlack;
+				  info.Student_Info_back_color := clWindow;
+				end
+				else
+				begin
+				  info.Student_Info := Format(' %s '#13#10, [info.FIO]);
+				  info.Student_Info_color := clGreen;
+				  info.Student_Info_back_color := clWindow;
+
+				end;
+			end;
+		end;
+	end;
+
+	'дз':
+	begin
+	case Trim(info.ECTS) of 
+			
+			'F':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;					
+				end;
+			
+			'FX':
+			  begin
+					info.TraditionalMark := 2;
+					info.Student_Info := Format(' %s - %s  %d'#13#10, [info.FIO, info.ECTS, info.TraditionalMark]);
+					info.Student_Info_color := clBlack;
+					info.Student_Info_back_color := clYellow;			
+				end;
+				
+			'NR':
+			  begin
+					info.TraditionalMark := 11000;
+					info.Student_Info := Format(' %s - %s'#13#10, [info.FIO, _('не ранжировался')]);
+					info.Student_Info_color := clGreen;
+					info.Student_Info_back_color := clWindow;			
+				end;
+				
+			'NV':
+			  begin
+					info.TraditionalMark := 11001;
+					info.Student_Info := Format(_(' %s - не ранжировался. Нет ведомостей')+#13#10, [info.FIO]);
+					info.Student_Info_color := clRed;
+					info.Student_Info_back_color := clWindow;			
+				end;	
+				
+			else
+			begin
+				if GetTypeTraditionalMark = 'E' then
+				begin
+				  info.TraditionalMark := GetTraditionalMarkFromECTS(info.ECTS);
+				end
+				else
+				begin
+					i := 0;
+					while (info.Full_Credits_Avg <= strtoint(Guide_TradMarks.Names[i]))  do
+					begin
+						info.TraditionalMark := strtoint(Guide_TradMarks.Values[Guide_TradMarks.Names[i]]);
+					  if (i = Guide_TradMarks.count -1) then break
+						else i := i + 1;
+					end;
+				end;
+				if info.Full_Credits_Avg <> NULL then 
+				begin
+				  info.Student_Info := Format(' %s - %s(%f)  %d'#13#10, [info.FIO, info.ECTS, info.Full_Credits_Avg / 100, info.TraditionalMark]);
+				  info.Student_Info_color := clBlack;
+				  info.Student_Info_back_color := clWindow;
+				end
+				else
+				begin
+				  info.Student_Info := Format(' %s '#13#10, [info.FIO]);
+				  info.Student_Info_color := clGreen;
+				  info.Student_Info_back_color := clWindow;
+
+				end;
+			end;
+		end;
+	end;
+
+	'іс':
 	begin
 	case Trim(info.ECTS) of 
 			
