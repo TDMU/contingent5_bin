@@ -62,7 +62,7 @@ begin
     DISCIPLINE_FINISHED = 1;
      for select
        (S2T.CREDITS_ALL ) as CREDITS_AVG,
-       (case when (((:FORMREPORT = 'לך')  and (coalesce(S2T.CREDITS_TEST, 0) < :MIN_CREDITS_VALUE)) or (S2T.TESTRESULTID in (-1, -2, -4, -6))) then 1 else 0 end) as FX_CREDITS,
+       (case when ((((:FORMREPORT = 'לך') or (:FORMREPORT = 'הח') or (:FORMREPORT = '³ס') )  and (coalesce(S2T.CREDITS_TEST, 0) < :MIN_CREDITS_VALUE)) or (S2T.TESTRESULTID in (-1, -2, -4, -6))) then 1 else 0 end) as FX_CREDITS,
        (case when S2T.TESTRESULTID = -3 then 1 else 0 end) as F_CREDITS,
        (case when (S2T.TESTRESULTID is null) and (S2T.CREDITS_ALL = 0) then 1 else 0 end) as EMPTY_CREDITS_EXISTS,
        (case when S2T.ONLY_E = 1 then 1 else 0 end) as ONLY_E,
