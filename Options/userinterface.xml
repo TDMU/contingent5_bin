@@ -1,0 +1,983 @@
+<?xml version="1.0"?>
+<UserInterface>
+  <Actions>
+    <Action Name="actDipExportDiplom" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+      <Params>
+        <Param Name="ReportFile" Value="Диплом(экспорт).xrp"/>
+      </Params>
+    </Action>
+    <Action Name="actStudExportDiplom" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+      <Params>
+        <Param Name="ReportFile" Value="Студенческий(экспорт).xrp"/>
+      </Params>
+    </Action>
+    <Action Name="actExportKadry" Caption="Экспорт в Мед. кадры" NotEmpty="True"/>
+    <Action Name="actPCardView" Caption="Просмотр" ImageIndex="26" ShortCut="F3" NotEmpty="True" Plugin="PCard">
+      <Params>
+        <Param Name="Action" Value="View"/>
+      </Params>
+    </Action>
+    <Action Name="actPCardInsert" Caption="Новый студент" ImageIndex="41" ShortCut="F2" Plugin="PCard">
+      <Params>
+        <Param Name="Action" Value="Add"/>
+      </Params>
+    </Action>
+    <Action Name="actECardView" Caption="Учебная карточка" ImageIndex="40" NotEmpty="True" Plugin="ECard">
+      <Params>
+        <Param Name="Action" Value="View"/>
+      </Params>
+    </Action>
+     <Action Name="actLibraryView" Caption="Библиотека" ImageIndex="32" NotEmpty="True" Plugin="ECard">
+      <Params>
+        <Param Name="Action" Value="ViewLibrary"/>
+      </Params>
+    </Action>
+    <Action Name="actEduPlansView" Caption="Учебные планы" ImageIndex="-1" Plugin="EduPlan">
+      <Params>
+        <Param Name="Action" Value="View"/>
+      </Params>
+    </Action>
+    <Action Name="actEduPlansView_B" Caption="Учебные планы (ECTS)" ImageIndex="-1" Plugin="EduPlan_B">
+      <Params>
+        <Param Name="Action" Value="View"/>
+      </Params>
+    </Action>
+    <Action Name="actVariantsEditorView"  Caption="Дисциплины (ECTS)" ImageIndex="-1" Plugin="EduPlan_B">
+      <Params>
+        <Param Name="Action" Value="VariantsEditorView"/>
+      </Params>
+    </Action>
+    <Action Name="actEduPlanDeliver" Caption="Разнести учебный план (ECTS)" ImageIndex="-1" Plugin="EduPlan_B" AutoUnload="True">
+      <Params>
+        <Param Name="Action" Value="DeliverPlan"/>
+      </Params>
+    </Action>
+    <Action Name="actPlanRaspView" Caption="Планы распределения" ImageIndex="-1" Plugin="PlanRasp" AutoUnload="True">
+      <Params>
+        <Param Name="Action" Value="PlanRasp"/>
+      </Params>
+    </Action>
+    <Action Name="actEnterPlanView" Caption="Планы приема" ImageIndex="-1" Plugin="PlanRasp" AutoUnload="True">
+      <Params>
+        <Param Name="Action" Value="EnterPlan"/>
+      </Params>
+    </Action>
+    <Action Name="actNCOrdersView" Caption="Подготовка приказов" ImageIndex="20" Plugin="Orders">
+      <Params>
+        <Param Name="Action" Value="NCOrdersView"/>
+      </Params>
+    </Action>
+    <Action Name="actCOrdersView" Caption="Утверждённые приказы" ImageIndex="22" Plugin="Orders">
+      <Params>
+        <Param Name="Action" Value="COrdersView"/>
+      </Params>
+    </Action>
+    <Action Name="actOptionsView" Plugin="Options" AutoUnload="True">
+      <Params>
+        <Param Name="Action" Value="OptionsView"/>
+      </Params>
+    </Action>
+    <Action Name="actColorSettingsView" Plugin="Options" AutoUnload="True">
+      <Params>
+        <Param Name="Action" Value="ColorSettingsView"/>
+      </Params>
+    </Action>
+    
+    <Action Name="actProtocolsView" Caption="Список протоколов" Plugin="Protocols" AutoUnload="True">
+      <Params>
+        <Param Name="Action" Value="ProtocolsView"/>
+      </Params>
+    </Action>
+
+    <Action Name="actGuideView" Plugin="Guide" AutoUnload="True"/>
+    <Action Name="actJournalView" Plugin="Journal" AutoUnload="True"/>
+    <Action Name="actStudentListOpenReport" Plugin="Reports" AutoUnload="True"/>
+    <Action Name="actExcelImport" Plugin="Import" AutoUnload="True"/>
+    <Action Name="actMOZStat" Caption="Подготовка статистики" Plugin="MOZStat" AutoUnload="True"/>
+    <Action Name="actSearch" Caption="Поиск" ImageIndex="13" ShortCut="Ctrl+F+F"/>
+    <Action Name="actGrantView" Plugin="Grant" AutoUnload="True"/>
+    <Action Name="actLibrary" Plugin="ULibrary" AutoUnload="True"/>
+  </Actions>
+
+  <Toolbars>
+    <Toolbar1>
+      <Toolbutton Action="actStudentListExit"/>
+      <Toolbutton Action="-"/>
+      <Toolbutton Action="actPCardView"/>
+      <Toolbutton Action="actPCardInsert"/>
+      <Toolbutton Action="-"/>
+      <Toolbutton Action="actECardView"/>
+      <Toolbutton Action="-"/>
+      <Toolbutton Action="actNCOrdersView"/>
+      <Toolbutton Action="actCOrdersView"/>
+      <Toolbutton Action="-"/>
+      <Toolbutton Action="actStudentListShowFavorites"/>
+      <Toolbutton Action="actStudentListShowFilter"/>
+      <Toolbutton Action="actStudentListApplyFilter"/>
+      <Toolbutton Action="actStudentListAddFieldCondition"/>
+      <Toolbutton Action="actStudentListDeleteFieldConditions"/>
+      <Toolbutton Action="-"/>
+      <Toolbutton Action="actSearch"/>
+      <Toolbutton Action="actStudentListRefresh"/>
+      <Toolbutton Action="actStudentListFieldsVisibility"/>
+      <Toolbutton Action="-"/>
+      <Toolbutton Action="actStudentListArch"/>
+      <Toolbutton Action="actStudentListLastData"/>
+    </Toolbar1>
+  </Toolbars>
+
+  <Menu>
+    <Category Caption="Список">
+      <Category Caption="Выделение">
+        <Item Caption="Всех" Action="actStudentListSelectAll" ShortCut="Ctrl+A" NotEmpty="True"/>
+        <Item Caption="Копировать в буфер" Action="actStudentListEditCopy" ShortCut="Ctrl+C" NotEmpty="True"/>
+        <Item Caption="-"/>
+        <Item Caption="Инвертировать выделение" Action="actStudentListInvertSelection" NotEmpty="True"/>
+        <Item Caption="-"/>
+        <Item Caption="Сохранить выделение" Action="actStudentListSaveSelection" NotEmpty="True"/>
+        <Item Caption="Загрузить выделение" Action="actStudentListLoadSelection"/>
+      </Category>
+      <Item Caption="-"/>
+      <Item Caption="Последние данные" Action="actStudentListLastData"/>
+      <Category Caption="Архив">
+        <Item Caption="Архив/Основная БД" Action="actStudentListArch"/>
+        <Item Caption="Выделенных студентов в архив" Action="actStudentListToArch"/>
+        <Item Caption="Выделенных студентов из архива" Action="actStudentListFromArch"/>
+      </Category>
+      <Item Caption="-"/>
+      <Item Caption="Удалить" Action="actStudentListDeleteSelected" ShortCut="Ctrl+DEL" NotEmpty="True"/>
+      <Item Caption="-"/>
+      <Category Caption="Импорт">
+        <Item Caption="из Excel" Action="actExcelImport"/>
+      </Category>
+      <Category Caption="Экспорт в программу 'Диплом'">
+        <Item Caption="Диплома" Action="actDipExportDiplom"/>
+        <Item Caption="Студенческого билета" Action="actStudExportDiplom"/>
+      </Category>
+      <Category Caption="Экспорт в программу 'Мед. кадры'">
+        <Item Caption="Экспорт" Action="actExportKadry"/>
+      </Category>
+      <Item Caption="-"/>
+      <Item Caption="Обновить" Action="actStudentListRefresh" ShortCut="F5"/>
+      <Item Caption="Количество записей" Action="actStudentListRecCount" ShortCut="F9" NotEmpty="True"/>
+      <Item Caption="-"/>
+      <Item Caption="Выход" Action="actStudentListExit" ShortCut="Alt+F4"/>
+    </Category>
+    <Category Caption="Личная карточка">
+      <Item Action="actPCardView"/>
+      <Item Action="actPCardInsert"/>
+    </Category>
+    <Category Caption="Успеваемость">
+      <Item Action="actECardView"/>
+      <Item Caption="-"/>
+      <Item Action="actEduPlansView"/>
+      <Item Caption="-"/>
+      <Item Action="actVariantsEditorView"/>
+      <Item Action="actEduPlansView_B"/>
+      <Item Action="actEduPlanDeliver"/>
+      <Item Caption="-"/>
+      <Item Action="actProtocolsView"/>
+      <Item Caption="-"/>
+      <Item Action="actPlanRaspView"/>
+      <Item Action="actEnterPlanView"/>
+      <Item Caption="-"/>
+      <Item Caption="Стипендия" Action="actGrantView"/>
+      <Item Caption="-"/>
+      <Item Caption="Библиотека" Action="actLibraryView"/>
+    </Category>
+    <Category Caption="Приказы">
+      <Item Action="actNCOrdersView"/>
+      <Item Action="actCOrdersView"/>
+    </Category>
+    <Category Caption="Отчёты" Country="ru">
+      <Category Caption="Списки">
+        <Item Caption="Список студентов" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов с ФИО на ин. яз." NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов NFIO.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов по группам" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов по группам.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов с адресом" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов с адресом.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов (срок обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (термин обучения).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов с доп. информацией" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов с доп. информацией.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов для &quot;Крок&quot;" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Крок.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Заявка на &quot;Крок&quot;" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Заявка на Крок.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Список студентов (средний балл за весь период обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл за весь период).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов (средний балл за семестр)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="ECTS. Список студентов (средний балл за семестр)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список студентов (средний балл за весь период обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл за весь период ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS&amp;&amp;Трад. Список студентов (средний балл за весь период обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов ECTS_Трад (средний балл за весь период).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Степендиальный фонд (РФ)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Степендиальный фонд (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+         <Item Caption="Список выпускников с доп. информацией" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список выпускников с доп. информацией.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список выпускников с документами об образовании" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список выпускников с документами об образовании.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов, которые должны приступить к обучению" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов которые должны приступить к обучению.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Журнал посещений" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Журнал посещений.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Список должников(книги)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список должников(книги).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Формуляр читателя" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Формуляр читателя.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Формуляр читателя 1" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Формуляр читателя_1.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Отчет для внесения студентов в ЄДЕБО" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Отчет для внесения студентов в EDBO.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Приложение УДЦМО" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Додаток УДЦМО.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Экспорт данных в программу &quot;Education&quot; в XML формате" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Экспорт данных в программу Education в XML формате.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов со стипендией (требование КФУ)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов со стипендией.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Справки">
+        <Item Caption="Справка об обучении" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Справка об обучении.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Справка об обучении(Англ.)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Справка об обучении(Англ).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка(ECTS).xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Успеваемость">
+        <Item Caption="Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Непроставленные оценки" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Непроставленные оценки.xrp"/>
+          </Params>
+        </Item>
+
+        <Item Caption="Успеваемость за семестр (сводная)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Успеваемость за семестр (сводная).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сведения о результатах экзаменационной сессии" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Ведомость о результатах экзаменационной сессии.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сведения о результатах экзаменационной сессии по дисциплинам" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Ведомость о результатах экзаменационной сессии по дисциплинам.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Общий итог сдачи экзаменов" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Общий итог сдачи экзаменов.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Учебная карточка студента (титульный лист)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Учебная карточка студента.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сводная ведомость академической успеваемости" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Сводная ведомость академической успеваемости.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Приложение к диплому" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Приложение к аттестату" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к аттестату.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="ECTS. Успеваемость за семестр (сводная)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Успеваемость за семестр (сводная ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Успеваемость по модулям (сводная)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Успеваемость по модулям.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка (Англ)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка (ECTS)(Англ).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка (Англ.)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка (ECTS)(Англ).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка (с результатами модулей)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка_ext (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список студентов, имеющих задолженности" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов, имеющих задолженности.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Академическая справка (бланк)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка бланк(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Приложение к диплому" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список оценок для приложения к диплому" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому(ECTS) с ECTS оценками.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список оценок для приложения к диплому - 2021" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому(ECTS) с ECTS оценками-2021.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Cводная ведомость успеваемости " NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Итоги экзаменационной сессии(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Общий итог сдачи экзаменов" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Общий итог сдачи экзаменов(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Анализ успеваемости"  Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Анализ успеваемости (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Протоколы ранжирования" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список протоколов ранжирования.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Статистика">
+        <Item Caption="Движение контингента" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Движение контингента (статистика).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Движение контингента по фамилиям" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Движение контингента по фамилиям (Excel).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Перерыв в обучении по фамилиям" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Перерыв в обучении по фамилиям (Excel).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Отчет 2-3 нк" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="2-3 нк.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сведения о контингенте студентов" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Сведения о контингенте.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Контингент по странам" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Контингент по странам.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Распределение">
+        <Item Caption="Список трудоустройства по областям" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список трудоустройства по областям.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список трудоустройства" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список трудоустройства.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Выписка из ведомости персонального распределения выпускника" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Выписка из ведомости персонального распределения выпускника.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Справка о самостоятельном трудоустройстве" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Справка о самостоятельном трудоустройстве.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Карточка трудоустройства выпускника" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Карточка трудоустройства выпускника.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Направление на работу" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Направление на работу.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Выполнение плана трудоустройства" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Выполнение плана трудоустройства.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="ПФО">
+        <Item Caption="Движение контингента (статистика)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Движение контингента (статистика для ПФО).xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Item Caption="-"/>
+      <Item Action="actMOZStat"/>
+      <Item Caption="-"/>
+      <Item Caption="Открыть из файла" Action="actStudentListOpenReport"/>
+    </Category>
+    <Category Caption="Отчёты" Country="ua">
+      <Category Caption="Списки">
+        <Item Caption="Список студентов" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов с ФИО на ин. яз." NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов NFIO.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов по группам" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов по группам.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов с адресом" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов с адресом.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов (термин обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (термин обучения).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов с доп. информацией" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов с доп. информацией.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов для &quot;Крок&quot;" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Крок.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Заявка на &quot;Крок&quot;" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Заявка на Крок.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Список студентов (средний балл за весь период обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл за весь период).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентов (средний балл за семестр)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="ECTS. Список студентов (средний балл за семестр)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список студентов (средний балл за весь период обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов (средний балл за весь период ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS&amp;&amp;Трад. Список студентов (средний балл за весь период обучения)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов ECTS_Трад (средний балл за весь период).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+         <Item Caption="Список выпускников с доп. информацией" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список выпускников с доп. информацией.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список выпускников с документами об образовании" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список выпускников с документами об образовании.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список студентів, які повинні приступити до навчання" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов которые должны приступить к обучению.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Журнал посещений" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Журнал посещений.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Список должников(книги)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список должников(книги).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Формуляр читателя" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Формуляр читателя.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Формуляр читателя 1" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Формуляр читателя_1.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Отчет для внесения студентов в ЄДЕБО" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Отчет для внесения студентов в EDBO.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Додаток УДЦМО" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Додаток УДЦМО.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Экспорт данных в программу &quot;Education&quot; в XML формате" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Экспорт данных в программу Education в XML формате.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Справки">
+        <Item Caption="Справка об обучении" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Справка об обучении.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Справка об обучении(Англ.)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Справка об обучении(Англ).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка(ECTS).xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Успеваемость">
+        <Item Caption="Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Непроставленные оценки" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Непроставленные оценки.xrp"/>
+          </Params>
+        </Item>
+
+        <Item Caption="Успеваемость за семестр (сводная)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Успеваемость за семестр (сводная).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сведения о результатах экзаменационной сессии" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Ведомость о результатах экзаменационной сессии.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сведения о результатах экзаменационной сессии по дисциплинам" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Ведомость о результатах экзаменационной сессии по дисциплинам.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Общий итог сдачи экзаменов" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Общий итог сдачи экзаменов.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Учебная карточка студента (титульный лист)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Учебная карточка студента.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сводная ведомость академической успеваемости" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Сводная ведомость академической успеваемости.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Приложение к диплому" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Приложение к аттестату" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к аттестату.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="ECTS. Успеваемость за семестр (сводная)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Успеваемость за семестр (сводная ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Успеваемость по модулям (сводная)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Успеваемость по модулям.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка(Англ.)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка (ECTS)(Англ).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Семестровая выписка (с результатами модулей)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Семестровая выписка_ext (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список студентов, имеющих задолженности" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список студентов, имеющих задолженности.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Академическая справка" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Академическая справка (бланк)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Академическая справка бланк(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Приложение к диплому" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Список оценок для приложения к диплому" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Приложение к диплому(ECTS) с ECTS оценками.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Cводная ведомость успеваемости " NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Итоги экзаменационной сессии(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Общий итог сдачи экзаменов" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Общий итог сдачи экзаменов(ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="ECTS. Анализ успеваемости"  Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Анализ успеваемости (ECTS).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="Протоколи ранжування" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список протоколов ранжирования.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Статистика">
+        <Item Caption="Движение контингента" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Движение контингента (статистика).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Движение контингента по фамилиям" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Движение контингента по фамилиям (Excel).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Перерыв в обучении по фамилиям" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Перерыв в обучении по фамилиям (Excel).xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="2-3 нк" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="2-3 нк.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Сведения о контингенте студентов" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Сведения о контингенте.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Контингент за країнами" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Контингент по странам.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="Распределение">
+        <Item Caption="Список трудоустройства по областям" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список трудоустройства по областям.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Список трудоустройства" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Список трудоустройства.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Выписка из ведомости персонального распределения выпускника" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Выписка из ведомости персонального распределения выпускника.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Справка о самостоятельном трудоустройстве" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Справка о самостоятельном трудоустройстве.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Карточка трудоустройства выпускника" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Карточка трудоустройства выпускника.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Направление на работу" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Направление на работу.xrp"/>
+          </Params>
+        </Item>
+        <Item Caption="Выполнение плана трудоустройства" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Выполнение плана трудоустройства.xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Category Caption="ПФО">
+        <Item Caption="Движение контингента (статистика)" NotEmpty="True" Plugin="Reports" AutoUnload="True">
+          <Params>
+            <Param Name="ReportFile" Value="Движение контингента (статистика для ПФО).xrp"/>
+          </Params>
+        </Item>
+      </Category>
+      <Item Caption="-"/>
+      <Item Action="actMOZStat"/>
+      <Item Caption="-"/>	
+      <Item Caption="Открыть из файла" Action="actStudentListOpenReport"/>
+    </Category>
+
+    <Category Caption="Фильтр">
+      <Item Caption="Использовать фильтр" Action="actStudentListApplyFilter" ShortCut="Ctrl+T" />
+      <Item Caption="-"/>
+      <Item Caption="Добавить условие по значению ячейки" Action="actStudentListAddFieldCondition" />
+      <Item Caption="Удалить условия по столбцу" Action="actStudentListDeleteFieldConditions" />
+      <Item Caption="-"/>
+      <Item Caption="Очистить фильтр" Action="actStudentListClearFilter" />
+      <Item Caption="-"/>
+      <Item Caption="Панель фильтра" Action="actStudentListShowFilter" ShortCut="Ctrl+Alt+F" />
+      <Item Caption="Панель избранного" Action="actStudentListShowFavorites" ImageIndex="42"/>
+    </Category>
+    <Category Caption="Администрирование">
+      <Item Caption="Настройки" Action="actOptionsView"/>
+      <Item Caption="Справочники" Action="actGuideView"/>
+      <Item Caption="-"/>
+      <Category Caption="Пакеты">
+        <Item Caption="Создание пакета (студенты)" Action="actCreatePackage" Plugin="Replicator" AutoUnload="True">
+          <Params>
+            <Param Name="Action" Value="rpExportStudents"/>
+          </Params>
+        </Item>
+        <Item Caption="Создание пакета (справочники)" Action="actCreatePackage_Guides" Plugin="Replicator" AutoUnload="True">
+          <Params>
+            <Param Name="Action" Value="rpExportGuides"/>
+          </Params>
+        </Item>
+
+        <Item Caption="-"/>
+        <Item Caption="Приём пакета" Action="actGetPackage" Plugin="Replicator" AutoUnload="True">
+          <Params>
+            <Param Name="Action" Value="rpImport"/>
+          </Params>
+        </Item>
+        <Item Caption="-"/>
+        <Item Caption="-"/>
+        <Item Caption="Экспорт выделенных студентов в XML" Action="actCreateXMLStudents" Plugin="Replicator" AutoUnload="True">
+          <Params>
+            <Param Name="Action" Value="rpExportXMLStudents"/>
+          </Params>
+        </Item>
+      </Category>
+      <Item Caption="-"/>
+      <Item Caption="Журнал" Action="actJournalView"/>
+      <Category Caption="Таблица">
+        <Item Caption="Видимость столбцов" Action="actStudentListFieldsVisibility" />
+        <Item Caption="-"/>
+        <Item Caption="Сохранить компоновку" Action="actStudentListSaveGridLayout"/>
+        <Item Caption="Загрузить компоновку" Action="actStudentListLoadGridLayout"/>
+        <Item Caption="-"/>
+        <Item Caption="Заморозить 1-й столбец" Action="actStudentListFrozeCol"/>
+        <Item Caption="Построчное выделение" Action="actStudentListRowSelection"/>
+        <Item Caption="Закрепить компоновку" Action="actStudentListFrozeLayout"/>
+        <Item Caption="-"/>
+        <Item Caption="Настройки цветов" Action="actColorSettingsView"/>
+      </Category>
+      <Item Caption="Язык" Action="actRegionalPolicy"/>
+    </Category>
+    <Category Caption="Помощь">
+      <Item Caption="Содержание" Action="actStudentListHelpContent"/>
+      <Item Caption="-"/>
+      <Item Caption="О программе" Action="actStudentListAbout"/>
+      <Item Caption="Содержание обновлений" Action="actUpdateInfo"/>
+    </Category>
+  </Menu>
+</UserInterface>
