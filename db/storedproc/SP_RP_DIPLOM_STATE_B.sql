@@ -11,7 +11,8 @@ returns (
     eduyear smallint,
     end_semester smallint,
     end_eduyear smallint,
-    semester smallint)
+    semester smallint,
+    discipline_eng varchar(150))
 as
 declare variable disciplineid integer;
 declare variable maxweight smallint;
@@ -24,6 +25,7 @@ begin
            SM.SEMESTER,
            SM.EDUYEAR,
            GD.DISCIPLINE,
+           GD.DISCIPLINE_ENG,
            max(FR.WEIGHT)
       from V_LASTSESSIONMARKS SM
       inner join V_GUIDE_DISCIPLINE GD
@@ -50,10 +52,10 @@ begin
              )
             )
         and SV.VARIANTID is Null
-      group by SM.SEMESTER, SM.DISCIPLINEID, GD.DISCIPLINE, SM.EDUYEAR,
+      group by SM.SEMESTER, SM.DISCIPLINEID, GD.DISCIPLINE, GD.DISCIPLINE_ENG, SM.EDUYEAR,
               SM.SEMESTER, SM.EDUYEAR
       order by SM.SEMESTER, GD.DISCIPLINE
-      into :SEMESTER, :DISCIPLINEID, :DISCIPLINE, :EDUYEAR, :END_SEMESTER,
+      into :SEMESTER, :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :EDUYEAR, :END_SEMESTER,
            :END_EDUYEAR, :MAXWEIGHT do
   begin
     MARKSTR = null;
@@ -84,6 +86,7 @@ begin
   for
     select LP.DISCIPLINEID,
            GD.DISCIPLINE,
+           GD.DISCIPLINE_ENG, 
            LP.SEMESTER,
            LP.EDUYEAR,
            LP.END_SEMESTER,
@@ -102,7 +105,7 @@ begin
           ('True' <> :EXCLUDE_1K)
           or (not LP.SEMESTER in (1, 2))
         )
-      into :DISCIPLINEID, :DISCIPLINE, :SEMESTER, :EDUYEAR, :END_SEMESTER,
+      into :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :SEMESTER, :EDUYEAR, :END_SEMESTER,
            :END_EDUYEAR do
   begin
     MARKSTR = null;
