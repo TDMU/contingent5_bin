@@ -12,12 +12,16 @@ returns (
     end_semester smallint,
     end_eduyear smallint,
     semester smallint,
-    discipline_eng varchar(150))
+    discipline_eng varchar(150),
+    credits_avg numeric(5,2),
+    credits numeric(5,2),
+    hours smallint)
 as
 declare variable disciplineid integer;
 declare variable maxweight smallint;
 begin
   /* Procedure Text */
+  CREDITS = null;
   for
     select SM.SEMESTER,
            SM.DISCIPLINEID,
@@ -26,6 +30,7 @@ begin
            SM.EDUYEAR,
            GD.DISCIPLINE,
            GD.DISCIPLINE_ENG,
+           sum(SM.ALLHOURS),
            max(FR.WEIGHT)
       from V_LASTSESSIONMARKS SM
       inner join V_GUIDE_DISCIPLINE GD
@@ -56,9 +61,10 @@ begin
               SM.SEMESTER, SM.EDUYEAR
       order by SM.SEMESTER, GD.DISCIPLINE
       into :SEMESTER, :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :EDUYEAR, :END_SEMESTER,
-           :END_EDUYEAR, :MAXWEIGHT do
+           :END_EDUYEAR, :HOURS, :MAXWEIGHT do
   begin
     MARKSTR = null;
+    CREDITS_AVG = null;
     ECTS = null;
 
     select first 1 GM.MARKSTR
@@ -90,7 +96,26 @@ begin
            LP.SEMESTER,
            LP.EDUYEAR,
            LP.END_SEMESTER,
-           LP.END_EDUYEAR
+           LP.END_EDUYEAR,
+
+           (select sum(VM.HOURS_ALL)
+           from V_STUDENT_DISCIPLINES_LAST STL
+           inner join B_VARIANT_ITEMS VI
+           on VI.PARENTVARIANTID = STL.VARIANTID
+           inner join B_VARIANT_MODULE VM
+           on VM.VARIANTID = VI.VARIANTID
+           where STL.DISCIPLINEID = LP.DISCIPLINEID
+                 and STL.STUDENTID = :STUDENTID) as HOURS,
+
+           (select sum(VM.CREDITS)
+           from V_STUDENT_DISCIPLINES_LAST STL
+           inner join B_VARIANT_ITEMS VI
+           on VI.PARENTVARIANTID = STL.VARIANTID
+           inner join B_VARIANT_MODULE VM
+           on VM.VARIANTID = VI.VARIANTID
+           where STL.DISCIPLINEID = LP.DISCIPLINEID
+                 and STL.STUDENTID = :STUDENTID) as CREDITS
+
       from V_STUDENT_DISCIPLINES_LAST LP
       inner join V_GUIDE_DISCIPLINE GD
         on (GD.DISCIPLINEID = LP.DISCIPLINEID)
@@ -106,12 +131,13 @@ begin
           or (not LP.SEMESTER in (1, 2))
         )
       into :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :SEMESTER, :EDUYEAR, :END_SEMESTER,
-           :END_EDUYEAR do
+           :END_EDUYEAR, :HOURS, :CREDITS do
   begin
     MARKSTR = null;
+    CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR, S2p.ECTS
+    select first 1 GM.MARKSTR, S2P.CREDITS_AVG, S2p.ECTS
     from RANKING_PROTOCOLS RP
     inner join STUDENT2PROTOCOL S2P
     on RP.PROTOCOLID = S2P.PROTOCOLID
@@ -121,7 +147,7 @@ begin
           and RP.DISCIPLINEID = :DISCIPLINEID
           and not RP.PROTOCOLDATE is null
     order by RP.PROTOCOLDATE desc
-    into :MARKSTR, :ECTS;
+    into :MARKSTR, :CREDITS_AVG, :ECTS;
 
     if (ECTS = 'S') then
     begin
@@ -148,6 +174,8 @@ GRANT SELECT ON STUDENT2VARIANT TO PROCEDURE SP_RP_DIPLOM_STATE_B;
 GRANT SELECT ON DISCIPLINE_EDULEVEL TO PROCEDURE SP_RP_DIPLOM_STATE_B;
 GRANT SELECT ON V_GUIDE_MARKTYPE TO PROCEDURE SP_RP_DIPLOM_STATE_B;
 GRANT SELECT ON V_STUDENT_DISCIPLINES_LAST TO PROCEDURE SP_RP_DIPLOM_STATE_B;
+GRANT SELECT ON B_VARIANT_ITEMS TO PROCEDURE SP_RP_DIPLOM_STATE_B;
+GRANT SELECT ON B_VARIANT_MODULE TO PROCEDURE SP_RP_DIPLOM_STATE_B;
 GRANT SELECT ON B_VARIANT_DISCIPLINE TO PROCEDURE SP_RP_DIPLOM_STATE_B;
 GRANT SELECT ON V_GUIDE_FORMREPORT_B TO PROCEDURE SP_RP_DIPLOM_STATE_B;
 GRANT SELECT ON RANKING_PROTOCOLS TO PROCEDURE SP_RP_DIPLOM_STATE_B;
