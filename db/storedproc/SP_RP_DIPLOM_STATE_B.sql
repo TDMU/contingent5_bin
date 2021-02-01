@@ -15,7 +15,8 @@ returns (
     discipline_eng varchar(150),
     credits_avg numeric(5,2),
     credits numeric(5,2),
-    hours smallint)
+    hours smallint,
+    markstr_eng varchar(20))
 as
 declare variable disciplineid integer;
 declare variable maxweight smallint;
@@ -64,10 +65,11 @@ begin
            :END_EDUYEAR, :HOURS, :MAXWEIGHT do
   begin
     MARKSTR = null;
+    MARKSTR_ENG = null;
     CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR
+    select first 1 GM.MARKSTR, GM.MARKSTR_ENG
     from V_LASTSESSIONMARKS SM
     inner join V_GUIDE_FORMREPORT FR
       on (FR.FORMREPORT = SM.FORMREPORT)
@@ -84,7 +86,7 @@ begin
         or (not SM.SEMESTER in (1, 2))
       )
     order by SM.SEMESTER desc, GM.MARKNUM desc
-    into :MARKSTR;
+    into :MARKSTR, :MARKSTR_ENG;
 
     suspend;
   end
@@ -134,10 +136,11 @@ begin
            :END_EDUYEAR, :HOURS, :CREDITS do
   begin
     MARKSTR = null;
+    MARKSTR_ENG = null;
     CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR, S2P.CREDITS_AVG, S2p.ECTS
+    select first 1 GM.MARKSTR, GM.MARKSTR_ENG, S2P.CREDITS_AVG, S2p.ECTS
     from RANKING_PROTOCOLS RP
     inner join STUDENT2PROTOCOL S2P
     on RP.PROTOCOLID = S2P.PROTOCOLID
@@ -147,17 +150,19 @@ begin
           and RP.DISCIPLINEID = :DISCIPLINEID
           and not RP.PROTOCOLDATE is null
     order by RP.PROTOCOLDATE desc
-    into :MARKSTR, :CREDITS_AVG, :ECTS;
+    into :MARKSTR, :MARKSTR_ENG, :CREDITS_AVG, :ECTS;
 
     if (ECTS = 'S') then
     begin
       ECTS = 'склав';
       MARKSTR = 'склав';
+      MARKSTR_ENG = 'pass';
     end
     if (ECTS = 'NS') then
     begin
       ECTS = 'не склав';
       MARKSTR = 'не склав';
+      MARKSTR_ENG = 'fail';
     end
     suspend;
   end

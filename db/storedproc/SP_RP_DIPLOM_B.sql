@@ -15,7 +15,8 @@ returns (
     semester smallint,
     end_semester smallint,
     end_eduyear smallint,
-    discipline_eng varchar(150))
+    discipline_eng varchar(150),
+    markstr_eng varchar(20))
 as
 declare variable disciplineid integer;
 declare variable maxweight smallint;
@@ -66,10 +67,11 @@ begin
            :END_EDUYEAR, :HOURS, :MAXWEIGHT do
   begin
     MARKSTR = null;
+    MARKSTR_ENG = null;
     CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR
+    select first 1 GM.MARKSTR, GM.MARKSTR_ENG
     from V_LASTSESSIONMARKS SM
     inner join V_GUIDE_FORMREPORT FR
       on (FR.FORMREPORT = SM.FORMREPORT)
@@ -86,7 +88,7 @@ begin
         or (not SM.SEMESTER in (1, 2))
       )
     order by SM.SEMESTER desc, GM.MARKNUM desc
-    into :MARKSTR;
+    into :MARKSTR, :MARKSTR_ENG;
 
     suspend;
   end
@@ -139,10 +141,11 @@ begin
            :END_EDUYEAR, :HOURS, :CREDITS do
   begin
     MARKSTR = null;
+    MARKSTR_ENG = null;
     CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR, S2P.CREDITS_AVG, S2p.ECTS
+    select first 1 GM.MARKSTR, GM.MARKSTR_ENG, S2P.CREDITS_AVG, S2p.ECTS
     from RANKING_PROTOCOLS RP
     inner join STUDENT2PROTOCOL S2P
     on RP.PROTOCOLID = S2P.PROTOCOLID
@@ -153,7 +156,7 @@ begin
           and RP.DISCIPLINEID = :DISCIPLINEID
           and not RP.PROTOCOLDATE is null
     order by RP.CREATEDATE desc
-    into :MARKSTR, :CREDITS_AVG, :ECTS;
+    into :MARKSTR, :MARKSTR_ENG, :CREDITS_AVG, :ECTS;
 
     suspend;
   end
