@@ -16,7 +16,9 @@ returns (
     credits_avg numeric(5,2),
     credits numeric(5,2),
     hours smallint,
-    markstr_eng varchar(20))
+    markstr_eng varchar(20),
+    markstr_c varchar(20),
+    markstr_eng_c varchar(20))
 as
 declare variable disciplineid integer;
 declare variable maxweight smallint;
@@ -65,11 +67,13 @@ begin
            :END_EDUYEAR, :HOURS, :MAXWEIGHT do
   begin
     MARKSTR = null;
+    MARKSTR_C = null;
     MARKSTR_ENG = null;
+    MARKSTR_ENG_C = null;
     CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR, GM.MARKSTR_ENG
+    select first 1 GM.MARKSTR, GM.MARKSTR_ENG, GM.MARKSTR AS MARKSTR_C, GM.MARKSTR_ENG AS MARKSTR_ENG_C
     from V_LASTSESSIONMARKS SM
     inner join V_GUIDE_FORMREPORT FR
       on (FR.FORMREPORT = SM.FORMREPORT)
@@ -86,7 +90,7 @@ begin
         or (not SM.SEMESTER in (1, 2))
       )
     order by SM.SEMESTER desc, GM.MARKNUM desc
-    into :MARKSTR, :MARKSTR_ENG;
+    into :MARKSTR, :MARKSTR_ENG, :MARKSTR_C, :MARKSTR_ENG_C;
 
     suspend;
   end
@@ -136,11 +140,13 @@ begin
            :END_EDUYEAR, :HOURS, :CREDITS do
   begin
     MARKSTR = null;
+    MARKSTR_C = null;
     MARKSTR_ENG = null;
+    MARKSTR_ENG_C = null;
     CREDITS_AVG = null;
     ECTS = null;
 
-    select first 1 GM.MARKSTR, GM.MARKSTR_ENG, S2P.CREDITS_AVG, S2p.ECTS
+    select first 1 GM.MARKSTR, GM.MARKSTR_ENG, S2P.CREDITS_AVG, S2p.ECTS, GM.MARKSTR_C, GM.MARKSTR_ENG_C
     from RANKING_PROTOCOLS RP
     inner join STUDENT2PROTOCOL S2P
     on RP.PROTOCOLID = S2P.PROTOCOLID
@@ -150,19 +156,23 @@ begin
           and RP.DISCIPLINEID = :DISCIPLINEID
           and not RP.PROTOCOLDATE is null
     order by RP.PROTOCOLDATE desc
-    into :MARKSTR, :MARKSTR_ENG, :CREDITS_AVG, :ECTS;
+    into :MARKSTR, :MARKSTR_ENG, :CREDITS_AVG, :ECTS, :MARKSTR_C, :MARKSTR_ENG_C;
 
     if (ECTS = 'S') then
     begin
       ECTS = 'склав';
       MARKSTR = 'склав';
+      MARKSTR_C = 'Склав';
       MARKSTR_ENG = 'pass';
+      MARKSTR_ENG_C = 'Pass';
     end
     if (ECTS = 'NS') then
     begin
       ECTS = 'не склав';
       MARKSTR = 'не склав';
+      MARKSTR_C = 'Не склав';
       MARKSTR_ENG = 'fail';
+      MARKSTR_ENG_C = 'Fail';
     end
     suspend;
   end
