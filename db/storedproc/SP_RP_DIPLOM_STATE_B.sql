@@ -163,8 +163,8 @@ begin
       ECTS = 'склав';
       MARKSTR = 'склав';
       MARKSTR_C = 'Склав';
-      MARKSTR_ENG = 'pass';
-      MARKSTR_ENG_C = 'Pass';
+      MARKSTR_ENG = 'passed';
+      MARKSTR_ENG_C = 'Passed';
     end
     if (ECTS = 'NS') then
     begin
