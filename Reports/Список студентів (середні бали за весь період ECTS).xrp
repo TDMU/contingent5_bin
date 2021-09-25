@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Список студентов (средний балл за весь период ECTS)" ProgressMax="100" EncodeText="False" ID="{2E17D5EA-E613-47ED-A7E5-EFC052927106}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="Precision" DisplayLabel="Точність" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="0
+1
+2
+3
+4
+5
+" KeyItems="#
+#.0
+#.00
+#.000
+#.0000
+#.00000" CommonValue="False"/><Parameter Name="Semesters" DisplayLabel="Семестри" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SEMESTER, 0, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1" CommonValue="False"/></UserParameters><Bands><Band Name="dsStudents" AutoOpen="True" UniDirectional="False" Master="" Suppress="False" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>select S.FIO, S.GROUPNUM,
+(select  avg(cast(S2P.CREDITS_AVG as numeric(9, 6)))
+ from STUDENT2PROTOCOL S2P
+ left join RANKING_PROTOCOLS RP
+   on (RP.PROTOCOLID = S2P.PROTOCOLID)
+ inner join V_LASTPROTOCOL VLP
+   on (S2P.PROTOCOLID = VLP.PROTOCOLID
+      and VLP.STUDENTID = S2P.STUDENTID
+       and VLP.EDUYEAR = RP.EDUYEAR
+       and VLP.SEMESTER = RP.SEMESTER
+       and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+ where (S2P.STUDENTID = S.STUDENTID)
+   and (RP.SEMESTER in ( @@SEMESTERS_KEYS%0@ ))
+   and (S2P.TRADITIONALMARK in (2,3,4,5))
+) as AVGMARK
+
+from STUDENTS S
+where S.STUDENTID in (@@STUDENTSID%0@)
+order by S.GROUPNUM, S.FIO
+</SQL><Events OnAfterCreateDataSet="dsStudents_OnAfterCreateDataSet" OnGetFieldData="dsStudents_OnGetFieldData"/></Band></Bands><Script>procedure dsStudents_OnAfterCreateDataSet(ds: TpFibDataSet);
+begin
+  Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+end;
+
+
+procedure dsStudents_OnGetFieldData(Field: TDBFieldInfo);
+begin
+  if Field.FieldName = 'AvgMark' then
+  begin
+    if Field.Value &lt;&gt; '' then
+      Field.Value := FormatFloat(Params.Item('Precision_KEY').Value, Field.Value);
+  end;
+end;
+
+
+begin
+end.</Script></Report>

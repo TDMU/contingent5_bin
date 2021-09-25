@@ -1,0 +1,84 @@
+<?xml version="1.0" encoding="windows-1251"?><Report Type="rtXls" EmbededTemplate="False" ScriptLanguage="PascalScript" Name="Успішність за все навчання (ECTS)" ProgressMax="100" EncodeText="False" ID="{49F04D19-EE97-4083-866A-F86A554C2BA3}"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack">
+<Parameter Name="Precision" DisplayLabel="Точність" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="0
+1
+2
+3
+4
+5
+" KeyItems="0
+1
+2
+3
+4
+5
+" CommonValue="False"/>
+<Parameter Name="Semesters" DisplayLabel="Семестри" ParamType="Grid" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" SQL="select SEMESTER, 0, SEMESTER
+from GUIDE_SEMESTER
+where USE = 1
+order by 1" CommonValue="False"/>
+<Events OnAfterQueryParams="OnAfterQueryParams"/>
+<Parameter Name="UseGroup" DisplayLabel="По группам" ParamType="CheckBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" CommonValue="False"/>
+</UserParameters><Bands><Band Name="dsList" AutoOpen="True" UniDirectional="False" Master="" DateTimeDisplayFormat="dd.mm.yyyy hh:mm AMPM" DateDisplayFormat="dd.mm.yyyy" TimeDisplayFormat="hh:mm AMPM" NumericDisplayFormat="#,##0."><SQL>
+select S.STUDENTID, S.FIO, S.GROUPNUM, 
+(select round(avg(cast(S2P.CREDITS_AVG as numeric(9, 6))), @@PRECISION_KEY%1@)
+ from STUDENT2PROTOCOL S2P
+ left join RANKING_PROTOCOLS RP
+   on (RP.PROTOCOLID = S2P.PROTOCOLID)
+ inner join V_LASTPROTOCOL VLP
+   on (S2P.PROTOCOLID = VLP.PROTOCOLID
+      and VLP.STUDENTID = S2P.STUDENTID
+       and VLP.EDUYEAR = RP.EDUYEAR
+       and VLP.SEMESTER = RP.SEMESTER
+       and VLP.DISCIPLINEID = RP.DISCIPLINEID)
+ where (S2P.STUDENTID = S.STUDENTID)
+   and (RP.SEMESTER in ( @@SEMESTERS_KEYS%0@ ))
+   and (S2P.TRADITIONALMARK in (2,3,4,5))
+) as AVGMARK
+from STUDENTS S
+where S.STUDENTID in (@@STUDENTSID%0@)
+order by S.GROUPNUM, S.FIO
+</SQL></Band></Bands><Script>procedure OnAfterQueryParams;
+var
+  App : Variant;
+  sheet, range : Variant;
+  Row,Col : Integer;
+  LStudentID : Variant;
+  SL : TStringList;
+  j : Integer;
+  NStudent: Integer;
+
+begin
+   SL := TstringList.Create;
+   App := CreateOleObject('Excel.Application');
+   App.Visible := True;
+   App.WorkBooks.Add(Report.TemplateDoc);
+   Report.TemplateDoc := '';
+   Sheet := App.ActiveSheet;
+   
+   Params.Item('StudentsID').Value := HostAppl.Data.GetSelectedList('STUDENTID');
+   if Params.Item('UseGroup').Value then Params.Item('sortorder').Value := 'GROUPNUM, ';
+   dsList.Active := True;
+   dsList.First;
+   Row := 3;
+   LStudentID := 0;
+   NStudent := 0;
+   while not dsList.Eof do
+   begin
+     // сменился студент
+     if (LStudentID &lt;&gt; dsList.FieldByName('STUDENTID').Value) then
+     begin
+       Row := Row + 1;
+       NStudent := NStudent + 1;
+       Sheet.Cells(Row,2).Value := '''' + IntToStr(NStudent) + '.'; // Номер п.п.
+       Sheet.Cells(Row,3).Value := dsList.FieldByName('FIO').AsString; //ФИО
+       Sheet.Cells(Row,4).Value := dsList.FieldByName('GROUPNUM').AsString; // Группа
+       Sheet.Cells(Row, 5).Value := dsList.FieldByName('AVGMARK').AsFloat;
+       LStudentID := dsList.FieldByName('STUDENTID').Value;
+     end;
+     dsList.Next;
+   end;
+
+end;
+
+begin
+end.</Script></Report>
