@@ -18,7 +18,8 @@ returns (
     discipline_eng varchar(150),
     markstr_eng varchar(20),
     markstr_c varchar(20),
-    markstr_eng_c varchar(20))
+    markstr_eng_c varchar(20),
+    disciplinetype char(1))
 as
 declare variable disciplineid integer;
 declare variable maxweight smallint;
@@ -27,6 +28,7 @@ begin
   CREDITS = null;
   for
     select SM.DISCIPLINEID,
+           SM.DISCIPLINETYPE,
            GD.DISCIPLINE,
            GD.DISCIPLINE_ENG,
            SM.SEMESTER,
@@ -62,10 +64,10 @@ begin
              )
             )
         and SV.VARIANTID is Null
-      group by SM.DISCIPLINEID, GD.DISCIPLINE, GD.DISCIPLINE_ENG, SM.SEMESTER, SM.EDUYEAR,
+      group by SM.DISCIPLINETYPE, SM.DISCIPLINEID, GD.DISCIPLINE, GD.DISCIPLINE_ENG, SM.SEMESTER, SM.EDUYEAR,
               SM.SEMESTER, SM.EDUYEAR
       order by 2
-      into :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :SEMESTER, :EDUYEAR, :END_SEMESTER,
+      into :DISCIPLINETYPE, :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :SEMESTER, :EDUYEAR, :END_SEMESTER,
            :END_EDUYEAR, :HOURS, :MAXWEIGHT do
   begin
     MARKSTR = null;
@@ -98,7 +100,8 @@ begin
   end
 
   for
-    select LP.DISCIPLINEID,
+    select LP.DISCIPLINETYPE,
+           LP.DISCIPLINEID,
            GD.DISCIPLINE,
            GD.DISCIPLINE_ENG,
            LP.SEMESTER,
@@ -139,9 +142,9 @@ begin
           ('True' <> :EXCLUDE_1K)
           or (not LP.SEMESTER in (1, 2))
         )
-      group by LP.DISCIPLINEID, GD.DISCIPLINE, GD.DISCIPLINE_ENG, LP.SEMESTER, LP.EDUYEAR,
+      group by LP.DISCIPLINETYPE, LP.DISCIPLINEID, GD.DISCIPLINE, GD.DISCIPLINE_ENG, LP.SEMESTER, LP.EDUYEAR,
               LP.END_SEMESTER, LP.END_EDUYEAR
-      into :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :SEMESTER, :EDUYEAR, :END_SEMESTER,
+      into :DISCIPLINETYPE, :DISCIPLINEID, :DISCIPLINE, :DISCIPLINE_ENG, :SEMESTER, :EDUYEAR, :END_SEMESTER,
            :END_EDUYEAR, :HOURS, :CREDITS do
   begin
     MARKSTR = null;
