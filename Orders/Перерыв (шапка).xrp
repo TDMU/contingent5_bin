@@ -1,9 +1,13 @@
 <?xml version="1.0" encoding="windows-1251"?><Report Type="rtRtf" EmbededTemplate="False" Name="Перерыв (шапка)" ProgressMax="100" ID="{F7ABA1E5-E286-4A4F-98BB-020022EB78A2}" EncodeText="False" ScriptLanguage="PascalScript"><UserParameters Caption="Параметры" Title="" PersonalSettings="False" SaveCheckBox="False" Position="poDefault" FontName="MS Sans Serif" FontSize="9" Color="clBlack"><Parameter Name="IntReason" DisplayLabel="Надання" ParamType="ComboBox" Required="True" AutoSize="True" SaveValue="svSave" ShowCheck="False" SaveCheck="True" Visible="True" Items="академічної відпустки за станом здоров'я
 академічної відпустки з догляду за дитиною
 академічної відпустки у зв'язку з вагітністю та пологами
+академічної відпустки у зв'язку з участю в програмі академічної мобільності
+академічної відпустки у зв'язку з призовом на військову службу в Збройних Cилах України
 права проходження повторного курсу навчання" KeyItems="3001
 3002
 3003
+3004
+3005
 0" CommonValue="False"/><Events OnAfterQueryParams="OnAfterQueryParams"/></UserParameters><Bands/><Script>procedure OnAfterQueryParams;
 begin
   OrderParams.Item('IntReason_KEY').Value :=
